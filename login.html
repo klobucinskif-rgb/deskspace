@@ -33,6 +33,11 @@
   .field[hidden] { display: none; }
   .btn { width: 100%; height: 46px; margin-top: 6px; border-radius: 11px; font-size: 16px; }
   .err { font-size: 13px; color: var(--red); min-height: 18px; margin: -4px 0 -6px; }
+  .or { display: flex; align-items: center; gap: 12px; margin: 20px 0 14px; font-size: 12.5px; color: var(--muted); }
+  .or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+  .demo-btn { margin-top: 0; background: var(--fill); color: var(--ink); }
+  .demo-btn:hover { background: var(--fill-hover); }
+  .demo-btn svg { width: 16px; height: 16px; }
   .swap { margin-top: 22px; text-align: center; font-size: 14px; color: var(--ink-2); }
   .swap button { color: var(--blue); font-weight: 500; }
   .swap button:hover { text-decoration: underline; text-underline-offset: 3px; }
@@ -86,8 +91,11 @@
       <button class="btn btn-primary" type="submit" id="submit">Sign in</button>
     </form>
 
+    <div class="or">or</div>
+    <button class="btn demo-btn" type="button" id="demo">Enter the demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+
     <p class="swap"><span id="swap-q">New to Deskspace?</span> <button type="button" id="swap">Create an account</button></p>
-    <p class="demo">This is a demo sign-in. Any email and password work, and nothing leaves this browser.</p>
+    <p class="demo">“Enter the demo” opens a sample workspace with one click, no sign-up. The form is a demo too: any email and password work, and nothing leaves this browser.</p>
   </div>
 </main>
 
@@ -97,6 +105,14 @@
   try { var u = JSON.parse(localStorage.getItem(KEY) || 'null'); if (u && u.email) { location.replace('app.html'); return; } } catch (e) { /* storage unavailable */ }
 
   var $ = function (id) { return document.getElementById(id); };
+  // One click into a sample workspace: no form, no password.
+  function enterDemo() {
+    try { localStorage.setItem(KEY, JSON.stringify({ name: 'Ana Petrova', email: 'ana@haldenstudio.co', demo: true })); }
+    catch (err) { $('err').textContent = 'This browser is blocking storage, so the demo cannot open.'; return; }
+    location.replace('app.html');
+  }
+  if (/[?&]demo=1/.test(location.search)) { enterDemo(); return; }
+  $('demo').addEventListener('click', enterDemo);
   var signup = /[?&]new=1/.test(location.search);
   function paint() {
     $('title').textContent = signup ? 'Create your Deskspace account' : 'Sign in to Deskspace';
