@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var KEY = 'deskspace-demo-v3', USER_KEY = 'deskspace-user';
+  var KEY = 'deskspace-demo-v4', USER_KEY = 'deskspace-user';
   var $ = function (s, r) { return (r || document).querySelector(s); };
   // Demo sign-in: the user is whoever signed in on login.html (stored in this browser only).
   var USER = null;
@@ -31,12 +31,29 @@
     var h = 0; for (var i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) % 5;
     return ' c' + (h + 1);
   }
-  function av(name, sm) { return '<span class="av' + (sm ? ' sm' : '') + avClass(name) + '">' + esc(name.charAt(0).toUpperCase()) + '</span>'; }
+  function photoOf(name) {
+    if (name === ME) return USER.photo || '';
+    var w = S && S.workspaces && ws(), m = w && (w.members || []).filter(function (x) { return !x.me && x.name === name; })[0];
+    return (m && m.photo) || '';
+  }
+  function av(name, sm, cls) {
+    var ph = photoOf(name);
+    return '<span class="av' + (sm ? ' sm' : '') + (cls ? ' ' + cls : '') + avClass(name) + (ph ? ' has-photo' : '') + '">' + (ph ? '<img src="' + ph + '" alt="">' : esc(name.charAt(0).toUpperCase())) + '</span>';
+  }
 
   var ICON = {
     home: '<path d="M4 11l8-6.5 8 6.5v8a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
     folder: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
     review: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',
+    notes: '<path d="M6.5 3.5h8l4.5 4.5v11a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 19V5a1.5 1.5 0 0 1 1.5-1.5z"/><path d="M14.5 3.5V8H19M8.5 12.5h7M8.5 16h5"/>',
+    inbox: '<path d="M3.5 13.5l2.6-7.2A2 2 0 0 1 8 5h8a2 2 0 0 1 1.9 1.3l2.6 7.2V18a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/><path d="M3.5 13.5H8l1.5 2.5h5l1.5-2.5h4.5"/>',
+    cal: '<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+    clip: '<path d="M20.5 11.5l-8.2 8.2a5.2 5.2 0 0 1-7.4-7.4l8.5-8.5a3.5 3.5 0 0 1 5 5l-8.5 8.5a1.8 1.8 0 0 1-2.5-2.5l7.8-7.8"/>',
+    trash: '<path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 12.6a1.5 1.5 0 0 0 1.5 1.4h6a1.5 1.5 0 0 0 1.5-1.4L17.5 7"/>',
+    chevR: '<path d="M9 6l6 6-6 6"/>',
+    people: '<circle cx="9" cy="8.5" r="3.2"/><path d="M3 19.5c.6-3.2 3-5 6-5s5.4 1.8 6 5"/><circle cx="17.5" cy="9.5" r="2.4"/><path d="M16.5 14.6c2.4.2 4 1.7 4.5 4.4"/>',
+    camera: '<path d="M4 8.5A2 2 0 0 1 6 6.5h2l1.5-2h5L16 6.5h2a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><circle cx="12" cy="12.5" r="3.5"/>',
+    bolt: '<path d="M13 3L5 13.5h6L10 21l8-10.5h-6z"/>',
     plans: '<rect x="3" y="5.5" width="18" height="13" rx="3"/><path d="M3 10h18M7 14.5h4"/>',
     x: '<path d="M6 6l12 12M18 6L6 18"/>',
     activity: '<path d="M3 12h4l3-7 4 14 3-7h4"/>',
@@ -67,6 +84,7 @@
     '<svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5V5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>' +
     '<svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></button>';
 
+  var SEARCH_BTN = '<button class="icon-btn top-ic" data-act="search" title="Search (Ctrl K)" aria-label="Search">' + ic('search') + '</button>';
   var PLANS = [
     { id: 'free', name: 'Free', price: '€0', gb: 1, ws: 1, team: 1, f: 'Try it on one project.' },
     { id: 'creator', name: 'Creator', price: '€19.99', gb: 250, ws: 1, team: 1, f: 'For freelancers and solo creators.' },
@@ -81,7 +99,7 @@
     return { pct: Math.min(100, Math.max(1, Math.round(w.usedGb / p.gb * 100))), over: over, txt: gb(w.usedGb) + ' of ' + gb(p.gb),
       free: over ? 'Over the ' + p.name + ' limit by ' + gb(w.usedGb - p.gb) : p.name + ' plan · ' + gb(p.gb - w.usedGb) + ' free' };
   }
-  function wsSub(w) { return plan().name + ' · ' + w.team.length + (w.team.length === 1 ? ' person' : ' people'); }
+  function wsSub(w) { var k = (w.members || []).length; return plan().name + ' · ' + k + (k === 1 ? ' person' : ' people'); }
   function foldersOf(p) {
     if (!p.folders) p.folders = [];
     p.files.forEach(function (f) { if (f.folder && p.folders.indexOf(f.folder) < 0) p.folders.push(f.folder); });
@@ -95,19 +113,41 @@
     return {
       ws: 'halden', collapsed: false, plan: 'team',
       notes: [
-        { id: 'n1', text: 'Maren prefers the shorter intro. Keep every cut under 45 seconds.', project: '', ws: 'halden', when: 'Yesterday' },
-        { id: 'n2', text: 'Ask Jo for the final Atelier logo before the Lookbook export.', project: '', ws: 'halden', when: '2 days ago' },
-        { id: 'n3', text: 'The client wants the 9x16 version first. The wide cut can follow.', project: 'northline-campaign', ws: 'halden', when: 'Yesterday' }
+        { id: 'n1', ws: 'halden', project: 'northline-campaign', title: 'Frames for the 9x16 cut', date: dayOffset(0), created: ts(-1, 9, 40), entries: [
+          { id: 'e1', who: ME, at: ts(-1, 9, 40), text: 'Maren wants the vertical version first. These two frames hold up best in 9x16.', media: [{ id: 'm1', kind: 'image', src: 'social', name: 'social_frame.jpg' }, { id: 'm2', kind: 'image', src: 'walk-close', name: 'walk_close.jpg' }] },
+          { id: 'e2', who: 'Leo', at: ts(-1, 10, 5), text: 'Agreed. The bridge shot crops well too if we keep her on the right.', media: [{ id: 'm3', kind: 'image', src: 'bridge-arm', name: 'bridge.jpg' }] },
+          { id: 'e3', who: ME, at: ts(0, 9, 12), text: 'Here is the full reveal for reference.', media: [{ id: 'm4', kind: 'video', src: 'media/deskspace-reveal.mp4', thumb: 'poster', dur: 50, name: 'deskspace-reveal.mp4' }] }
+        ] },
+        { id: 'n2', ws: 'halden', project: 'lookbook-01', title: 'Colour references', date: dayOffset(-1), created: ts(-2, 16, 20), entries: [
+          { id: 'e4', who: 'Sam', at: ts(-2, 16, 20), text: 'Warm reds against a cool background, like these.', media: [{ id: 'm5', kind: 'image', src: 'lookbook', name: 'lookbook.jpg' }, { id: 'm6', kind: 'image', src: 'spring', name: 'spring.jpg' }, { id: 'm7', kind: 'image', src: 'teaser', name: 'teaser.jpg' }] }
+        ] },
+        { id: 'n3', ws: 'halden', project: '', title: 'Client preferences', date: dayOffset(-1), created: ts(-1, 18, 2), entries: [
+          { id: 'e5', who: ME, at: ts(-1, 18, 2), text: 'Maren prefers the shorter intro. Keep every cut under 45 seconds.', media: [] },
+          { id: 'e6', who: ME, at: ts(-1, 18, 4), text: 'Jo signs off on colour only after seeing it on a phone.', media: [] }
+        ] },
+        { id: 'n4', ws: 'halden', project: '', title: 'Ask Jo for the final logo', date: dayOffset(2), created: ts(-2, 11, 30), entries: [
+          { id: 'e7', who: ME, at: ts(-2, 11, 30), text: 'Ask Jo for the final Atelier logo before the Lookbook export.', media: [] }
+        ] }
       ],
       workspaces: [
-        { id: 'halden', name: 'Halden Studio', letter: 'H', usedGb: 1240, team: [ME, 'Leo', 'Sam', 'Jo', 'Kai'] },
-        { id: 'films', name: 'Halden Films', letter: 'F', cls: 'f', usedGb: 160, team: [ME, 'Leo', 'Kai'] }
+        { id: 'halden', name: 'Halden Studio', letter: 'H', usedGb: 1240, members: [
+          { id: 'u-me', me: true, name: ME, full: USER.name, email: USER.email, role: 'Owner', job: 'Producer. Runs the client projects and signs off deliveries.' },
+          { id: 'u-leo', name: 'Leo', full: 'Leo Brandt', email: 'leo@haldenstudio.co', role: 'Admin', job: 'Lead editor. Cuts the films and manages versions.' },
+          { id: 'u-sam', name: 'Sam', full: 'Sam Okafor', email: 'sam@haldenstudio.co', role: 'Editor', job: 'Colourist and finishing.' },
+          { id: 'u-mira', name: 'Mira', full: 'Mira Kos', email: 'mira@haldenstudio.co', role: 'Editor', job: 'Motion design and titles.' },
+          { id: 'u-kai', name: 'Kai', full: 'Kai Lund', email: 'kai@haldenstudio.co', role: 'Viewer', job: 'Accounts and invoicing.' }
+        ] },
+        { id: 'films', name: 'Halden Films', letter: 'F', cls: 'f', usedGb: 160, members: [
+          { id: 'u-me', me: true, name: ME, full: USER.name, email: USER.email, role: 'Owner', job: 'Producer.' },
+          { id: 'u-leo', name: 'Leo', full: 'Leo Brandt', email: 'leo@haldenstudio.co', role: 'Admin', job: 'Lead editor.' },
+          { id: 'u-kai', name: 'Kai', full: 'Kai Lund', email: 'kai@haldenstudio.co', role: 'Editor', job: 'Assistant editor.' }
+        ] }
       ],
       clients: [
         { id: 'northline', ws: 'halden', name: 'Northline', contact: 'Maren', color: '#4f9ce8' },
         { id: 'north', ws: 'halden', name: 'North Studio', contact: 'Noor', color: '#6c7fd8' },
         { id: 'atelier', ws: 'halden', name: 'Atelier Journal', contact: 'Jo', color: '#3db389' },
-        { id: 'forma', ws: 'halden', name: 'Forma', contact: 'Sam', color: '#e3a43a' }
+        { id: 'forma', ws: 'halden', name: 'Forma', contact: 'Elif', color: '#e3a43a' }
       ],
       projects: [
         { id: 'northline-campaign', ws: 'halden', name: 'Northline Campaign', client: 'northline', due: 'Fri 7 Nov', cover: 'bridge-wide', folders: ['Cuts', 'Selects', 'Audio', 'Delivery'], files: [
@@ -141,11 +181,34 @@
         ] }
       ],
       tasks: [
-        { id: 't1', text: 'Send v3 of the campaign film to Maren', project: 'northline-campaign', done: true },
-        { id: 't2', text: 'Recut the BTS pause at 00:21', project: 'northline-campaign', done: false },
-        { id: 't3', text: 'Export 9x16 teaser for social', project: 'northline-campaign', done: false },
-        { id: 't4', text: 'Apply Jo\'s two notes on Lookbook 01', project: 'lookbook-01', done: false },
-        { id: 't5', text: 'Follow up with North Studio on the teaser', project: 'spring-teaser', done: false }
+        { id: 't1', text: 'Send v3 of the campaign film to Maren', project: 'northline-campaign', ws: 'halden', due: dayOffset(-2), done: true, doneAt: ts(-2, 17, 0) },
+        { id: 't2', text: 'Recut the BTS pause at 00:21', project: 'northline-campaign', ws: 'halden', due: dayOffset(0), done: false },
+        { id: 't3', text: 'Export 9x16 teaser for social', project: 'northline-campaign', ws: 'halden', due: dayOffset(1), done: false },
+        { id: 't4', text: 'Apply Jo\'s two notes on Lookbook 01', project: 'lookbook-01', ws: 'halden', due: dayOffset(-1), done: false },
+        { id: 't5', text: 'Follow up with North Studio on the teaser', project: 'spring-teaser', ws: 'halden', due: '', done: false },
+        { id: 't6', text: 'Renew the stock music licence', project: '', ws: 'halden', due: dayOffset(3), done: false },
+        { id: 't7', text: 'Back up last month\'s raw footage', project: '', ws: 'halden', due: '', done: false }
+      ],
+      chats: [
+        { id: 'team-halden', ws: 'halden', kind: 'team', entries: [
+          { id: 'c-1', who: 'Leo', at: ts(-1, 9, 2), text: 'Morning! v3 of Northline is up for Maren.', media: [] },
+          { id: 'c-2', who: 'Sam', at: ts(-1, 9, 20), text: 'Grade on the bridge scene, before and after:', media: [{ id: 'cm1', kind: 'image', src: 'bridge-wide', name: 'before.jpg' }, { id: 'cm2', kind: 'image', src: 'bridge-arm', name: 'after.jpg' }] },
+          { id: 'c-3', who: ME, at: ts(-1, 11, 45), text: 'Looks great. Sharing the vertical frames note so everyone has it.', media: [], noteRef: 'n1' },
+          { id: 'c-4', who: 'Mira', at: ts(0, 8, 58), text: 'Titles for the Forma film are ready for review this afternoon.', media: [] },
+          { id: 'c-5', who: 'Kai', at: ts(0, 9, 30), text: 'Northline invoice goes out after delivery. The pay day is in the calendar.', media: [] }
+        ] },
+        { id: 'dm:halden:u-leo', ws: 'halden', kind: 'dm', member: 'u-leo', entries: [
+          { id: 'd-1', who: 'Leo', at: ts(0, 8, 40), text: 'Can you check the trim at 00:12 before I send v4?', media: [] },
+          { id: 'd-2', who: ME, at: ts(0, 8, 52), text: 'Yes, give me ten minutes.', media: [] }
+        ] }
+      ],
+      events: [
+        { id: 'ev1', ws: 'halden', title: 'Northline delivery window', type: 'delivery', project: 'northline-campaign', start: dayOffset(1), end: dayOffset(3) },
+        { id: 'ev2', ws: 'halden', title: 'Spring teaser review call', type: 'meeting', project: 'spring-teaser', start: dayOffset(0), end: dayOffset(0) },
+        { id: 'ev3', ws: 'halden', title: 'Lookbook 01 final cut', type: 'deadline', project: 'lookbook-01', start: dayOffset(5), end: dayOffset(5) },
+        { id: 'ev4', ws: 'halden', title: 'Northline invoice paid', type: 'payday', project: 'northline-campaign', start: dayOffset(9), end: dayOffset(9) },
+        { id: 'ev5', ws: 'halden', title: 'Forma shoot', type: 'shoot', project: 'forma-brand-film', start: dayOffset(12), end: dayOffset(13) },
+        { id: 'ev6', ws: 'halden', title: 'Team pay day', type: 'payday', project: '', start: dayOffset(16), end: dayOffset(16) }
       ],
       activity: [
         { who: 'Maren', text: 'approved Northline_Social_9x16.mp4', when: '2 h ago' },
@@ -160,10 +223,40 @@
   var S;
   try { S = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { S = null; }
   if (!S || !S.projects || !S.notes) S = seed();
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* storage unavailable or full */ } }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(S)); return true; }
+    catch (e) { toast('Browser storage is full, so this change lasts only until you reload. Remove some images from notes.'); return false; }
+  }
+  function migrate() {
+    S.workspaces.forEach(function (w) {
+      if (!w.members) w.members = (w.team || [ME]).map(function (n, i) { return { id: i ? 'u-' + slug(n) : 'u-me', me: !i, name: n, full: n, email: '', role: i ? 'Editor' : 'Owner', job: '' }; });
+      if (w.usedGb == null) w.usedGb = 0;
+    });
+    if (!S.chats) S.chats = [];
+    if (!S.events) S.events = [];
+    S.tasks.forEach(function (t) {
+      if (!t.ws) { var tp = t.project && project(t.project); t.ws = tp ? tp.ws : S.ws; }
+      if (t.due == null) t.due = '';
+    });
+    S.notes = S.notes.map(function (n) {
+      if (n.entries) return n;
+      return { id: n.id, ws: n.ws || S.ws, project: n.project || '', title: String(n.text || 'Note').split(/[.!?]/)[0].slice(0, 60), date: today(), created: Date.now(),
+        entries: [{ id: 'e' + uid(), who: ME, at: Date.now(), text: n.text || '', media: [] }] };
+    });
+  }
+  migrate();
+  var reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  var ui = { wsOpen: false, acct: false, share: false, shareDl: true, modal: null, as: 'team', folder: '', q: '', t: 0, playing: false, sel: 0, hot: '' };
+  var ui = { taskId: '', preset: '', qaLoc: '', noteId: '', pend: {}, reading: '', attachFor: '', shareFor: '', teamTab: 'chat', chatId: '', calMonth: '', evId: '', sq: '', si: 0, sres: [], lb: null, freshNote: '', freshEntry: '', freshTask: '', doneOpen: false, wsOpen: false, acct: false, share: false, shareDl: true, modal: null, as: 'team', folder: '', q: '', t: 0, playing: false, sel: 0, hot: '' };
   var blobs = {};      // fileId -> object URL of a file uploaded in this session
+  var mediaBlobs = {}; // note media id -> object URL of a video attached in this session
+  var lbEl = document.createElement('div'); lbEl.id = 'lb'; document.body.appendChild(lbEl);
+  var notePicker = document.createElement('input');
+  notePicker.type = 'file'; notePicker.multiple = true; notePicker.accept = 'image/*,video/*'; notePicker.hidden = true;
+  document.body.appendChild(notePicker);
+  var photoPicker = document.createElement('input');
+  photoPicker.type = 'file'; photoPicker.accept = 'image/*'; photoPicker.hidden = true;
+  document.body.appendChild(photoPicker);
   var tick = null;
 
   function ws() { return S.workspaces.filter(function (w) { return w.id === S.ws; })[0] || S.workspaces[0]; }
@@ -206,7 +299,7 @@
     var inReview = 0;
     ps.forEach(function (p) { p.files.forEach(function (f) { if (f.status === 'review' || f.status === 'changes') inReview++; }); });
     var ids = ps.map(function (p) { return p.id; });
-    var open = S.tasks.filter(function (t) { return !t.done && ids.indexOf(t.project) > -1; }).length;
+    var open = wsTasks().filter(function (t) { return !t.done; }).length;
     function item(v, icon, label, count) {
       var on = r.v === v || (v === 'projects' && (r.v === 'p' || r.v === 'f'));
       return '<button class="nav-item' + (on ? ' on' : '') + '" data-go="' + v + '" title="' + label + '">' + ic(icon) + '<span>' + label + '</span>' + (count != null ? '<span class="count">' + count + '</span>' : '') + '</button>';
@@ -221,7 +314,7 @@
       }).join('') + '</div>';
     }
     h += '</div>';
-    h += item('home', 'home', 'Home') + item('projects', 'folder', 'Projects', ps.length) + item('review', 'review', 'In review', inReview) + item('tasks', 'tasks', 'Tasks', open) + item('activity', 'activity', 'Activity') + item('plans', 'plans', 'Plans');
+    h += item('home', 'home', 'Home') + item('projects', 'folder', 'Projects', ps.length) + item('review', 'review', 'In review', inReview) + item('tasks', 'tasks', 'Tasks', open) + item('notes', 'notes', 'Notes', wsNotes().length) + item('calendar', 'cal', 'Calendar') + item('team', 'people', 'Team', (w.members || []).length) + item('activity', 'activity', 'Activity') + item('plans', 'plans', 'Plans');
     var cs = clients();
     if (cs.length) {
       h += '<div class="side-label">Clients</div>' + cs.map(function (c) {
@@ -243,7 +336,7 @@
       p = project(r.a); f = r.v === 'f' ? fileOf(p, r.b) : null;
       h += '<button class="icon-btn" data-go="' + (f ? 'p/' + r.a : 'projects') + '" aria-label="Back">' + ic('back') + '</button>';
       if (p) h += '<div class="crumb"><b>' + esc(f ? f.name : p.name) + '</b><small>' + esc(f ? p.name : client(p.client).name + ' · ' + p.files.length + ' file' + (p.files.length === 1 ? '' : 's')) + '</small></div>';
-      h += '<span class="sp"></span>' + THEME_BTN;
+      h += '<span class="sp"></span>' + SEARCH_BTN + THEME_BTN;
       if (p && !f) h += '<button class="btn btn-primary btn-sm" data-act="upload">' + ic('upload') + 'Upload</button>';
       if (f && ui.as === 'team') {
         h += '<button class="btn btn-ghost btn-sm" data-act="new-version">' + ic('upload') + 'New version</button>' +
@@ -251,13 +344,14 @@
       }
     } else {
       var now = new Date();
-      var titles = { home: 'Good flow, ' + ME, projects: 'Projects', review: 'In review', tasks: 'Tasks', activity: 'Activity', plans: 'Plans', account: 'Account', c: client(r.a).name };
-      var subs = { home: now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }), projects: ws().name, review: 'Waiting on a client or on you', tasks: ws().name, activity: ws().name, plans: ws().name, account: USER.email, c: 'Client' };
-      h += '<div class="crumb"><b>' + esc(titles[r.v] || 'Deskspace') + '</b><small>' + esc(subs[r.v] || '') + '</small></div><span class="sp"></span>' + THEME_BTN;
-      if (r.v === 'home' || r.v === 'projects' || r.v === 'c') {
-        h += '<label class="search">' + ic('search') + '<input id="q" type="search" placeholder="Search projects" value="' + esc(ui.q) + '" aria-label="Search projects"></label>' +
-          '<button class="btn btn-primary btn-sm" data-act="new-project">' + ic('plus') + 'New project</button>';
-      }
+      var titles = { home: 'Good flow, ' + ME, projects: 'Projects', review: 'In review', tasks: 'Tasks', notes: 'Notes', calendar: 'Calendar', team: 'Team', activity: 'Activity', plans: 'Plans', account: 'Account', c: client(r.a).name };
+      var subs = { home: now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }), projects: ws().name, review: 'Waiting on a client or on you', tasks: ws().name, notes: ws().name, calendar: 'Deliveries, finish dates and pay days', team: ws().name, activity: ws().name, plans: ws().name, account: USER.email, c: 'Client' };
+      h += '<div class="crumb"><b>' + esc(titles[r.v] || 'Deskspace') + '</b><small>' + esc(subs[r.v] || '') + '</small></div><span class="sp"></span>' + SEARCH_BTN + THEME_BTN;
+      if (r.v === 'projects' || r.v === 'c') h += '<button class="btn btn-primary btn-sm" data-act="new-project">' + ic('plus') + 'New project</button>';
+      if (r.v === 'calendar') h += '<button class="btn btn-primary btn-sm" data-act="ev-new" data-id="">' + ic('plus') + 'New event</button>';
+      if (r.v === 'team' && canManage()) h += '<button class="btn btn-primary btn-sm" data-act="invite">' + ic('plus') + 'Invite member</button>';
+      if (r.v === 'tasks') h += '<button class="btn btn-primary btn-sm" data-act="task-new" data-id="">' + ic('plus') + 'New task</button>';
+      if (r.v === 'notes') h += '<button class="btn btn-primary btn-sm" data-act="note-new" data-id="">' + ic('plus') + 'New note</button>';
     }
     $('#top').innerHTML = h;
   }
@@ -282,41 +376,485 @@
     return list.filter(function (p) { return (p.name + ' ' + client(p.client).name).toLowerCase().indexOf(q) > -1; });
   }
 
-  function taskRows(tasks, pid) {
-    return (tasks.length ? tasks.map(function (t) {
-      var p = project(t.project);
-      return '<button class="row' + (t.done ? ' done' : '') + '" data-act="task" data-id="' + t.id + '"><span class="check' + (t.done ? ' on' : '') + '">' + ic('check') + '</span><span class="grow"><b>' + esc(t.text) + '</b>' + (!pid && p ? '<small>' + esc(p.name) + '</small>' : '') + '</span></button>';
-    }).join('') : '<div class="empty-sm">Nothing open. Add the next thing to do.</div>') +
-      '<form class="add" data-form="task" data-pid="' + (pid || '') + '"><input class="input" name="text" placeholder="Add a task…" autocomplete="off" aria-label="New task"><button class="btn btn-ghost btn-sm" type="submit">Add</button></form>';
+  /* ---------- dates ---------- */
+  function iso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function dayOffset(n) { var d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + n); return iso(d); }
+  function today() { return dayOffset(0); }
+  function ts(dayOff, h, m) { var d = new Date(); d.setDate(d.getDate() + dayOff); d.setHours(h, m, 0, 0); return d.getTime(); }
+  function fmtDay(s) {
+    if (!s) return '';
+    if (s === today()) return 'Today';
+    if (s === dayOffset(1)) return 'Tomorrow';
+    if (s === dayOffset(-1)) return 'Yesterday';
+    var p = s.split('-'), d = new Date(+p[0], +p[1] - 1, +p[2]);
+    return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) + (d.getFullYear() !== new Date().getFullYear() ? ' ' + d.getFullYear() : '');
   }
-  function notesFor(pid) { return S.notes.filter(function (n) { return (n.project || '') === pid && (pid || n.ws === S.ws); }); }
-  function noteRows(pid) {
-    var ns = notesFor(pid);
-    return (ns.length ? ns.map(function (n) {
-      return '<div class="note-row"><p>' + esc(n.text) + '<small>' + esc(n.when) + '</small></p><button class="x" data-act="note-del" data-id="' + n.id + '" aria-label="Delete note">' + ic('x') + '</button></div>';
-    }).join('') : '<div class="empty-sm">No notes yet. Write down what you don\'t want to forget.</div>') +
-      '<form class="add" data-form="note" data-pid="' + pid + '"><input class="input" name="text" placeholder="Write a note…" autocomplete="off" aria-label="New note"><button class="btn btn-ghost btn-sm" type="submit">Add</button></form>';
+  function fmtTime(t) { return new Date(t).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); }
+
+  /* ---------- shared bits ---------- */
+  function locOptions(sel, none) {
+    var ps = projects();
+    return '<option value="">' + none + '</option>' + (ps.length ? '<optgroup label="Projects">' + ps.map(function (p) {
+      return '<option value="' + esc(p.id) + '"' + (p.id === sel ? ' selected' : '') + '>' + esc(p.name) + '</option>';
+    }).join('') + '</optgroup>' : '');
+  }
+  function sec(icon, title, n, go) {
+    return '<div class="sec-h">' + icon + '<span>' + title + '</span><span class="muted">' + n + '</span>' + (go ? '<button class="link" data-go="' + go + '">Open project ' + ic('chevR') + '</button>' : '') + '</div>';
+  }
+  function cdot(p) { return '<span class="dot" style="background:' + client(p.client).color + '"></span>'; }
+
+  /* ---------- tasks ---------- */
+  function taskById(id) { return S.tasks.filter(function (t) { return t.id === id; })[0]; }
+  function wsTasks() {
+    var ids = projects().map(function (p) { return p.id; });
+    return S.tasks.filter(function (t) { return t.project ? ids.indexOf(t.project) > -1 : (t.ws || S.ws) === S.ws; });
+  }
+  function byDue(a, b) { var x = a.due || '9999-99-99', y = b.due || '9999-99-99'; return x < y ? -1 : x > y ? 1 : 0; }
+  function taskLoc(t) { var p = t.project && project(t.project); return p ? p.name : 'My Tasks'; }
+  function dueChip(t) {
+    if (!t.due) return '';
+    var cls = t.done ? '' : t.due < today() ? ' late' : t.due === today() ? ' today' : '';
+    return '<span class="due' + cls + '" title="Due ' + esc(fmtDay(t.due)) + '">' + ic('cal') + esc(fmtDay(t.due)) + '</span>';
+  }
+  function taskRow(t, showLoc) {
+    return '<div class="tk' + (t.done ? ' is-done' : ' open') + (t.id === ui.freshTask ? ' fresh' : '') + '" data-id="' + t.id + '">' +
+      (t.done ? '' : '<div class="tk-bg" aria-hidden="true">' + ic('check') + 'Done</div>') +
+      '<div class="row task' + (t.done ? ' done' : '') + '">' +
+        '<button class="check' + (t.done ? ' on' : '') + '" data-act="task" data-id="' + t.id + '" aria-label="' + (t.done ? 'Mark as not done' : 'Mark as done') + '" title="' + (t.done ? 'Mark as not done' : 'Mark as done') + '">' + ic('check') + '</button>' +
+        '<button class="tk-main" data-act="task-edit" data-id="' + t.id + '" title="Edit task"><b>' + esc(t.text) + '</b>' + (showLoc ? '<small>' + esc(taskLoc(t)) + '</small>' : '') + '</button>' +
+        dueChip(t) +
+      '</div></div>';
+  }
+  function quickAdd(pid, mode) {
+    var loc = mode === 'full' ? (ui.qaLoc || '') : (pid || '');
+    return '<form class="add qa" data-form="task" data-pid="' + esc(pid || '') + '">' +
+      '<input class="input" name="text" placeholder="' + (pid ? 'Add a task…' : 'Add to My Tasks…') + '" autocomplete="off" aria-label="New task">' +
+      (mode ? '<input class="input date" type="date" name="due" aria-label="Due date" title="Due date">' : '') +
+      (mode === 'full' ? '<select class="input sel" name="loc" aria-label="Location" title="Location">' + locOptions(loc, 'My Tasks') + '</select>' : '') +
+      '<button class="btn btn-ghost btn-sm" type="submit">Add</button></form>';
+  }
+  function doneBlock(list) {
+    if (!list.length) return '';
+    return '<details class="tdone"' + (ui.doneOpen ? ' open' : '') + '><summary>' + ic('chevR') + 'Completed <span class="muted">' + list.length + '</span></summary><div class="card list">' +
+      list.slice().sort(function (a, b) { return (b.doneAt || 0) - (a.doneAt || 0); }).map(function (t) { return taskRow(t, true); }).join('') + '</div></details>';
+  }
+  function vTasks() {
+    var all = wsTasks(), open = all.filter(function (t) { return !t.done; }).sort(byDue), done = all.filter(function (t) { return t.done; });
+    var late = open.filter(function (t) { return t.due && t.due < today(); }).length;
+    var mine = open.filter(function (t) { return !t.project; });
+    var h = '<div class="view-head"><h1>Tasks</h1><small>' + open.length + ' open' + (late ? ' · <span class="late-txt">' + late + ' overdue</span>' : '') + '</small></div>';
+    h += '<div class="card qa-card">' + quickAdd('', 'full') + '</div>';
+    h += sec(ic('inbox'), 'My Tasks', mine.length) + '<div class="card list">' + (mine.length ? mine.map(function (t) { return taskRow(t, false); }).join('') : '<div class="empty-sm">Nothing here. Tasks without a project land in My Tasks.</div>') + '</div>';
+    projects().forEach(function (p) {
+      var pts = open.filter(function (t) { return t.project === p.id; });
+      if (pts.length) h += sec(cdot(p), esc(p.name), pts.length, 'p/' + p.id + '/tasks') + '<div class="card list">' + pts.map(function (t) { return taskRow(t, false); }).join('') + '</div>';
+    });
+    return h + doneBlock(done);
+  }
+  function afterTasks() { save(); renderSide(); renderView(); }
+  function completeTask(tk, id) {
+    var t = taskById(id); if (!t) return;
+    if (t.done) { t.done = false; delete t.doneAt; afterTasks(); toast('Moved back to ' + taskLoc(t)); return; }
+    var finish = function () { t.done = true; t.doneAt = Date.now(); log(ME, 'completed “' + t.text + '”'); afterTasks(); toast('Completed: ' + t.text); };
+    if (!tk || reduceMotion) { finish(); return; }
+    if (tk.classList.contains('leaving')) return;
+    var row = tk.querySelector('.row'), chk = tk.querySelector('.check');
+    if (chk) { chk.classList.add('on', 'pop'); }
+    tk.style.height = tk.offsetHeight + 'px';
+    tk.classList.add('leaving');
+    setTimeout(function () { tk.classList.add('arm'); row.style.transform = 'translateX(-104%)'; }, 150);
+    setTimeout(function () { tk.classList.add('gone'); }, 560);
+    setTimeout(finish, 840);
+  }
+
+  /* ---------- notes ---------- */
+  function noteById(id) { return S.notes.filter(function (n) { return n.id === id; })[0]; }
+  function wsNotes() {
+    var ids = projects().map(function (p) { return p.id; });
+    return S.notes.filter(function (n) { return n.project ? ids.indexOf(n.project) > -1 : (n.ws || S.ws) === S.ws; });
+  }
+  function lastAt(n) { var e = n.entries[n.entries.length - 1]; return e ? e.at : (n.created || 0); }
+  function byRecent(a, b) { return lastAt(b) - lastAt(a); }
+  function notesOf(pid) { return wsNotes().filter(function (n) { return (n.project || '') === pid; }).sort(byRecent); }
+  function noteMedia(n) { var out = []; n.entries.forEach(function (e) { (e.media || []).forEach(function (m) { out.push(m); }); }); return out; }
+  function noteExcerpt(n) { for (var i = n.entries.length - 1; i >= 0; i--) if (n.entries[i].text) return n.entries[i].text; return ''; }
+  function noteLoc(n) { var p = n.project && project(n.project); return p ? p.name : 'My Notes'; }
+  function isUrl(x) { return /^(data:|blob:|media\/|https?:)/.test(x || ''); }
+  function mUrl(m) { return m.src ? (isUrl(m.src) ? m.src : src(m.src)) : (mediaBlobs[m.id] || ''); }
+  function mThumb(m) { return m.kind === 'image' ? mUrl(m) : (m.thumb ? (isUrl(m.thumb) ? m.thumb : src(m.thumb)) : ''); }
+  function countTxt(n) { var k = n.entries.length, f = noteMedia(n).length; return k + ' message' + (k === 1 ? '' : 's') + (f ? ' · ' + f + ' file' + (f === 1 ? '' : 's') : ''); }
+
+  function nCard(n) {
+    var media = noteMedia(n), ths = media.map(mThumb).filter(Boolean), who = [], cover;
+    n.entries.forEach(function (e) { if (who.indexOf(e.who) < 0) who.push(e.who); });
+    if (media.length) {
+      var pics = ths.length >= 3 ? ths.slice(0, 3) : ths.slice(0, 1);
+      cover = '<span class="ncover' + (pics.length === 3 ? ' stack' : '') + '">' + (pics.length ? pics.map(function (u) { return '<img src="' + u + '" alt="" loading="lazy">'; }).join('') : '<span class="ph">' + ic('film') + '</span>') +
+        '<span class="nbadge">' + ic('clip') + media.length + '</span></span>';
+    } else cover = '<span class="ncover"><span class="quote">' + esc(noteExcerpt(n) || 'Empty note. Open it to start writing.') + '</span></span>';
+    var k = n.entries.length;
+    return '<button class="card ncard' + (n.id === ui.freshNote && !ui.modal ? ' fresh' : '') + '" data-act="note-open" data-id="' + n.id + '">' + cover +
+      '<span class="body"><b>' + esc(n.title) + '</b><small>' + esc(noteLoc(n)) + (n.date ? ' · ' + esc(fmtDay(n.date)) : '') + '</small></span>' +
+      '<span class="nfoot"><span class="avs">' + who.slice(0, 3).map(function (w) { return av(w, true); }).join('') + '</span><span>' + k + ' message' + (k === 1 ? '' : 's') + '</span></span></button>';
+  }
+  function nLine(n, actName) {
+    var media = noteMedia(n), th = media.length ? mThumb(media[0]) : '';
+    return '<button class="row nline" data-act="' + (typeof actName === 'string' ? actName : 'note-open') + '" data-id="' + n.id + '">' + (th ? '<img class="nthumb" src="' + th + '" alt="">' : '<span class="nic">' + ic('notes') + '</span>') +
+      '<span class="grow"><b>' + esc(n.title) + '</b><small>' + esc(noteLoc(n)) + ' · ' + esc(noteExcerpt(n) || 'No messages yet') + '</small></span>' +
+      (media.length ? '<span class="due">' + ic('clip') + media.length + '</span>' : '') + '</button>';
+  }
+  function addNoteTile(pid) { return '<button class="add-tile" data-act="note-new" data-id="' + esc(pid) + '"><span>' + ic('plus') + '</span>New note</button>'; }
+  function vNotes() {
+    var all = wsNotes().sort(byRecent), mine = all.filter(function (n) { return !n.project; });
+    var h = '<div class="view-head"><h1>Notes</h1><small>' + all.length + ' note' + (all.length === 1 ? '' : 's') + ' · open one to write and attach images or videos</small></div>';
+    h += sec(ic('inbox'), 'My Notes', mine.length) + '<div class="ngrid">' + mine.map(nCard).join('') + addNoteTile('') + '</div>';
+    projects().forEach(function (p) {
+      var ns = all.filter(function (n) { return n.project === p.id; });
+      if (ns.length) h += sec(cdot(p), esc(p.name), ns.length, 'p/' + p.id + '/notes') + '<div class="ngrid">' + ns.map(nCard).join('') + addNoteTile(p.id) + '</div>';
+    });
+    return h;
+  }
+
+  /* chat threads: notes and team chats share one look */
+  function chatById(id) { return S.chats.filter(function (c) { return c.id === id; })[0]; }
+  function threadById(id) { return noteById(id) || chatById(id); }
+  function pendOf(id) { return ui.pend[id] || (ui.pend[id] = []); }
+  function mediaGrid(list) {
+    var n = list.length;
+    return '<div class="mgrid ' + (n === 1 ? 'one' : n === 3 ? 'three' : 'two') + '">' + list.slice(0, 4).map(function (m, i) {
+      var th = mThumb(m), playable = m.kind !== 'video' || !!mUrl(m);
+      return '<button type="button" class="mt' + (m.kind === 'video' ? ' vid' : '') + (playable ? '' : ' gone') + '" data-act="lb" data-id="' + m.id + '" aria-label="Open ' + esc(m.name || m.kind) + '">' +
+        (th ? '<img src="' + th + '" alt="">' : '<span class="ph">' + ic('film') + '</span>') +
+        (m.kind === 'video' ? '<span class="play">' + ic('play') + '</span>' + (m.dur ? '<span class="dur">' + tc(m.dur) + '</span>' : '') : '') +
+        (i === 3 && n > 4 ? '<span class="more">+' + (n - 4) + '</span>' : '') + '</button>';
+    }).join('') + '</div>';
+  }
+  function noteRefHtml(id) {
+    var n = noteById(id);
+    if (!n) return '<span class="nref gone"><span class="nic">' + ic('notes') + '</span><span><b>Note deleted</b><small>It is no longer available</small></span></span>';
+    var th = noteMedia(n).map(mThumb).filter(Boolean)[0];
+    return '<button type="button" class="nref" data-act="note-open" data-id="' + n.id + '">' + (th ? '<img src="' + th + '" alt="">' : '<span class="nic">' + ic('notes') + '</span>') +
+      '<span><b>' + esc(n.title) + '</b><small>' + esc(noteLoc(n)) + ' · ' + countTxt(n) + '</small></span>' + ic('chevR') + '</button>';
+  }
+  function threadHtml(n) {
+    if (!n.entries.length) return n.kind ? '<div class="thread-empty">' + ic('review') + '<b>No messages yet</b>Say hello, share a note, or drop images and videos here.</div>' :
+      '<div class="thread-empty">' + ic('notes') + '<b>Start the note</b>Write below, or attach images and videos with the clip. You can also drop or paste files here.</div>';
+    var out = '', lastDay = '';
+    n.entries.forEach(function (e, i) {
+      var d = iso(new Date(e.at)), prev = n.entries[i - 1], me = e.who === ME;
+      if (d !== lastDay) { out += '<div class="day-sep">' + esc(fmtDay(d)) + '</div>'; lastDay = d; }
+      var cont = prev && prev.who === e.who && iso(new Date(prev.at)) === d && e.at - prev.at < 10 * 60 * 1000;
+      var hasMedia = e.media && e.media.length;
+      out += '<div class="msg' + (me ? ' me' : '') + (cont ? ' cont' : '') + (e.id === ui.freshEntry ? ' new' : '') + '">' +
+        (me ? '' : (cont ? '<span class="av-sp"></span>' : av(e.who, true))) +
+        '<div class="bubble' + (hasMedia ? ' has-media' : '') + '">' + (!me && !cont ? '<b class="who">' + esc(e.who) + '</b>' : '') +
+        (hasMedia ? mediaGrid(e.media) : '') + (e.noteRef ? noteRefHtml(e.noteRef) : '') + (e.text ? '<p>' + esc(e.text) + '</p>' : '') +
+        '<time>' + fmtTime(e.at) + '</time></div></div>';
+    });
+    return out;
+  }
+  function chatHead(n) {
+    return '<header class="chat-h"><span class="chat-ic">' + ic('notes') + '</span><div class="chat-t">' +
+      '<input class="chat-title" data-note-field="title" value="' + esc(n.title) + '" aria-label="Note title" maxlength="80">' +
+      '<div class="chat-meta"><label class="meta-chip" title="Location">' + ic('folder') + '<select data-note-field="project" aria-label="Location">' + locOptions(n.project, 'My Notes') + '</select></label>' +
+      '<label class="meta-chip" title="Date">' + ic('cal') + '<input type="date" data-note-field="date" value="' + esc(n.date || '') + '" aria-label="Date"></label>' +
+      '<span class="muted" id="chat-count">' + countTxt(n) + '</span></div></div>' +
+      '<button class="icon-btn" data-act="note-del" data-id="' + n.id + '" title="Delete note" aria-label="Delete note">' + ic('trash') + '</button>' +
+      '<button class="icon-btn" data-act="close-modal" data-force="1" title="Close" aria-label="Close">' + ic('x') + '</button></header>';
+  }
+  function pendHtml(id) {
+    return pendOf(id).map(function (m) {
+      var th = mThumb(m);
+      return '<div class="pend-tile">' + (th ? '<img src="' + th + '" alt="">' : '<span class="ph">' + ic('film') + '</span>') + (m.kind === 'video' ? '<span class="pend-vid">' + ic('play') + '</span>' : '') +
+        '<button type="button" class="pend-x" data-act="pend-del" data-id="' + m.id + '" aria-label="Remove ' + esc(m.name || 'attachment') + '">' + ic('x') + '</button></div>';
+    }).join('') + (ui.reading === id ? '<div class="pend-tile loading"><span class="spin"></span></div>' : '');
+  }
+  function composerHtml(id, share) {
+    return '<form class="composer" data-form="note-msg" data-thread="' + esc(id) + '"><div class="pend" data-pend="' + esc(id) + '">' + pendHtml(id) + '</div>' +
+      '<div class="comp-row"><button type="button" class="icon-btn" data-act="note-attach" title="Attach images or videos" aria-label="Attach images or videos">' + ic('clip') + '</button>' +
+      (share ? '<button type="button" class="icon-btn" data-act="share-note" title="Share a note" aria-label="Share a note">' + ic('notes') + '</button>' : '') +
+      '<textarea class="compose" name="text" rows="1" placeholder="Write a message…" aria-label="Message"></textarea>' +
+      '<button class="send" type="submit" aria-label="Send" title="Send">' + ic('send') + '</button></div>' +
+      '<div class="comp-hint">Enter to send · Shift + Enter for a new line · drop or paste images and videos</div></form>';
+  }
+  function threadEl(id) { return document.querySelector('[data-thread-body="' + id + '"]'); }
+  function paintThread(id) {
+    var n = threadById(id), th = threadEl(id);
+    if (!n || !th) return;
+    th.innerHTML = threadHtml(n); ui.freshEntry = '';
+    th.scrollTop = th.scrollHeight;
+    [].forEach.call(th.querySelectorAll('.msg.new img'), function (img) { img.addEventListener('load', function () { th.scrollTop = th.scrollHeight; }, { once: true }); });
+    if (noteById(id)) { var cnt = $('#chat-count'); if (cnt) cnt.textContent = countTxt(n); }
+  }
+  function paintPending(id) { var el = document.querySelector('[data-pend="' + id + '"]'); if (el) el.innerHTML = pendHtml(id); }
+  function bindChat(root, id, first) {
+    if (!root) return;
+    var th = threadEl(id), c = root.querySelector('.compose');
+    if (th) {
+      th.scrollTop = th.scrollHeight;
+      if (first) [].forEach.call(th.querySelectorAll('img'), function (img) { img.addEventListener('load', function () { th.scrollTop = th.scrollHeight; }, { once: true }); });
+    }
+    root.ondragover = function (e) { if (e.dataTransfer && [].indexOf.call(e.dataTransfer.types || [], 'Files') > -1) { e.preventDefault(); root.classList.add('drop-hi'); } };
+    root.ondragleave = function (e) { if (!root.contains(e.relatedTarget)) root.classList.remove('drop-hi'); };
+    root.ondrop = function (e) { e.preventDefault(); root.classList.remove('drop-hi'); addPending(e.dataTransfer.files, id); };
+    if (c) c.focus();
+  }
+  function shrinkImage(file) {
+    return new Promise(function (resolve) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () {
+        var s = Math.min(1, 1280 / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement('canvas'), out = '';
+        c.width = Math.max(1, Math.round(img.naturalWidth * s)); c.height = Math.max(1, Math.round(img.naturalHeight * s));
+        try { var ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(img, 0, 0, c.width, c.height); out = c.toDataURL('image/jpeg', 0.8); } catch (e) { out = ''; }
+        URL.revokeObjectURL(url); resolve(out);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); resolve(''); };
+      img.src = url;
+    });
+  }
+  function readMedia(file) {
+    if (file.type.indexOf('image/') === 0) return shrinkImage(file).then(function (data) { return data ? { id: 'm' + uid(), kind: 'image', name: file.name, src: data } : null; });
+    if (file.type.indexOf('video/') === 0) return makeThumb(file).then(function (res) {
+      var id = 'm' + uid(); mediaBlobs[id] = res.url;
+      return { id: id, kind: 'video', name: file.name, src: '', thumb: res.thumb, dur: isFinite(res.dur) ? Math.round(res.dur) : 0 };
+    });
+    return Promise.resolve(null);
+  }
+  function addPending(list, id) {
+    if (!id) return;
+    var files = [].slice.call(list || []), ok = files.filter(function (f) { return /^(image|video)\//.test(f.type); });
+    if (ok.length < files.length) toast('Only images and videos can be attached');
+    ok = ok.slice(0, Math.max(0, 12 - pendOf(id).length));
+    if (!ok.length) return;
+    ui.reading = id; paintPending(id);
+    Promise.all(ok.map(readMedia)).then(function (res) {
+      res.forEach(function (m) { if (m) pendOf(id).push(m); });
+      ui.reading = ''; paintPending(id);
+      var form = document.querySelector('form[data-thread="' + id + '"]'), c = form && form.querySelector('.compose'); if (c) c.focus();
+    });
+  }
+  function renderLb() {
+    var n = ui.lb && threadById(ui.lb.t), list = n ? noteMedia(n) : [], m = ui.lb ? list[ui.lb.i] : null;
+    if (!m) { ui.lb = null; lbEl.innerHTML = ''; return; }
+    var url = mUrl(m), th = mThumb(m), body;
+    if (m.kind === 'video') body = url ? '<video src="' + url + '" controls autoplay playsinline' + (th ? ' poster="' + th + '"' : '') + '></video>' :
+      '<div class="lb-gone">' + (th ? '<img src="' + th + '" alt="">' : '') + '<p>This demo keeps attached videos only until the page is reloaded. Attach it again to play it.</p></div>';
+    else body = '<img src="' + url + '" alt="' + esc(m.name || 'Image') + '">';
+    lbEl.innerHTML = '<div class="lightbox" data-act="lb-close" role="dialog" aria-modal="true" aria-label="' + esc(m.name || 'Attachment') + '">' + body +
+      '<button class="lb-x" data-act="lb-close" data-force="1" aria-label="Close">' + ic('x') + '</button>' +
+      (list.length > 1 ? '<button class="lb-nav prev" data-act="lb-nav" data-id="-1" aria-label="Previous">' + ic('back') + '</button><button class="lb-nav next" data-act="lb-nav" data-id="1" aria-label="Next">' + ic('arrow') + '</button>' : '') +
+      '<div class="lb-cap">' + esc(m.name || '') + (list.length > 1 ? ' · ' + (ui.lb.i + 1) + ' of ' + list.length : '') + '</div></div>';
+  }
+  function lbStep(d) {
+    var n = ui.lb && threadById(ui.lb.t), len = n ? noteMedia(n).length : 0;
+    if (!len) return;
+    ui.lb.i = (ui.lb.i + d + len) % len; renderLb();
+  }
+  function closeModal() {
+    var wasNote = ui.modal === 'note';
+    if (wasNote) ui.pend[ui.noteId] = [];
+    ui.modal = null; ui.taskId = ''; ui.evId = ''; ui.lb = null; renderLb(); renderModal();
+    if (wasNote) { renderView(); ui.freshNote = ''; }
   }
 
   function vHome() {
-    var w = ws(), st = store(w), all = projects(), ps = filtered(all);
-    var order = { changes: 0, approved: 1, review: 2, draft: 3 };
-    ps = ps.slice().sort(function (a, b) { return order[pStatus(a)] - order[pStatus(b)]; });
-    var deliver = ps.filter(function (p) { return pStatus(p) === 'approved'; }).length, revise = ps.filter(function (p) { return pStatus(p) === 'changes'; }).length;
-    var ids = all.map(function (p) { return p.id; });
-    var open = S.tasks.filter(function (t) { return !t.done && ids.indexOf(t.project) > -1; }).slice(0, 5);
-    var circ = 2 * Math.PI * 28;
-    var h = '<div class="view-head"><h1>Active projects</h1><small>' + deliver + ' to deliver · ' + revise + ' to revise</small><span class="sp"></span><small>Sorted by what needs you</small></div>';
-    if (ui.q && !ps.length) h += '<div class="empty"><b>Nothing matches “' + esc(ui.q) + '”</b>Try another name or client.</div>';
-    else h += '<div class="pgrid">' + ps.map(pCard).join('') + '</div>' + (ui.q ? '' : '<button class="add-tile bar" data-act="new-project"><span>' + ic('plus') + '</span>New project</button>');
-    h += '<div class="home3">' +
-      '<div class="card list"><div class="card-h">Tasks <button class="link" data-go="tasks">See all</button></div>' + (all.length ? taskRows(open, '') : '<div class="empty-sm">Create a project to add tasks.</div>') + '</div>' +
-      '<div class="card list"><div class="card-h">Notes <span class="muted">' + notesFor('').length + '</span></div>' + noteRows('') + '</div>' +
-      '<div class="card"><div class="card-h">Activity <button class="link" data-go="activity">See all</button></div><div class="pad">' + (all.length ? '<ul class="act">' + S.activity.slice(0, 5).map(actLi).join('') + '</ul>' : '<span class="muted">Uploads, comments and approvals show up here.</span>') + '</div></div></div>';
-    h += '<div class="home2">' +
+    var w = ws(), st = store(w), all = projects(), td = today();
+    var recent = all.slice(0, 6), deliver = all.filter(function (p) { return pStatus(p) === 'approved'; }).length, revise = all.filter(function (p) { return pStatus(p) === 'changes'; }).length;
+    var open = wsTasks().filter(function (t) { return !t.done; }).sort(byDue).slice(0, 6), recentNotes = wsNotes().sort(byRecent).slice(0, 4);
+    var up = wsEvents().filter(function (e) { return (e.end || e.start) >= td; }).sort(byStart).slice(0, 3);
+    var circ = 2 * Math.PI * 28, tc0 = chatById(teamChatId()), last = tc0 && tc0.entries[tc0.entries.length - 1];
+    var tiles = [['new-project', 'folder', 'New project', 'Start a client project'], ['task-new', 'tasks', 'New task', 'Into My Tasks or a project'], ['note-new', 'notes', 'New note', 'Write, add images and videos'], ['ev-new', 'cal', 'New event', 'Delivery, finish date, pay day']];
+    var h = '<div class="home"><div class="tiles">' + tiles.map(function (t) {
+      return '<button class="tile" data-act="' + t[0] + '" data-id=""><span class="tile-ic">' + ic(t[1]) + '<i>' + ic('plus') + '</i></span><span><b>' + t[2] + '</b><small>' + t[3] + '</small></span></button>';
+    }).join('') + '</div>';
+    h += '<div class="view-head"><h1>Recent projects</h1><small>' + deliver + ' to deliver · ' + revise + ' to revise</small><span class="sp"></span><button class="link see-all" data-go="projects">See all ' + ic('chevR') + '</button></div>';
+    h += recent.length ? '<div class="pgrid six">' + recent.map(pCard).join('') + '</div>' : emptyProjects();
+    h += '<div class="home3 grow">' +
+      '<div class="card list"><div class="card-h">Tasks <span class="card-acts"><button class="icon-btn sm" data-act="task-new" data-id="" title="New task" aria-label="New task">' + ic('plus') + '</button><button class="link" data-go="tasks">See all</button></span></div>' +
+        (open.length ? open.map(function (t) { return taskRow(t, true); }).join('') : '<div class="empty-sm">Nothing open. Add the next thing to do.</div>') + quickAdd('', '') + '</div>' +
+      '<div class="card list"><div class="card-h">Notes <span class="card-acts"><button class="icon-btn sm" data-act="note-new" data-id="" title="New note" aria-label="New note">' + ic('plus') + '</button><button class="link" data-go="notes">See all</button></span></div>' +
+        (recentNotes.length ? recentNotes.map(function (n) { return nLine(n); }).join('') : '<div class="empty-sm">No notes yet.</div>') + '<button class="add-line" data-act="note-new" data-id="">' + ic('plus') + 'New note</button></div>' +
+      '<div class="card list"><div class="card-h">Activity <button class="link" data-go="activity">See all</button></div><div class="pad">' + (S.activity.length ? '<ul class="act">' + S.activity.slice(0, 6).map(actLi).join('') + '</ul>' : '<span class="muted">Uploads, comments and approvals show up here.</span>') + '</div></div></div>';
+    h += '<div class="home3 bottom">' +
       '<div class="card pad"><div class="sub-h">Storage <button class="link" style="font-size:12px" data-go="plans">Plans</button></div><div class="ring"><svg viewBox="0 0 68 68"><circle class="trk" cx="34" cy="34" r="28" fill="none" stroke-width="6"/><circle class="val' + (st.over ? ' over' : '') + '" cx="34" cy="34" r="28" fill="none" stroke-width="6" stroke-linecap="round" stroke-dasharray="' + (circ * st.pct / 100).toFixed(1) + ' ' + circ.toFixed(1) + '" transform="rotate(-90 34 34)"/><text x="34" y="38.5" text-anchor="middle">' + st.pct + '%</text></svg><div><b>' + esc(st.txt) + '</b><small>' + esc(st.free) + '</small></div></div></div>' +
-      '<div class="card pad"><div class="sub-h">Team <small>' + w.team.length + ' people</small></div><div class="avs">' + w.team.map(function (n) { return av(n); }).join('') + '</div><span class="muted">Clients review by link and don\'t need a seat.</span></div></div>';
+      '<div class="card"><div class="card-h">Coming up <button class="link" data-go="calendar">Calendar</button></div><div class="evlist">' + (up.length ? up.map(evLine).join('') : '<div class="empty-sm">Nothing planned. Add a delivery or a pay day.</div>') + '</div></div>' +
+      '<div class="card pad team-card"><div class="sub-h">Team <small>' + w.members.length + ' of ' + plan().team + ' seats</small></div><div class="avs">' + w.members.map(function (m) { return av(mName(m)); }).join('') + '</div>' +
+        '<p class="tc-prev">' + (last ? '<b>' + esc(last.who === ME ? 'You' : last.who) + ':</b> ' + esc(last.text || (last.noteRef ? 'Shared a note' : 'Sent an attachment')) : 'Clients review by link and don\'t need a seat.') + '</p>' +
+        '<div class="row-btns"><button class="btn btn-ghost btn-sm" data-act="chat-open" data-id="' + teamChatId() + '">' + ic('review') + 'Team chat</button><button class="btn btn-ghost btn-sm" data-act="team-tab" data-id="members">' + ic('people') + 'Members</button></div></div>' +
+      '</div></div>';
     return h;
+  }
+
+  /* ---------- team ---------- */
+  var ROLES = ['Owner', 'Admin', 'Editor', 'Viewer'];
+  var ROLE_INFO = { Owner: 'Plan, billing and everything else', Admin: 'Manages members, projects and clients', Editor: 'Uploads, comments and delivers', Viewer: 'Views and comments' };
+  function myMember(w) { w = w || ws(); return (w.members || []).filter(function (m) { return m.me; })[0]; }
+  function canManage() { var m = myMember(); return !!m && (m.role === 'Owner' || m.role === 'Admin'); }
+  function isOwner() { var m = myMember(); return !!m && m.role === 'Owner'; }
+  function mName(m) { return m.me ? ME : m.name; }
+  function mFull(m) { return m.me ? USER.name : (m.full || m.name); }
+  function mEmail(m) { return m.me ? USER.email : (m.email || ''); }
+  function memberById(id) { return (ws().members || []).filter(function (m) { return m.id === id; })[0]; }
+  function teamChatId() { return 'team-' + S.ws; }
+  function dmId(mid) { return 'dm:' + S.ws + ':' + mid; }
+  function ensureChat(id) {
+    var c = chatById(id);
+    if (!c) { var dm = id.indexOf('dm:') === 0; c = { id: id, ws: S.ws, kind: dm ? 'dm' : 'team', member: dm ? id.split(':')[2] : '', entries: [] }; S.chats.push(c); }
+    return c;
+  }
+  function chatOk(id) { return id === teamChatId() || (id.indexOf('dm:' + S.ws + ':') === 0 && !!memberById(id.split(':')[2])); }
+  function shortWhen(t) { var d = iso(new Date(t)); return d === today() ? fmtTime(t) : d === dayOffset(-1) ? 'Yesterday' : new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); }
+  function chatListHtml() {
+    var w = ws(), rows = [{ id: teamChatId(), team: true }].concat(w.members.filter(function (m) { return !m.me; }).map(function (m) { return { id: dmId(m.id), m: m }; }));
+    return rows.map(function (r) {
+      var c = chatById(r.id), last = c && c.entries[c.entries.length - 1];
+      var what = last ? (last.text || (last.noteRef ? 'Shared a note' : (last.media && last.media.length ? last.media.length + ' attachment' + (last.media.length === 1 ? '' : 's') : ''))) : '';
+      var prev = last ? (last.who === ME ? 'You: ' : (r.team ? last.who + ': ' : '')) + what : (r.team ? 'Group chat for everyone in ' + w.name : (r.m.role + ' · ' + (r.m.job || 'No messages yet')));
+      var icon = r.team ? '<span class="ws-ic big ' + (w.cls || '') + '">' + w.letter + '</span>' : av(r.m.name, false, 'lg2');
+      return '<button class="cl-row' + (ui.chatId === r.id ? ' on' : '') + '" data-act="chat-open" data-id="' + esc(r.id) + '">' + icon +
+        '<span class="cl-main"><span class="cl-top"><b>' + esc(r.team ? w.name : mFull(r.m)) + '</b>' + (last ? '<time>' + esc(shortWhen(last.at)) + '</time>' : '') + '</span><small>' + esc(prev) + '</small></span></button>';
+    }).join('');
+  }
+  function paintChatList() { var el = $('#chat-list'); if (el) el.innerHTML = chatListHtml(); }
+  function teamChatHtml() {
+    var w = ws();
+    if (!ui.chatId || !chatOk(ui.chatId)) ui.chatId = teamChatId();
+    var c = ensureChat(ui.chatId), team = c.kind === 'team', m = team ? null : memberById(c.member);
+    var head = team ? '<span class="ws-ic big ' + (w.cls || '') + '">' + w.letter + '</span><div class="cp-t"><b>' + esc(w.name) + '</b><small>' + esc(w.members.map(mName).join(', ')) + '</small></div>' :
+      av(m.name, false, 'lg2') + '<div class="cp-t"><b>' + esc(mFull(m)) + '</b><small>' + esc(m.role + (m.job ? ' · ' + m.job : '')) + '</small></div>';
+    return '<div class="tchat"><aside class="cl"><div class="cl-h">Chats</div><div class="cl-list" id="chat-list">' + chatListHtml() + '</div></aside>' +
+      '<section class="chat-pane"><header class="cp-h">' + head + (team ? '<button class="btn btn-ghost btn-sm" data-act="team-tab" data-id="members">' + ic('people') + 'Members</button>' : '') + '</header>' +
+      '<div class="thread" data-thread-body="' + esc(c.id) + '">' + threadHtml(c) + '</div>' + composerHtml(c.id, true) + '</section></div>';
+  }
+  function teamMembersHtml() {
+    var w = ws(), mg = canManage(), own = isOwner(), seats = plan().team, used = w.members.length;
+    var h = '<div class="tm-bar card"><div><b>' + used + ' of ' + seats + ' seat' + (seats === 1 ? '' : 's') + ' used</b><small>' + esc(plan().name) + ' plan · clients review by link and don\'t take a seat</small></div>' +
+      '<div class="meter"><i' + (used > seats ? ' class="over"' : '') + ' style="width:' + Math.min(100, used / seats * 100) + '%"></i></div>' +
+      (mg ? '<button class="btn btn-primary btn-sm" data-act="invite">' + ic('plus') + 'Invite member</button>' : '') +
+      (own ? '<button class="btn btn-ghost btn-sm" data-act="team-new">' + ic('people') + 'Create team</button>' : '') + '</div>';
+    h += '<div class="card members">' + w.members.map(function (m) {
+      var editable = mg && !m.me && m.role !== 'Owner';
+      return '<div class="mem" data-mid="' + m.id + '">' +
+        (m.me ? '<button class="mem-ph" data-act="photo-up" title="Change your photo" aria-label="Change your photo">' + av(mName(m), false, 'xl') + '<span class="cam">' + ic('camera') + '</span></button>' : av(m.name, false, 'xl')) +
+        '<div class="mem-id"><b>' + esc(mFull(m)) + (m.me ? '<span class="you">You</span>' : '') + '</b><small>' + esc(mEmail(m)) + '</small></div>' +
+        '<div class="mem-job">' + (mg || m.me ? '<input class="input slim" data-member-field="job" value="' + esc(m.job || '') + '" placeholder="What does ' + esc(mName(m)) + ' do?" aria-label="What ' + esc(mName(m)) + ' does">' : '<span>' + esc(m.job || '—') + '</span>') + '</div>' +
+        '<div class="mem-role">' + (editable ? '<select class="input slim" data-member-field="role" aria-label="Role of ' + esc(mName(m)) + '">' + ROLES.slice(1).map(function (r) { return '<option' + (r === m.role ? ' selected' : '') + '>' + r + '</option>'; }).join('') + '</select>' : '<span class="role-pill r-' + m.role.toLowerCase() + '">' + m.role + '</span>') + '</div>' +
+        '<div class="mem-acts">' + (!m.me ? '<button class="icon-btn" data-act="chat-open" data-id="' + esc(dmId(m.id)) + '" title="Message ' + esc(mName(m)) + '" aria-label="Message ' + esc(mName(m)) + '">' + ic('review') + '</button>' : '') +
+          (editable && own ? '<button class="icon-btn" data-act="member-del" data-id="' + m.id + '" title="Remove from team" aria-label="Remove ' + esc(mName(m)) + ' from the team">' + ic('trash') + '</button>' : '') + '</div></div>';
+    }).join('') + '</div>';
+    h += '<div class="roles-legend">' + ROLES.map(function (r) { return '<div><span class="role-pill r-' + r.toLowerCase() + '">' + r + '</span><small>' + ROLE_INFO[r] + '</small></div>'; }).join('') + '</div>';
+    return h;
+  }
+  function vTeam() {
+    var w = ws(), tab = ui.teamTab || 'chat';
+    return '<div class="view-head"><h1>' + esc(w.name) + '</h1><small>' + w.members.length + ' of ' + plan().team + ' seats · ' + esc(plan().name) + ' plan</small><span class="sp"></span>' +
+      '<div class="seg txt big" role="tablist"><button class="' + (tab === 'chat' ? 'on' : '') + '" data-act="team-tab" data-id="chat" role="tab" aria-selected="' + (tab === 'chat') + '">' + ic('review') + 'Chat</button>' +
+      '<button class="' + (tab === 'members' ? 'on' : '') + '" data-act="team-tab" data-id="members" role="tab" aria-selected="' + (tab === 'members') + '">' + ic('people') + 'Members</button></div></div>' +
+      (tab === 'members' ? teamMembersHtml() : teamChatHtml());
+  }
+  function squarePhoto(file) {
+    return new Promise(function (resolve) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () {
+        var sz = Math.min(img.naturalWidth, img.naturalHeight), c = document.createElement('canvas'), out = '';
+        c.width = c.height = 256;
+        try { c.getContext('2d').drawImage(img, (img.naturalWidth - sz) / 2, (img.naturalHeight - sz) / 2, sz, sz, 0, 0, 256, 256); out = c.toDataURL('image/jpeg', 0.85); } catch (e) { out = ''; }
+        URL.revokeObjectURL(url); resolve(out);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); resolve(''); };
+      img.src = url;
+    });
+  }
+  function saveUser() { try { localStorage.setItem(USER_KEY, JSON.stringify(USER)); return true; } catch (e) { toast('Browser storage is full, so this lasts only until you reload'); return false; } }
+
+  /* ---------- calendar ---------- */
+  var EV_TYPES = { delivery: 'Delivery', deadline: 'Finish date', payday: 'Pay day', shoot: 'Shoot', meeting: 'Review or meeting' };
+  function wsEvents() {
+    var ids = projects().map(function (p) { return p.id; });
+    return S.events.filter(function (e) { return e.project ? ids.indexOf(e.project) > -1 : (e.ws || S.ws) === S.ws; });
+  }
+  function evById(id) { return S.events.filter(function (e) { return e.id === id; })[0]; }
+  function byStart(a, b) { return a.start < b.start ? -1 : a.start > b.start ? 1 : 0; }
+  function evSpan(e) { return !e.end || e.end === e.start ? fmtDay(e.start) : fmtDay(e.start) + ' – ' + fmtDay(e.end); }
+  function evLine(e) {
+    var p = e.project && project(e.project), d = e.start.split('-');
+    var mon = new Date(+d[0], +d[1] - 1, +d[2]).toLocaleDateString('en-GB', { month: 'short' });
+    return '<button class="evl" data-act="ev-edit" data-id="' + e.id + '"><span class="evd t-' + e.type + '"><b>' + (+d[2]) + '</b><small>' + mon + '</small></span>' +
+      '<span class="grow"><b>' + esc(e.title) + '</b><small>' + EV_TYPES[e.type] + ' · ' + esc(evSpan(e)) + (p ? ' · ' + esc(p.name) : '') + '</small></span></button>';
+  }
+  function vCalendar() {
+    var ym = ui.calMonth || today().slice(0, 7), y = +ym.slice(0, 4), mo = +ym.slice(5, 7) - 1;
+    var first = new Date(y, mo, 1, 12), lead = (first.getDay() + 6) % 7, start = new Date(y, mo, 1 - lead, 12);
+    var evs = wsEvents(), dueTasks = wsTasks().filter(function (t) { return !t.done && t.due; }), td = today();
+    var h = '<div class="cal-wrap"><div class="cal-main"><div class="cal-head"><h1>' + first.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) + '</h1>' +
+      '<div class="cal-nav"><button class="icon-btn" data-act="cal-nav" data-id="-1" aria-label="Previous month">' + ic('back') + '</button><button class="btn btn-ghost btn-sm" data-act="cal-today">Today</button><button class="icon-btn" data-act="cal-nav" data-id="1" aria-label="Next month">' + ic('arrow') + '</button></div></div>' +
+      '<div class="cal-grid"><div class="cal-dow">' + ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(function (d) { return '<span>' + d + '</span>'; }).join('') + '</div><div class="cal-cells">';
+    for (var i = 0; i < 42; i++) {
+      var d = new Date(start); d.setDate(start.getDate() + i);
+      var ds = iso(d), dow = i % 7;
+      var chips = evs.filter(function (e) { return e.start <= ds && (e.end || e.start) >= ds; }).sort(byStart).map(function (e) {
+        var st = e.start === ds, en = (e.end || e.start) === ds;
+        return '<button class="ev t-' + e.type + (st ? ' s' : '') + (en ? ' e' : '') + '" data-act="ev-edit" data-id="' + e.id + '" title="' + esc(e.title + ' · ' + evSpan(e)) + '">' + (st || dow === 0 ? esc(e.title) : '&nbsp;') + '</button>';
+      }).concat(dueTasks.filter(function (t) { return t.due === ds; }).map(function (t) {
+        return '<button class="ev t-task s e" data-act="task-edit" data-id="' + t.id + '" title="Task due: ' + esc(t.text) + '">' + ic('check') + esc(t.text) + '</button>';
+      }));
+      h += '<div class="cell' + (d.getMonth() === mo ? '' : ' out') + (ds === td ? ' today' : '') + (dow > 4 ? ' wkend' : '') + '" data-act="ev-new" data-id="' + ds + '" title="Add an event on ' + esc(fmtDay(ds)) + '">' +
+        '<span class="dn">' + d.getDate() + '</span>' + chips.slice(0, 3).join('') + (chips.length > 3 ? '<span class="ev-more">+' + (chips.length - 3) + ' more</span>' : '') + '</div>';
+    }
+    h += '</div></div></div>';
+    var upc = evs.filter(function (e) { return (e.end || e.start) >= td; }).sort(byStart).slice(0, 8);
+    h += '<aside class="cal-side"><div class="card pad"><div class="sub-h">Coming up</div>' + (upc.length ? upc.map(evLine).join('') : '<p class="muted">Nothing planned yet.</p>') + '</div>' +
+      '<div class="card pad"><div class="sub-h">Types</div><div class="legend">' + Object.keys(EV_TYPES).map(function (k) {
+        var n = evs.filter(function (e) { return e.type === k; }).length;
+        return '<button class="lg-row t-' + k + '" data-act="ev-type-new" data-id="' + k + '"><i class="lg"></i>' + EV_TYPES[k] + '<span class="muted">' + n + '</span>' + ic('plus') + '</button>';
+      }).join('') + '<div class="lg-row t-task"><i class="lg"></i>Task due<span class="muted">' + dueTasks.length + '</span></div></div></div></aside></div>';
+    return h;
+  }
+
+  /* ---------- search ---------- */
+  function searchItems(q) {
+    q = q.trim().toLowerCase();
+    var out = [], ps = projects();
+    function hit(x) { return String(x || '').toLowerCase().indexOf(q) > -1; }
+    if (!q) {
+      out.push({ g: 'Quick actions', ic: 'folder', t: 'New project', s: 'Start a client project', act: 'new-project' },
+        { g: 'Quick actions', ic: 'tasks', t: 'New task', s: 'Into My Tasks or a project', act: 'task-new' },
+        { g: 'Quick actions', ic: 'notes', t: 'New note', s: 'Write, add images and videos', act: 'note-new' },
+        { g: 'Quick actions', ic: 'cal', t: 'New event', s: 'Delivery, finish date, pay day', act: 'ev-new' });
+      ps.slice(0, 5).forEach(function (p) { out.push({ g: 'Recent projects', ic: 'folder', t: p.name, s: client(p.client).name, go: 'p/' + p.id }); });
+      return out;
+    }
+    ps.forEach(function (p) { if (hit(p.name) || hit(client(p.client).name)) out.push({ g: 'Projects', ic: 'folder', t: p.name, s: client(p.client).name + ' · ' + p.files.length + ' files', go: 'p/' + p.id }); });
+    ps.forEach(function (p) { p.files.forEach(function (f) { if (hit(f.name)) out.push({ g: 'Files', ic: f.kind === 'video' ? 'film' : 'file', t: f.name, s: p.name + ' · v' + f.version, go: 'f/' + p.id + '/' + f.id }); }); });
+    wsTasks().forEach(function (t) { if (hit(t.text)) out.push({ g: 'Tasks', ic: 'tasks', t: t.text, s: taskLoc(t) + (t.due ? ' · ' + fmtDay(t.due) : '') + (t.done ? ' · done' : ''), act: 'task-edit', id: t.id }); });
+    wsNotes().forEach(function (n) { if (hit(n.title) || n.entries.some(function (e) { return hit(e.text); })) out.push({ g: 'Notes', ic: 'notes', t: n.title, s: noteLoc(n) + ' · ' + (noteExcerpt(n) || 'No messages yet'), act: 'note-open', id: n.id }); });
+    wsEvents().forEach(function (e) { if (hit(e.title) || hit(EV_TYPES[e.type])) out.push({ g: 'Calendar', ic: 'cal', t: e.title, s: EV_TYPES[e.type] + ' · ' + evSpan(e), act: 'ev-edit', id: e.id }); });
+    ws().members.forEach(function (m) { if (hit(mFull(m)) || hit(m.job) || hit(m.role)) out.push({ g: 'Team', ic: 'people', t: mFull(m), s: m.role + (m.job ? ' · ' + m.job : ''), member: m.id }); });
+    clients().forEach(function (c) { if (hit(c.name)) out.push({ g: 'Clients', ic: 'people', t: c.name, s: 'Client · ' + c.contact, go: 'c/' + c.id }); });
+    return out.slice(0, 40);
+  }
+  function markHit(t) {
+    var q = (ui.sq || '').trim(); if (!q) return esc(t);
+    var i = t.toLowerCase().indexOf(q.toLowerCase());
+    return i < 0 ? esc(t) : esc(t.slice(0, i)) + '<mark>' + esc(t.slice(i, i + q.length)) + '</mark>' + esc(t.slice(i + q.length));
+  }
+  function searchResultsHtml() {
+    var items = ui.sres = searchItems(ui.sq || ''), g = '', h = '';
+    if (!items.length) return '<div class="sr-empty">Nothing matches “' + esc(ui.sq) + '”.</div>';
+    if (ui.si >= items.length) ui.si = items.length - 1;
+    items.forEach(function (it, i) {
+      if (it.g !== g) { h += '<div class="sr-g">' + it.g + '</div>'; g = it.g; }
+      h += '<button class="sr' + (i === ui.si ? ' on' : '') + '" data-act="sr-go" data-id="' + i + '"><span class="sr-ic">' + ic(it.ic) + '</span><span class="grow"><b>' + markHit(it.t) + '</b><small>' + esc(it.s) + '</small></span>' + (i === ui.si ? '<kbd>Enter</kbd>' : '') + '</button>';
+    });
+    return h;
+  }
+  function openSearch() { ui.sq = ''; ui.si = 0; ui.modal = 'search'; renderModal(); }
+  function srGo(i) {
+    var it = (ui.sres || [])[i]; if (!it) return;
+    ui.modal = null; renderModal();
+    if (it.go) go(it.go);
+    else if (it.member) { var mm = memberById(it.member); ui.teamTab = mm && mm.me ? 'members' : 'chat'; if (mm && !mm.me) ui.chatId = dmId(mm.id); route().v === 'team' ? renderView() : go('team'); }
+    else if (it.act) act(it.act, it.id || '', document.body, { target: null });
   }
 
   function vPlans() {
@@ -342,11 +880,13 @@
 
   function vAccount() {
     var w = ws(), st = store(w), pl = plan();
-    return '<div class="narrow"><div class="profile"><span class="av lg">' + esc(ME.charAt(0).toUpperCase()) + '</span><div><h1>' + esc(USER.name) + '</h1><small>' + esc(USER.email) + '</small></div></div>' +
+    return '<div class="narrow"><div class="profile"><button class="mem-ph" data-act="photo-up" title="Change your photo" aria-label="Change your photo">' + av(ME, false, 'xxl') + '<span class="cam">' + ic('camera') + '</span></button>' +
+      '<div><h1>' + esc(USER.name) + '</h1><small>' + esc(USER.email) + (myMember() ? ' · ' + esc(myMember().role) + ' in ' + esc(ws().name) : '') + '</small>' +
+      '<div class="ph-btns"><button class="btn btn-ghost btn-sm" data-act="photo-up">' + ic('camera') + (USER.photo ? 'Change photo' : 'Add a photo') + '</button>' + (USER.photo ? '<button class="btn btn-ghost btn-sm" data-act="photo-del">Remove</button>' : '') + '</div></div></div>' +
       '<div class="group"><h2>Profile</h2><form class="card fields" data-form="profile"><div><label for="ac-name">Full name</label><input class="input" id="ac-name" name="name" value="' + esc(USER.name) + '" required autocomplete="name"></div><div><label for="ac-email">Email</label><input class="input" id="ac-email" name="email" type="email" value="' + esc(USER.email) + '" required autocomplete="email"></div><div class="foot"><button class="btn btn-primary btn-sm" type="submit">Save changes</button></div></form></div>' +
       '<div class="group"><h2>Plan and storage</h2><div class="card"><div class="kv"><span><b>' + esc(pl.name) + ' plan</b><small>' + pl.price + ' per month · ' + gb(pl.gb) + ' storage</small></span><button class="btn btn-ghost btn-sm" data-go="plans">Change plan</button></div><div class="kv"><span><b>Storage</b><small>' + esc(st.txt) + ' in ' + esc(w.name) + '</small></span><div class="meter"><i' + (st.over ? ' class="over"' : '') + ' style="width:' + st.pct + '%"></i></div></div></div></div>' +
       '<div class="group"><h2>Workspaces</h2><div class="card">' + S.workspaces.map(function (x) {
-        return '<div class="kv"><span style="display:flex;align-items:center;gap:10px"><span class="ws-ic ' + (x.cls || '') + '">' + x.letter + '</span><span><b>' + esc(x.name) + '</b><small>' + x.team.length + ' members</small></span></span>' + (x.id === S.ws ? '<span class="muted">Current</span>' : '<button class="btn btn-ghost btn-sm" data-act="ws-set" data-id="' + x.id + '">Switch</button>') + '</div>';
+        return '<div class="kv"><span style="display:flex;align-items:center;gap:10px"><span class="ws-ic ' + (x.cls || '') + '">' + x.letter + '</span><span><b>' + esc(x.name) + '</b><small>' + x.members.length + ' members</small></span></span>' + (x.id === S.ws ? '<span class="muted">Current</span>' : '<button class="btn btn-ghost btn-sm" data-act="ws-set" data-id="' + x.id + '">Switch</button>') + '</div>';
       }).join('') + '</div></div>' +
       '<div class="group"><h2>Session</h2><div class="card"><div class="kv"><span><b>Sign out</b><small>You stay signed in on this browser until you sign out.</small></span><button class="btn btn-danger btn-sm" data-act="logout">Sign out</button></div></div></div></div>';
   }
@@ -373,7 +913,7 @@
     var st = pStatus(p), tasks = S.tasks.filter(function (t) { return t.project === p.id; });
     var approved = p.files.filter(function (f) { return f.status === 'approved'; });
     var h = '<div class="view-head"><h1>' + esc(p.name) + '</h1>' + pill(st) + '<span class="sp"></span><small>' + (p.due ? 'Due ' + esc(p.due) + ' · ' : '') + tasks.filter(function (t) { return !t.done; }).length + ' open tasks</small></div>';
-    h += '<div class="tabs">' + [['files', 'Files', p.files.length], ['tasks', 'Tasks', tasks.length], ['notes', 'Notes', notesFor(p.id).length], ['activity', 'Activity', ''], ['delivery', 'Delivery', approved.length]].map(function (t) {
+    h += '<div class="tabs">' + [['files', 'Files', p.files.length], ['tasks', 'Tasks', tasks.length], ['notes', 'Notes', notesOf(p.id).length], ['activity', 'Activity', ''], ['delivery', 'Delivery', approved.length]].map(function (t) {
       return '<button class="tab' + (tab === t[0] ? ' on' : '') + '" data-go="p/' + p.id + '/' + t[0] + '">' + t[1] + (t[2] !== '' ? '<span class="n">' + t[2] + '</span>' : '') + '</button>';
     }).join('') + '</div>';
 
@@ -388,9 +928,11 @@
       h += fs.length ? '<div class="fgrid">' + fs.map(function (f) { return fCard(p, f); }).join('') + '</div>' : '';
       h += '<div class="drop" id="drop">' + (p.files.length ? 'Drop videos, photos or documents here to add them to ' + (ui.folder ? '“' + esc(ui.folder) + '”' : 'this project') : '<b style="color:var(--ink);display:block;margin-bottom:4px">No files yet</b>Drop the first cut here, or use Upload.') + '</div>';
     } else if (tab === 'tasks') {
-      h += taskList(tasks, p.id);
+      var po = tasks.filter(function (t) { return !t.done; }).sort(byDue);
+      h += '<div class="card list">' + (po.length ? po.map(function (t) { return taskRow(t, false); }).join('') : '<div class="empty-sm">No open tasks in this project.</div>') + quickAdd(p.id, 'date') + '</div>' +
+        doneBlock(tasks.filter(function (t) { return t.done; }));
     } else if (tab === 'notes') {
-      h += '<div class="card list narrow">' + noteRows(p.id) + '</div>';
+      h += '<div class="ngrid">' + notesOf(p.id).map(nCard).join('') + addNoteTile(p.id) + '</div>';
     } else if (tab === 'activity') {
       var acts = S.activity.filter(function (a) { return p.files.some(function (f) { return a.text.indexOf(f.name) > -1; }) || a.text.indexOf(p.name) > -1; });
       h += acts.length ? '<div class="card pad"><ul class="act">' + acts.map(actLi).join('') + '</ul></div>' : '<div class="empty"><b>No activity yet</b>Uploads, comments and approvals show up here.</div>';
@@ -404,14 +946,6 @@
       }
     }
     return h;
-  }
-
-  function taskList(tasks, pid) { return '<div class="card list">' + taskRows(tasks, pid) + '</div>'; }
-
-  function vTasks() {
-    var ids = projects().map(function (p) { return p.id; });
-    var ts = S.tasks.filter(function (t) { return ids.indexOf(t.project) > -1; });
-    return '<div class="view-head"><h1>Tasks</h1><small>' + ts.filter(function (t) { return !t.done; }).length + ' open</small></div>' + (ids.length ? taskList(ts, '') : emptyProjects());
   }
 
   function vInReview() {
@@ -561,6 +1095,7 @@
     var r = route(), view = $('#view'), h;
     clearInterval(tick); tick = null;
     view.classList.toggle('flush', r.v === 'f');
+    view.classList.toggle('fill', r.v === 'home' || r.v === 'team' || r.v === 'calendar');
     if (r.v === 'f') {
       var p = project(r.a), f = fileOf(p, r.b), key = r.a + '/' + r.b;
       if (f && lastFile !== key) { lastFile = key; ui.t = 0; ui.sel = f.version; ui.hot = ''; ui.share = false; }
@@ -575,17 +1110,25 @@
       else if (r.v === 'p') h = vProject(project(r.a), r.b);
       else if (r.v === 'review') h = vInReview();
       else if (r.v === 'tasks') h = vTasks();
+      else if (r.v === 'notes') h = vNotes();
+      else if (r.v === 'calendar') h = vCalendar();
+      else if (r.v === 'team') h = vTeam();
       else if (r.v === 'activity') h = vActivity();
       else if (r.v === 'plans') h = vPlans();
       else if (r.v === 'account') h = vAccount();
       else h = vHome();
     }
     view.innerHTML = h;
+    ui.freshTask = '';
+    if (r.v === 'team' && (ui.teamTab || 'chat') === 'chat') bindChat($('.chat-pane'), ui.chatId, true);
     if (r.v === 'f') bindReview();
     if (r.v === 'p') bindDrop();
   }
+  var shownModal = '';
   function renderModal() {
-    var m = ui.modal, h = '';
+    var m = ui.modal, h = '', key = m ? m + ':' + (ui.noteId || '') + ':' + (ui.taskId || '') + ':' + (ui.evId || '') : '', anim = !!m && key !== shownModal;
+    shownModal = key;
+    var cancel = '<button class="btn btn-ghost btn-sm" type="button" data-act="close-modal" data-force="1">Cancel</button>';
     if (m === 'project') {
       h = '<div class="scrim" data-act="close-modal"><form class="modal" data-form="project" role="dialog" aria-modal="true" aria-label="New project"><h3>New project</h3><label for="np-name">Project name</label><input class="input" id="np-name" name="name" required placeholder="e.g. Autumn Reels" autocomplete="off">' +
         '<label for="np-client">Client</label><input class="input" id="np-client" name="client" required list="np-clients" placeholder="Client name" autocomplete="off"><datalist id="np-clients">' + clients().map(function (c) { return '<option value="' + esc(c.name) + '">'; }).join('') + '</datalist>' +
@@ -598,9 +1141,73 @@
       if (cur) h = '<div class="scrim" data-act="close-modal"><form class="modal" data-form="version" role="dialog" aria-modal="true" aria-label="New version"><h3>Upload v' + (cur.f.version + 1) + ' of ' + esc(cur.f.name) + '</h3><label for="nv-file">File (optional in this demo)</label><input class="input" style="padding-top:8px" id="nv-file" name="file" type="file">' +
         '<label for="nv-note">What changed?</label><input class="input" id="nv-note" name="note" placeholder="e.g. Trimmed 5 s — the intro now ends at 00:07." autocomplete="off">' +
         '<div class="foot"><button class="btn btn-ghost btn-sm" type="button" data-act="close-modal" data-force="1">Cancel</button><button class="btn btn-primary btn-sm" type="submit">Upload version</button></div></form></div>';
+    } else if (m === 'task') {
+      var tk = ui.taskId ? taskById(ui.taskId) : null, tLoc = tk ? tk.project : (ui.preset || ''), tDue = tk ? (tk.due || '') : '';
+      h = '<div class="scrim" data-act="close-modal"><form class="modal" data-form="task-full" role="dialog" aria-modal="true" aria-label="' + (tk ? 'Edit task' : 'New task') + '"><h3>' + (tk ? 'Edit task' : 'New task') + '</h3>' +
+        '<label for="tf-text">Task</label><input class="input" id="tf-text" name="text" required autocomplete="off" placeholder="e.g. Export the 9x16 teaser" value="' + esc(tk ? tk.text : '') + '">' +
+        '<div class="two"><div><label for="tf-loc">Location</label><select class="input" id="tf-loc" name="loc">' + locOptions(tLoc, 'My Tasks') + '</select></div>' +
+        '<div><label for="tf-due">Due date</label><input class="input" id="tf-due" name="due" type="date" value="' + esc(tDue) + '"></div></div>' +
+        '<div class="qd" role="group" aria-label="Quick dates">' + [['0', 'Today'], ['1', 'Tomorrow'], ['7', 'In a week'], ['', 'No date']].map(function (x) {
+          var on = x[0] === '' ? !tDue : tDue === dayOffset(+x[0]);
+          return '<button type="button" class="chip' + (on ? ' on' : '') + '" data-act="qd" data-id="' + x[0] + '">' + x[1] + '</button>';
+        }).join('') + '</div>' +
+        '<p class="hint">' + ic('inbox') + 'Pick My Tasks when it doesn\'t belong to a project.</p>' +
+        '<div class="foot">' + (tk ? '<button class="btn btn-danger btn-sm" type="button" data-act="task-del" data-id="' + tk.id + '" style="margin-right:auto">Delete</button>' : '') + cancel +
+        '<button class="btn btn-primary btn-sm" type="submit">' + (tk ? 'Save' : 'Add task') + '</button></div></form></div>';
+    } else if (m === 'note-new') {
+      h = '<div class="scrim" data-act="close-modal"><form class="modal" data-form="note-new" role="dialog" aria-modal="true" aria-label="New note"><h3>New note</h3>' +
+        '<label for="nn-title">Title</label><input class="input" id="nn-title" name="title" autocomplete="off" maxlength="80" placeholder="e.g. Frames for the vertical cut">' +
+        '<div class="two"><div><label for="nn-loc">Location</label><select class="input" id="nn-loc" name="loc">' + locOptions(ui.preset || '', 'My Notes') + '</select></div>' +
+        '<div><label for="nn-date">Date</label><input class="input" id="nn-date" name="date" type="date" value="' + today() + '"></div></div>' +
+        '<p class="hint">' + ic('clip') + 'The note opens like a chat. Write in it and attach images or videos.</p>' +
+        '<div class="foot">' + cancel + '<button class="btn btn-primary btn-sm" type="submit">Create note</button></div></form></div>';
+    } else if (m === 'note') {
+      var nObj = noteById(ui.noteId);
+      if (nObj) h = '<div class="scrim chat-scrim" data-act="close-modal"><div class="modal chat" id="chat" role="dialog" aria-modal="true" aria-label="' + esc(nObj.title) + '">' +
+        chatHead(nObj) + '<div class="thread" data-thread-body="' + nObj.id + '">' + threadHtml(nObj) + '</div>' + composerHtml(nObj.id, false) + '</div></div>';
+      ui.freshEntry = '';
+    } else if (m === 'ev') {
+      var ev = ui.evId ? evById(ui.evId) : null, eS = ev ? ev.start : (ui.preset || today()), eE = ev ? (ev.end || ev.start) : eS, eT = ev ? ev.type : (ui.evType || 'delivery'), eP = ev ? ev.project : '';
+      h = '<div class="scrim" data-act="close-modal"><form class="modal" data-form="ev" role="dialog" aria-modal="true" aria-label="' + (ev ? 'Edit event' : 'New event') + '"><h3>' + (ev ? 'Edit event' : 'New event') + '</h3>' +
+        '<label>Type</label><div class="types" role="radiogroup" aria-label="Type">' + Object.keys(EV_TYPES).map(function (k) {
+          return '<label class="type-chip t-' + k + '"><input type="radio" name="type" value="' + k + '"' + (k === eT ? ' checked' : '') + '><span><i class="lg"></i>' + EV_TYPES[k] + '</span></label>';
+        }).join('') + '</div>' +
+        '<label for="ev-title">Title</label><input class="input" id="ev-title" name="title" required autocomplete="off" placeholder="e.g. Northline delivery window" value="' + esc(ev ? ev.title : '') + '">' +
+        '<label for="ev-proj">Project</label><select class="input" id="ev-proj" name="project">' + locOptions(eP, 'No project') + '</select>' +
+        '<div class="two"><div><label for="ev-s">From</label><input class="input" id="ev-s" name="start" type="date" required value="' + eS + '"></div><div><label for="ev-e">To</label><input class="input" id="ev-e" name="end" type="date" value="' + eE + '"></div></div>' +
+        '<p class="hint">' + ic('cal') + 'Use From and To for a delivery window. Keep one day for a finish date or a pay day.</p>' +
+        '<div class="foot">' + (ev ? '<button class="btn btn-danger btn-sm" type="button" data-act="ev-del" data-id="' + ev.id + '" style="margin-right:auto">Delete</button>' : '') + cancel +
+        '<button class="btn btn-primary btn-sm" type="submit">' + (ev ? 'Save' : 'Add event') + '</button></div></form></div>';
+    } else if (m === 'invite') {
+      var full = ws().members.length >= plan().team;
+      h = '<div class="scrim" data-act="close-modal"><form class="modal" data-form="invite" role="dialog" aria-modal="true" aria-label="Invite member"><h3>Invite to ' + esc(ws().name) + '</h3>' +
+        (full ? '<p class="hint">' + ic('alert') + 'All ' + plan().team + ' seat' + (plan().team === 1 ? '' : 's') + ' on the ' + esc(plan().name) + ' plan are used. Upgrade to add more people.</p><div class="foot">' + cancel + '<button class="btn btn-primary btn-sm" type="button" data-go="plans">See plans</button></div>' :
+          '<label for="iv-name">Full name</label><input class="input" id="iv-name" name="name" required autocomplete="off" placeholder="e.g. Nina Petrov">' +
+          '<label for="iv-email">Email</label><input class="input" id="iv-email" name="email" type="email" required autocomplete="off" placeholder="nina@studio.com">' +
+          '<div class="two"><div><label for="iv-role">Role</label><select class="input" id="iv-role" name="role">' + ROLES.slice(1).map(function (r) { return '<option' + (r === 'Editor' ? ' selected' : '') + '>' + r + '</option>'; }).join('') + '</select></div>' +
+          '<div><label for="iv-job">What they do</label><input class="input" id="iv-job" name="job" autocomplete="off" placeholder="e.g. Sound design"></div></div>' +
+          '<p class="hint">' + ic('people') + (ws().members.length + 1) + ' of ' + plan().team + ' seats after this invite. This demo sends no email.</p>' +
+          '<div class="foot">' + cancel + '<button class="btn btn-primary btn-sm" type="submit">Send invite</button></div>') + '</form></div>';
+    } else if (m === 'team-new') {
+      var canNew = S.workspaces.length < plan().ws;
+      h = '<div class="scrim" data-act="close-modal"><form class="modal" data-form="team-new" role="dialog" aria-modal="true" aria-label="Create team"><h3>Create a team</h3>' +
+        (canNew ? '<label for="tn-name">Team name</label><input class="input" id="tn-name" name="name" required autocomplete="off" placeholder="e.g. Halden Social">' +
+          '<p class="hint">' + ic('people') + 'You will be the owner. Invite people and give them roles after it is created. ' + S.workspaces.length + ' of ' + plan().ws + ' teams on the ' + esc(plan().name) + ' plan.</p>' +
+          '<div class="foot">' + cancel + '<button class="btn btn-primary btn-sm" type="submit">Create team</button></div>' :
+          '<p class="hint">' + ic('alert') + 'The ' + esc(plan().name) + ' plan includes ' + plan().ws + ' team' + (plan().ws === 1 ? '' : 's') + ' and all are in use. Team gives you 2, Agency gives you 5.</p><div class="foot">' + cancel + '<button class="btn btn-primary btn-sm" type="button" data-go="plans">See plans</button></div>') + '</form></div>';
+    } else if (m === 'share-note') {
+      var sn = wsNotes().sort(byRecent);
+      h = '<div class="scrim" data-act="close-modal"><div class="modal" role="dialog" aria-modal="true" aria-label="Share a note"><h3>Share a note in the chat</h3><div class="share-list">' +
+        (sn.length ? sn.map(function (n) { return nLine(n, 'share-pick'); }).join('') : '<div class="empty-sm">No notes yet. Create one first.</div>') + '</div><div class="foot">' + cancel + '</div></div></div>';
+    } else if (m === 'search') {
+      h = '<div class="scrim at-top" data-act="close-modal"><div class="modal finder" role="dialog" aria-modal="true" aria-label="Search"><div class="sr-in">' + ic('search') +
+        '<input id="sq" type="search" placeholder="Search projects, files, tasks, notes, people…" autocomplete="off" value="' + esc(ui.sq || '') + '" aria-label="Search"><kbd>Esc</kbd></div>' +
+        '<div class="sr-list" id="sres">' + searchResultsHtml() + '</div></div></div>';
     }
+    if (anim) h = h.replace('class="scrim', 'class="scrim anim');
     $('#layer').innerHTML = h;
-    var first = $('#layer input:not([type=file])'); if (first) first.focus();
+    if (m === 'note') bindChat($('#chat'), ui.noteId, anim);
+    else { var first = $('#layer input:not([type=file]):not([type=date])'); if (first) first.focus(); }
   }
   function render() { renderSide(); renderTop(); renderView(); renderModal(); }
 
@@ -676,16 +1283,78 @@
         break;
       case 'new-project': ui.modal = 'project'; renderModal(); break;
       case 'new-folder': ui.modal = 'folder'; renderModal(); break;
-      case 'note-del': S.notes = S.notes.filter(function (n) { return n.id !== id; }); save(); renderView(); break;
+      case 'note-del':
+        var dn = noteById(id || ui.noteId);
+        if (dn && confirm('Delete “' + dn.title + '” and everything in it?')) {
+          S.notes = S.notes.filter(function (n) { return n.id !== dn.id; }); save();
+          ui.modal = null; renderModal(); renderView(); renderSide(); toast('Note deleted');
+        }
+        break;
+      case 'note-new': ui.modal = 'note-new'; ui.preset = id || ''; renderModal(); break;
+      case 'note-open': ui.modal = 'note'; ui.noteId = id; ui.pend[id] = []; renderModal(); break;
+      case 'note-attach': ui.attachFor = el.closest('form').getAttribute('data-thread'); notePicker.click(); break;
+      case 'pend-del': var pf = el.closest('[data-pend]').getAttribute('data-pend'); ui.pend[pf] = pendOf(pf).filter(function (m) { return m.id !== id; }); paintPending(pf); break;
+      case 'lb':
+        var tb = el.closest('[data-thread-body]'), tid = tb && tb.getAttribute('data-thread-body'), ln = tid && threadById(tid);
+        var li = ln ? noteMedia(ln).map(function (m) { return m.id; }).indexOf(id) : -1;
+        if (li > -1) { ui.lb = { t: tid, i: li }; renderLb(); }
+        break;
+      case 'lb-nav': lbStep(parseInt(id, 10)); break;
+      case 'lb-close': if (ev.target === el || el.getAttribute('data-force')) { ui.lb = null; renderLb(); } break;
+      case 'search': openSearch(); break;
+      case 'sr-go': srGo(parseInt(id, 10)); break;
+      case 'team-tab': ui.teamTab = id; if (route().v === 'team') { renderView(); } else go('team'); break;
+      case 'chat-open': ui.teamTab = 'chat'; ui.chatId = id; if (route().v === 'team') { renderView(); } else go('team'); break;
+      case 'invite': ui.modal = 'invite'; renderModal(); break;
+      case 'team-new': ui.modal = 'team-new'; renderModal(); break;
+      case 'member-del':
+        var md = memberById(id);
+        if (md && confirm('Remove ' + mFull(md) + ' from ' + ws().name + '?')) {
+          ws().members = ws().members.filter(function (m) { return m.id !== id; });
+          S.chats = S.chats.filter(function (c) { return c.id !== dmId(id); });
+          log(ME, 'removed ' + mFull(md) + ' from the team'); save(); renderView(); renderSide(); toast(mFull(md) + ' was removed');
+        }
+        break;
+      case 'share-note': ui.shareFor = el.closest('form').getAttribute('data-thread'); ui.modal = 'share-note'; renderModal(); break;
+      case 'share-pick':
+        var sc = threadById(ui.shareFor), sNote = noteById(id);
+        if (sc && sNote) {
+          var se = { id: 'e' + uid(), who: ME, at: Date.now(), text: '', media: [], noteRef: id };
+          sc.entries.push(se); ui.freshEntry = se.id; save();
+          ui.modal = null; renderModal(); paintThread(ui.shareFor); paintChatList(); toast('Shared “' + sNote.title + '” in the chat');
+        }
+        break;
+      case 'photo-up': photoPicker.click(); break;
+      case 'photo-del': delete USER.photo; saveUser(); render(); toast('Photo removed'); break;
+      case 'ev-new': ui.modal = 'ev'; ui.evId = ''; ui.evType = ''; ui.preset = id || today(); renderModal(); break;
+      case 'ev-type-new': ui.modal = 'ev'; ui.evId = ''; ui.evType = id; ui.preset = today(); renderModal(); break;
+      case 'ev-edit': ui.modal = 'ev'; ui.evId = id; renderModal(); break;
+      case 'ev-del':
+        var de = evById(id); S.events = S.events.filter(function (e) { return e.id !== id; });
+        closeModal(); save(); renderView(); if (de) toast('Deleted: ' + de.title);
+        break;
+      case 'cal-nav':
+        var cm0 = (ui.calMonth || today().slice(0, 7)).split('-'), cd = new Date(+cm0[0], +cm0[1] - 1 + parseInt(id, 10), 1, 12);
+        ui.calMonth = iso(cd).slice(0, 7); renderView(); break;
+      case 'cal-today': ui.calMonth = ''; renderView(); break;
+      case 'task-new': ui.modal = 'task'; ui.taskId = ''; ui.preset = id || ''; renderModal(); break;
+      case 'task-edit': ui.modal = 'task'; ui.taskId = id; renderModal(); break;
+      case 'task-del':
+        var dt = taskById(id); S.tasks = S.tasks.filter(function (t) { return t.id !== id; });
+        closeModal(); afterTasks(); if (dt) toast('Deleted: ' + dt.text);
+        break;
+      case 'qd':
+        var qf = el.closest('form'); if (qf && qf.elements.due) qf.elements.due.value = id === '' ? '' : dayOffset(parseInt(id, 10));
+        [].forEach.call(el.parentNode.children, function (b) { b.classList.toggle('on', b === el); });
+        break;
       case 'plan-set':
         if (id !== S.plan) { S.plan = id; save(); render(); toast('You are now on the ' + plan().name + ' plan (demo, nothing is charged)'); }
         break;
       case 'new-version': ui.modal = 'version'; ui.share = false; renderModal(); break;
-      case 'close-modal': if (ev.target === el || el.getAttribute('data-force')) { ui.modal = null; renderModal(); } break;
+      case 'close-modal': if (ev.target === el || el.getAttribute('data-force')) closeModal(); break;
       case 'upload': $('#picker').click(); break;
       case 'folder': ui.folder = id; renderView(); break;
-      case 'task':
-        S.tasks.forEach(function (t) { if (t.id === id) t.done = !t.done; }); save(); renderSide(); renderView(); break;
+      case 'task': completeTask(el.closest('.tk'), id); break;
       case 'download': el.classList.add('done'); el.innerHTML = ic('check'); toast('Demo: the real app downloads the original file'); break;
       case 'download-all': toast('Demo: the real app downloads every approved file'); break;
       case 'play': setPlaying(!ui.playing); break;
@@ -717,6 +1386,7 @@
   }
 
   document.addEventListener('click', function (e) {
+    if (Date.now() - swallow < 400) { e.preventDefault(); return; }
     var g = e.target.closest('[data-go]');
     if (g) { e.preventDefault(); $('#app').classList.remove('drawer'); ui.wsOpen = false; ui.acct = false; ui.folder = g.getAttribute('data-go').indexOf('p/') === 0 ? ui.folder : ''; go(g.getAttribute('data-go')); return; }
     var a = e.target.closest('[data-act]');
@@ -732,23 +1402,60 @@
     e.preventDefault();
     var kind = form.getAttribute('data-form'), cur = curFile();
     if (kind === 'task') {
-      var text = form.elements.text.value.trim(); if (!text) return;
-      var pid = form.getAttribute('data-pid') || (projects()[0] && projects()[0].id);
-      if (!pid) { toast('Create a project first'); return; }
-      S.tasks.push({ id: 't' + uid(), text: text, project: pid, done: false }); save(); renderSide(); renderView();
-      var again = $('[data-form=task] input'); if (again) again.focus();
-    } else if (kind === 'comment' && cur) {
-      var body = form.elements.text.value.trim(); if (!body) return;
-      var c = client(cur.p.client), isClient = ui.as === 'client', id = 'c' + uid();
-      setPlaying(false);
-      cur.f.comments.push({ id: id, who: isClient ? c.contact : ME, role: isClient ? 'Client' : 'Editor', t: cur.f.kind === 'video' ? Math.floor(ui.t) : null, v: cur.f.version, text: body });
-      ui.hot = id; log(isClient ? c.contact : ME, 'commented on ' + cur.f.name + (cur.f.kind === 'video' ? ' at ' + tc(ui.t) : ''));
-      save(); renderSide(); renderView();
-    } else if (kind === 'note') {
-      var nt = form.elements.text.value.trim(); if (!nt) return;
-      S.notes.unshift({ id: 'n' + uid(), text: nt, project: form.getAttribute('data-pid') || '', ws: S.ws, when: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) });
-      save(); renderView();
-      var nin = $('[data-form=note] input'); if (nin) nin.focus();
+      var text = form.elements.text.value.trim(); if (!text) { form.elements.text.focus(); return; }
+      var pid = form.elements.loc ? form.elements.loc.value : (form.getAttribute('data-pid') || '');
+      var due = form.elements.due ? form.elements.due.value : '';
+      if (form.elements.loc) ui.qaLoc = pid;
+      var newT = { id: 't' + uid(), text: text, project: pid, ws: S.ws, due: due, done: false };
+      S.tasks.push(newT); ui.freshTask = newT.id; afterTasks();
+      toast('Added to ' + taskLoc(newT) + (due ? ' · due ' + fmtDay(due) : ''));
+      var again = $('[data-form=task] input[name=text]'); if (again) again.focus();
+    } else if (kind === 'task-full') {
+      var tt = form.elements.text.value.trim(); if (!tt) return;
+      var tl = form.elements.loc.value, td = form.elements.due.value, ex = ui.taskId && taskById(ui.taskId);
+      if (ex) { ex.text = tt; ex.project = tl; ex.due = td; ex.ws = S.ws; toast('Task saved'); }
+      else { var nt2 = { id: 't' + uid(), text: tt, project: tl, ws: S.ws, due: td, done: false }; S.tasks.push(nt2); ui.freshTask = nt2.id; toast('Added to ' + taskLoc(nt2) + (td ? ' · due ' + fmtDay(td) : '')); }
+      ui.modal = null; ui.taskId = ''; renderModal(); afterTasks();
+    } else if (kind === 'note-new') {
+      var title = form.elements.title.value.trim() || 'Untitled note';
+      var nn = { id: 'n' + uid(), ws: S.ws, project: form.elements.loc.value, title: title, date: form.elements.date.value || today(), created: Date.now(), entries: [] };
+      S.notes.unshift(nn); log(ME, 'created the note “' + title + '”' + (nn.project ? ' in ' + noteLoc(nn) : ''));
+      save(); ui.freshNote = nn.id; ui.modal = 'note'; ui.noteId = nn.id; ui.pend[nn.id] = [];
+      renderModal(); renderView(); renderSide();
+    } else if (kind === 'note-msg') {
+      var tid = form.getAttribute('data-thread'), nObj = threadById(tid), ta = form.elements.text, msg = ta.value.trim(), pl = pendOf(tid);
+      if (!nObj) return;
+      if (ui.reading === tid) { toast('Still preparing the attachments…'); return; }
+      if (!msg && !pl.length) { ta.focus(); return; }
+      var en = { id: 'e' + uid(), who: ME, at: Date.now(), text: msg, media: pl.slice() };
+      nObj.entries.push(en); ui.pend[tid] = []; ui.freshEntry = en.id;
+      ta.value = ''; ta.style.height = '';
+      save(); paintThread(tid); paintPending(tid);
+      if (noteById(tid)) renderView(); else paintChatList();
+      ta.focus();
+    } else if (kind === 'ev') {
+      var et = form.elements.title.value.trim(); if (!et) return;
+      var es = form.elements.start.value || today(), ee = form.elements.end.value || es;
+      if (ee < es) ee = es;
+      var eo = ui.evId && evById(ui.evId), etype = form.elements.type.value || 'delivery', eproj = form.elements.project.value;
+      if (eo) { eo.title = et; eo.type = etype; eo.project = eproj; eo.start = es; eo.end = ee; eo.ws = S.ws; toast('Event saved'); }
+      else { S.events.push({ id: 'ev' + uid(), ws: S.ws, title: et, type: etype, project: eproj, start: es, end: ee }); log(ME, 'added “' + et + '” to the calendar'); toast(EV_TYPES[etype] + ' added · ' + (es === ee ? fmtDay(es) : fmtDay(es) + ' – ' + fmtDay(ee))); }
+      if (route().v === 'calendar') ui.calMonth = es.slice(0, 7);
+      ui.modal = null; ui.evId = ''; renderModal(); save(); renderView();
+    } else if (kind === 'invite') {
+      var iname = form.elements.name.value.trim(), iemail = form.elements.email.value.trim();
+      if (!iname || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(iemail)) { toast('Enter a name and a valid email'); return; }
+      ws().members.push({ id: 'u-' + uid(), name: iname.split(' ')[0], full: iname, email: iemail, role: form.elements.role.value, job: form.elements.job.value.trim() });
+      log(ME, 'invited ' + iname + ' as ' + form.elements.role.value);
+      ui.modal = null; renderModal(); save(); renderView(); renderSide(); toast('Invite ready for ' + iemail + ' (demo, no email is sent)');
+    } else if (kind === 'team-new') {
+      var tname = form.elements.name.value.trim(); if (!tname) return;
+      if (S.workspaces.length >= plan().ws) { toast('Your plan has no free team slot'); return; }
+      var nw = { id: slug(tname) + uid(), name: tname, letter: tname.charAt(0).toUpperCase(), cls: ['', 'f', 'g', 'o'][S.workspaces.length % 4], usedGb: 0,
+        members: [{ id: 'u-me', me: true, name: ME, full: USER.name, email: USER.email, role: 'Owner', job: (myMember() && myMember().job) || '' }] };
+      S.workspaces.push(nw); S.ws = nw.id; ui.teamTab = 'members'; ui.chatId = '';
+      ui.modal = null; renderModal(); save(); toast('Team “' + tname + '” created. You are the owner.');
+      if (route().v === 'team') render(); else go('team');
     } else if (kind === 'folder') {
       var fp = project(route().a), fn = form.elements.name.value.trim(); if (!fp || !fn) return;
       var fl = foldersOf(fp);
@@ -785,18 +1492,104 @@
 
   document.addEventListener('input', function (e) {
     if (e.target.id === 'q') { ui.q = e.target.value; renderView(); }
+    if (e.target.id === 'sq') { ui.sq = e.target.value; ui.si = 0; var sr = $('#sres'); if (sr) sr.innerHTML = searchResultsHtml(); }
+    if (e.target.classList && e.target.classList.contains('compose')) { e.target.style.height = 'auto'; e.target.style.height = Math.min(140, e.target.scrollHeight) + 'px'; }
   });
   $('#picker').addEventListener('change', function () { addFiles(this.files); this.value = ''; });
   document.addEventListener('keydown', function (e) {
+    if (ui.lb) {
+      if (e.key === 'Escape') { ui.lb = null; renderLb(); return; }
+      if (e.key === 'ArrowRight') { lbStep(1); return; }
+      if (e.key === 'ArrowLeft') { lbStep(-1); return; }
+    }
+    if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); openSearch(); return; }
+    if (e.key === '/' && !ui.modal && !/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) { e.preventDefault(); openSearch(); return; }
+    if (ui.modal === 'search' && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+      e.preventDefault();
+      var sn0 = (ui.sres || []).length; if (!sn0) return;
+      ui.si = (ui.si + (e.key === 'ArrowDown' ? 1 : -1) + sn0) % sn0;
+      var srl = $('#sres'); if (srl) { srl.innerHTML = searchResultsHtml(); var on = srl.querySelector('.sr.on'); if (on) on.scrollIntoView({ block: 'nearest' }); }
+      return;
+    }
+    if (ui.modal === 'search' && e.key === 'Enter') { e.preventDefault(); srGo(ui.si); return; }
+    if (e.key === 'Enter' && e.target.classList && e.target.classList.contains('compose') && !e.shiftKey && !e.isComposing) { e.preventDefault(); e.target.form.requestSubmit(); return; }
+    if (e.key === 'Enter' && e.target.classList && e.target.classList.contains('chat-title')) { e.preventDefault(); e.target.blur(); return; }
     if (e.key === 'Escape') {
-      if (ui.modal) { ui.modal = null; renderModal(); }
+      if (ui.modal) closeModal();
       else if (ui.share) { ui.share = false; renderView(); }
       else if (ui.wsOpen || ui.acct) { ui.wsOpen = false; ui.acct = false; renderSide(); }
     }
     if (e.key === ' ' && curFile() && !/INPUT|TEXTAREA|BUTTON|SELECT/.test(e.target.tagName)) { e.preventDefault(); setPlaying(!ui.playing); }
   });
+  /* swipe a task to the left to complete it */
+  var drag = null, swallow = 0;
+  document.addEventListener('pointerdown', function (e) {
+    if (e.button !== 0) return;
+    var tk = e.target.closest('.tk.open');
+    if (!tk || e.target.closest('.check') || tk.classList.contains('leaving')) return;
+    drag = { tk: tk, row: tk.querySelector('.row'), x: e.clientX, y: e.clientY, dx: 0, on: false, id: tk.getAttribute('data-id'), pid: e.pointerId };
+  });
+  document.addEventListener('pointermove', function (e) {
+    if (!drag || e.pointerId !== drag.pid) return;
+    var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!drag.on) {
+      if (dx < -8 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+        drag.on = true; drag.row.classList.add('dragging');
+        try { drag.row.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+      } else { if (Math.abs(dy) > 10 || dx > 10) drag = null; return; }
+    }
+    drag.dx = Math.min(0, dx);
+    drag.row.style.transform = 'translateX(' + drag.dx + 'px)';
+    drag.tk.classList.toggle('arm', -drag.dx > drag.row.offsetWidth * 0.3);
+  });
+  function endDrag() {
+    if (!drag) return;
+    var d = drag; drag = null;
+    if (!d.on) return;
+    swallow = Date.now();
+    d.row.classList.remove('dragging');
+    if (-d.dx > d.row.offsetWidth * 0.3) completeTask(d.tk, d.id);
+    else { d.row.style.transform = ''; d.tk.classList.remove('arm'); }
+  }
+  document.addEventListener('pointerup', endDrag);
+  document.addEventListener('pointercancel', endDrag);
+
+  document.addEventListener('change', function (e) {
+    var mf = e.target.getAttribute && e.target.getAttribute('data-member-field');
+    if (mf) {
+      var mrow = e.target.closest('[data-mid]'), mem = mrow && memberById(mrow.getAttribute('data-mid'));
+      if (!mem) return;
+      if (mf === 'role' && !canManage()) return;
+      mem[mf] = e.target.value.trim();
+      save();
+      if (mf === 'role') { log(ME, 'made ' + mFull(mem) + ' ' + mem.role); toast(mFull(mem) + ' is now ' + mem.role); } else toast('Saved');
+      return;
+    }
+    var field = e.target.getAttribute && e.target.getAttribute('data-note-field'); if (!field) return;
+    var n = noteById(ui.noteId); if (!n) return;
+    var v = e.target.value;
+    if (field === 'title') { v = v.trim() || 'Untitled note'; e.target.value = v; }
+    n[field] = v; save(); renderView(); renderSide();
+    if (field === 'project') toast('Moved to ' + noteLoc(n));
+  });
+  document.addEventListener('paste', function (e) {
+    if (!e.target.classList || !e.target.classList.contains('compose') || !e.clipboardData) return;
+    var files = [].slice.call(e.clipboardData.files || []);
+    if (files.length) { e.preventDefault(); addPending(files, e.target.form.getAttribute('data-thread')); }
+  });
+  document.addEventListener('toggle', function (e) { if (e.target.classList && e.target.classList.contains('tdone')) ui.doneOpen = e.target.open; }, true);
+  notePicker.addEventListener('change', function () { addPending(this.files, ui.attachFor); this.value = ''; });
+  photoPicker.addEventListener('change', function () {
+    var f = this.files[0]; this.value = '';
+    if (!f) return;
+    squarePhoto(f).then(function (data) {
+      if (!data) { toast('That image could not be read'); return; }
+      USER.photo = data; saveUser(); render(); toast('Profile photo updated');
+    });
+  });
+
   function enter() { var v = $('#view'); v.classList.remove('enter'); void v.offsetWidth; v.classList.add('enter'); }
-  addEventListener('hashchange', function () { ui.modal = null; render(); $('#view').scrollTop = 0; enter(); });
+  addEventListener('hashchange', function () { ui.modal = null; ui.pend = {}; ui.lb = null; renderLb(); render(); $('#view').scrollTop = 0; enter(); });
 
   render();
   enter();
