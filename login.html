@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in — Deskspace</title>
+<meta name="theme-color" content="#cfe4fa">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/base.css">
+<style>
+  html, body { height: 100%; }
+  body { display: flex; flex-direction: column; min-height: 100%; }
+  .aurora { position: fixed; }
+  .top, main { position: relative; z-index: 1; }
+  .top { display: flex; gap: 14px; align-items: center; padding: 18px 24px; font-size: 14px; }
+  .top a.back { color: var(--ink-2); transition: color 0.2s; }
+  .top .theme-btn { margin-left: auto; }
+  .top a.back:hover { color: var(--ink); }
+  main { flex: 1; display: grid; place-items: center; padding: 24px 20px 64px; }
+  .card { width: 100%; max-width: 400px; padding: 40px 36px 32px; border-radius: 20px; background: var(--glass); backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%); box-shadow: var(--shadow-lg), 0 0 0 1px var(--hair); animation: card-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  @keyframes card-in { from { opacity: 0; transform: translateY(14px); } }
+  .card .mark { width: 52px; height: 52px; margin: 0 auto 22px; border-radius: 26%; box-shadow: 0 14px 28px -12px rgba(31, 111, 208, 0.55); }
+  h1 { font-size: 27px; font-weight: 600; letter-spacing: -0.03em; text-align: center; line-height: 1.15; }
+  .sub { margin-top: 8px; text-align: center; font-size: 15px; color: var(--ink-2); }
+  form { margin-top: 28px; display: flex; flex-direction: column; gap: 14px; }
+  label { display: block; font-size: 13px; font-weight: 500; color: var(--ink-2); margin-bottom: 6px; }
+  input { width: 100%; height: 44px; padding: 0 14px; border-radius: 11px; border: 1px solid var(--line-2); background: var(--surface); font-size: 16px; outline: 0; transition: border-color 0.15s, box-shadow 0.15s; }
+  input::placeholder { color: var(--faint); }
+  input:focus { border-color: var(--sky-500); box-shadow: 0 0 0 4px var(--ring); }
+  .field[hidden] { display: none; }
+  .btn { width: 100%; height: 46px; margin-top: 6px; border-radius: 11px; font-size: 16px; }
+  .err { font-size: 13px; color: var(--red); min-height: 18px; margin: -4px 0 -6px; }
+  .swap { margin-top: 22px; text-align: center; font-size: 14px; color: var(--ink-2); }
+  .swap button { color: var(--blue); font-weight: 500; }
+  .swap button:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .demo { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); text-align: center; font-size: 12.5px; line-height: 1.45; color: var(--muted); }
+  @media (max-width: 460px) { .card { padding: 32px 22px 26px; } }
+  @media (prefers-reduced-motion: reduce) { .card { animation: none; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="mark" viewBox="0 0 40 40">
+    <linearGradient id="mark-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fc5f7"/><stop offset="1" stop-color="#4896e6"/></linearGradient>
+    <rect width="40" height="40" rx="10" fill="url(#mark-g)"/>
+    <clipPath id="mark-d"><path d="M13 10h7a10 10 0 0 1 0 20h-9V12a2 2 0 0 1 2-2z"/></clipPath>
+    <g clip-path="url(#mark-d)">
+      <rect x="9" y="8" width="24" height="24" fill="#fff"/>
+      <path d="M9 23.5c3.5-3.4 7.5-3.4 11-.8s7.5 2.8 12-1.2V32H9z" fill="#bcdcfa"/>
+      <path d="M9 26.5c3.5-2.6 7.5-2.6 11-.6s7.5 2.2 12-1V32H9z" fill="#6aaeee"/>
+    </g>
+  </symbol>
+</svg>
+
+<div class="aurora flat" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<header class="top">
+  <a class="logo" href="index.html" aria-label="Deskspace home"><svg><use href="#mark"/></svg><span>Desk<span class="space">space</span></span></a>
+  <button class="theme-btn" type="button" data-theme-toggle aria-label="Switch between light and dark theme" title="Light / dark"><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5V5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></button>
+  <a class="back" href="index.html">Back to site</a>
+</header>
+
+<main>
+  <div class="card">
+    <svg class="mark" aria-hidden="true"><use href="#mark"/></svg>
+    <h1 id="title">Sign in to Deskspace</h1>
+    <p class="sub" id="sub">Pick up where your projects left off.</p>
+
+    <form id="form" novalidate>
+      <div class="field" id="f-name" hidden>
+        <label for="name">Full name</label>
+        <input id="name" name="name" type="text" autocomplete="name" placeholder="Ana Petrova">
+      </div>
+      <div class="field">
+        <label for="email">Work email</label>
+        <input id="email" name="email" type="email" autocomplete="email" placeholder="you@studio.com" required>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" placeholder="At least 6 characters" required minlength="6">
+      </div>
+      <p class="err" id="err" role="alert"></p>
+      <button class="btn btn-primary" type="submit" id="submit">Sign in</button>
+    </form>
+
+    <p class="swap"><span id="swap-q">New to Deskspace?</span> <button type="button" id="swap">Create an account</button></p>
+    <p class="demo">This is a demo sign-in. Any email and password work, and nothing leaves this browser.</p>
+  </div>
+</main>
+
+<script>
+(function () {
+  var KEY = 'deskspace-user';
+  try { var u = JSON.parse(localStorage.getItem(KEY) || 'null'); if (u && u.email) { location.replace('app.html'); return; } } catch (e) { /* storage unavailable */ }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var signup = /[?&]new=1/.test(location.search);
+  function paint() {
+    $('title').textContent = signup ? 'Create your Deskspace account' : 'Sign in to Deskspace';
+    $('sub').textContent = signup ? 'Start with a free workspace. Upgrade when the team grows.' : 'Pick up where your projects left off.';
+    $('f-name').hidden = !signup;
+    $('submit').textContent = signup ? 'Create account' : 'Sign in';
+    $('swap-q').textContent = signup ? 'Already have an account?' : 'New to Deskspace?';
+    $('swap').textContent = signup ? 'Sign in' : 'Create an account';
+    $('password').autocomplete = signup ? 'new-password' : 'current-password';
+    $('err').textContent = '';
+  }
+  $('swap').addEventListener('click', function () { signup = !signup; paint(); (signup ? $('name') : $('email')).focus(); });
+
+  $('form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var email = $('email').value.trim(), name = $('name').value.trim(), pw = $('password').value;
+    if (signup && !name) { $('err').textContent = 'Enter your name.'; $('name').focus(); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { $('err').textContent = 'Enter a valid email address.'; $('email').focus(); return; }
+    if (pw.length < 6) { $('err').textContent = 'The password needs at least 6 characters.'; $('password').focus(); return; }
+    if (!name) {
+      name = email.split('@')[0].replace(/[._-]+/g, ' ').replace(/\d+/g, '').trim().replace(/\b[a-z]/g, function (c) { return c.toUpperCase(); }) || 'You';
+    }
+    // The password is checked for length only and is never stored.
+    try { localStorage.setItem(KEY, JSON.stringify({ name: name, email: email })); }
+    catch (err) { $('err').textContent = 'This browser is blocking storage, so the demo cannot sign you in.'; return; }
+    location.href = 'app.html';
+  });
+
+  paint();
+  $('email').focus();
+})();
+</script>
+</body>
+</html>
