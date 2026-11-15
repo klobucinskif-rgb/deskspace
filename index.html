@@ -9,9 +9,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="js/theme.js?v=v11-11151452b"></script>
-<link rel="stylesheet" href="css/base.css?v=v11-11151452b">
-<link rel="stylesheet" href="css/site.css?v=v11-11151452b">
+<script src="js/cursor.js?v=v12-11151500" defer></script>
+<script src="js/theme.js?v=v12-11151500"></script>
+<link rel="stylesheet" href="css/base.css?v=v12-11151500">
+<link rel="stylesheet" href="css/site.css?v=v12-11151500">
 </head>
 <body class="lock">
 <div class="page-bg" aria-hidden="true"><i></i><i></i></div>
@@ -48,8 +49,10 @@
 
 <!-- INTRO: the mark, then the letters -->
 <div class="intro" id="intro" aria-hidden="true">
-  <div class="intro-lockup">
-    <svg class="intro-mark" viewBox="0 0 40 40">
+  <div class="intro-glow"></div>
+  <div class="intro-center">
+    <div class="intro-lockup">
+      <span class="intro-mk"><svg class="intro-mark" viewBox="0 0 40 40">
       <linearGradient id="im-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fc5f7"/><stop offset="1" stop-color="#4896e6"/></linearGradient>
       <rect width="40" height="40" rx="10" fill="url(#im-g)"/>
       <clipPath id="im-d"><path d="M13 10h7a10 10 0 0 1 0 20h-9V12a2 2 0 0 1 2-2z"/></clipPath>
@@ -58,10 +61,13 @@
         <path class="wv" d="M9 23.5c3.5-3.4 7.5-3.4 11-.8s7.5 2.8 12-1.2V44H9z" fill="#bcdcfa"/>
         <path class="wv b" d="M9 26.5c3.5-2.6 7.5-2.6 11-.6s7.5 2.2 12-1V44H9z" fill="#6aaeee"/>
       </g>
-    </svg>
-    <span class="intro-word">
+    </svg><i class="intro-ring"></i></span>
+      <span class="intro-word">
       <span style="--i:0">D</span><span style="--i:1">e</span><span style="--i:2">s</span><span style="--i:3">k</span><span class="sp" style="--i:4">s</span><span class="sp" style="--i:5">p</span><span class="sp" style="--i:6">a</span><span class="sp" style="--i:7">c</span><span class="sp" style="--i:8">e</span>
     </span>
+    </div>
+    <i class="intro-line"></i>
+    <p class="intro-tag">Client work · Review · Delivery</p>
   </div>
 </div>
 
@@ -472,7 +478,7 @@
 
 <!-- 11. CTA -->
 <section class="cta" id="cta">
-  <div class="cta-glow" id="cta-glow" aria-hidden="true"></div>
+  <div class="cta-beam" aria-hidden="true"></div><div class="cta-pool" aria-hidden="true"></div>
   <div class="wrap cta-in rv">
     <svg class="cta-mark" data-float="0.12" aria-hidden="true"><use href="#mark"/></svg>
     <h2>Run your client work in <em>Deskspace.</em></h2>
@@ -491,6 +497,6 @@
   </div>
 </footer>
 
-<script src="js/site.js?v=v11-11151452b"></script>
+<script src="js/site.js?v=v12-11151500"></script>
 </body>
 </html>

@@ -13,8 +13,8 @@
   function done() { if (intro && intro.parentNode) intro.parentNode.removeChild(intro); ready(); }
   if (reduce || !intro) done();
   else {
-    setTimeout(ready, 2250);
-    setTimeout(done, 3100);
+    setTimeout(ready, 2650);
+    setTimeout(done, 3550);
     var skip = function () { if (!intro.parentNode) return; intro.classList.add('skip'); ready(); setTimeout(done, 320); };
     intro.addEventListener('click', skip);
     addEventListener('keydown', function onKey() { removeEventListener('keydown', onKey); skip(); });
@@ -615,15 +615,15 @@
     });
   }
 
-  /* ---------- cta: the glow follows the pointer ---------- */
-  var cta = $('#cta'), glow = $('#cta-glow');
-  if (cta && glow && hover && !reduce) {
+  /* ---------- cta: the spotlight stays, the words drift a touch ---------- */
+  var cta = $('#cta'), ctaIn = $('.cta-in');
+  if (cta && ctaIn && hover && !reduce) {
     cta.addEventListener('pointermove', function (e) {
       var r = cta.getBoundingClientRect();
-      glow.style.setProperty('--gx', (e.clientX - r.left) + 'px');
-      glow.style.setProperty('--gy', (e.clientY - r.top) + 'px');
+      ctaIn.style.setProperty('--cx', (((e.clientX - r.left) / r.width - 0.5) * 14).toFixed(1) + 'px');
+      ctaIn.style.setProperty('--cy', (((e.clientY - r.top) / r.height - 0.5) * 8).toFixed(1) + 'px');
     });
-    cta.addEventListener('pointerleave', function () { glow.style.setProperty('--gx', '50%'); glow.style.setProperty('--gy', '55%'); });
+    cta.addEventListener('pointerleave', function () { ctaIn.style.setProperty('--cx', '0px'); ctaIn.style.setProperty('--cy', '0px'); });
   }
 
   onScroll();
