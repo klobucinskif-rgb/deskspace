@@ -9,11 +9,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="js/theme.js?v=v8-11151422"></script>
-<link rel="stylesheet" href="css/base.css?v=v8-11151422">
-<link rel="stylesheet" href="css/site.css?v=v8-11151422">
+<script src="js/theme.js?v=v9-11151432"></script>
+<link rel="stylesheet" href="css/base.css?v=v9-11151432">
+<link rel="stylesheet" href="css/site.css?v=v9-11151432">
 </head>
 <body class="lock">
+<div class="page-bg" aria-hidden="true"><i></i><i></i></div>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="mark" viewBox="0 0 40 40">
@@ -147,7 +148,7 @@
         <span class="so-l"><span class="so-off">Without Deskspace</span><span class="so-on">With Deskspace</span></span>
       </button>
     </div>
-    <div class="board rv" id="board" style="--d:2">
+    <div class="board rv" data-float="0.07" id="board" style="--d:2">
       <div class="bd-panel" aria-hidden="true"><span class="bd-ic">N</span><span><b>Northline Campaign</b><small>One project · one link</small></span><span class="pill review">In Review</span></div>
       <div class="mc mc1"><div class="c-a"><span class="mi"><svg><use href="#i-mail"/></svg></span><span><small>Maren Holt · 9:38</small><b>“Which version should I approve?”</b></span></div><div class="c-b"><span class="mi g"><svg><use href="#i-check"/></svg></span><span><b>Approved by Maren</b><small>v4 · today 11:42</small></span></div></div>
       <div class="mc mc2"><div class="c-a"><span class="bub">Can you trim the intro at 00:12?</span></div><div class="c-b"><span class="mi"><svg><use href="#i-chat"/></svg></span><span><b>Trim the intro here.</b><small>Maren · on v3 at 00:12 · resolved in v4</small></span></div></div>
@@ -174,7 +175,7 @@
     </div>
   </div>
   <div class="wrap wide">
-    <div class="pd rv" id="pd" data-state="review" style="--d:1">
+    <div class="pd rv" data-float="0.035" id="pd" data-state="review" style="--d:1">
       <div class="pd-main">
         <div class="pd-screen" id="pd-screen">
           <div class="pd-frames">
@@ -225,7 +226,7 @@
 <!-- 5. FLOW: a live scene that plays each step while you scroll -->
 <section class="flow" id="flow">
   <div class="wrap">
-    <div class="sec-head rv">
+    <div class="sec-head rv" data-float="-0.03">
       <p class="tag">03 — How it works</p>
       <h2>One link from <em>first upload</em> to final delivery.</h2>
     </div>
@@ -286,7 +287,7 @@
 <!-- 6. PRODUCT: pick a feature, see it -->
 <section class="feats" id="product">
   <div class="wrap">
-    <div class="feats-head rv">
+    <div class="feats-head rv" data-float="-0.03">
       <p class="tag">04 — In the app</p>
       <h2>Everything a client project needs, and nothing it doesn't.</h2>
     </div>
@@ -300,7 +301,7 @@
         <button class="fx-it" type="button" role="tab" id="fxt-5" aria-controls="fxp-5" aria-selected="false" tabindex="-1"><span class="fx-t">Tasks &amp; notes</span><span class="fx-d"><span>Tasks with dates, in a project or in My Tasks. Notes that read like a chat, with images and video attached.</span></span><span class="fx-bar"><i></i></span></button>
       </div>
 
-      <div class="fx-stage">
+      <div class="fx-stage" data-float="0.06">
         <!-- 0 files & versions -->
         <div class="fx-pane on" id="fxp-0" role="tabpanel" aria-labelledby="fxt-0">
           <div class="pv">
@@ -377,11 +378,11 @@
 <!-- 7. FILM: plays by itself when it scrolls into view -->
 <section class="film" id="film">
   <div class="film-in">
-    <div class="film-copy rv">
+    <div class="film-copy rv" data-float="-0.03">
       <p class="tag">05 — The film</p>
       <h2>See the whole flow in fifty&nbsp;seconds.</h2>
     </div>
-    <div class="film-frame rv" style="--d:1">
+    <div class="film-frame rv" data-float="0.05" style="--d:1">
       <video id="film-v" src="media/deskspace-reveal.mp4" poster="img/poster.jpg" muted loop playsinline preload="metadata"></video>
       <div class="film-ui">
         <button class="film-btn" id="film-pp" type="button" aria-label="Pause"><svg class="i-pa"><use href="#i-pause"/></svg><svg class="i-pl"><use href="#i-play"/></svg></button>
@@ -400,17 +401,17 @@
 <!-- 9. PRICING -->
 <section class="pricing" id="pricing">
   <div class="wrap">
-    <div class="sec-head rv">
+    <div class="sec-head rv" data-float="-0.03">
       <p class="tag">06 — Pricing</p>
       <h2>Start free. Grow into a team.</h2>
       <p class="lead">Monthly plans. Pick by storage and by how many people work inside. Clients review by link and never take a seat.</p>
     </div>
     <div class="plans rv" id="plans" style="--d:1">
-      <article class="plan"><h3>Free</h3><p class="for">Try it on one project.</p><div class="price"><span data-to="0">€0</span><small>/ month</small></div><ul><li><b>1 GB</b> storage</li><li>Personal space</li></ul><a class="btn btn-ghost" href="login.html?new=1">Start free</a></article>
-      <article class="plan"><h3>Creator</h3><p class="for">Freelancers and solo creators.</p><div class="price"><span data-to="19.99">€19.99</span><small>/ month</small></div><ul><li><b>250 GB</b> storage</li><li>Personal space</li></ul><a class="btn btn-ghost" href="login.html?new=1">Choose Creator</a></article>
-      <article class="plan"><h3>Pro</h3><p class="for">Heavy video work on your own.</p><div class="price"><span data-to="34.99">€34.99</span><small>/ month</small></div><ul><li><b>1 TB</b> storage</li><li>Personal space</li></ul><a class="btn btn-ghost" href="login.html?new=1">Choose Pro</a></article>
-      <article class="plan hot"><span class="rec">Recommended</span><h3>Team</h3><p class="for">Studios and small agencies.</p><div class="price"><span data-to="54.99">€54.99</span><small>/ month</small></div><ul><li><b>2 TB</b> storage</li><li>Up to <b>2 teams</b></li><li>Up to <b>5 people</b></li></ul><a class="btn btn-primary mag" href="login.html?new=1">Choose Team</a></article>
-      <article class="plan"><h3>Agency</h3><p class="for">Agencies with several teams.</p><div class="price"><span data-to="89.99">€89.99</span><small>/ month</small></div><ul><li><b>5 TB</b> storage</li><li>Up to <b>5 teams</b></li><li>Up to <b>10 people</b></li></ul><a class="btn btn-ghost" href="login.html?new=1">Choose Agency</a></article>
+      <article data-float="0.03" class="plan"><h3>Free</h3><p class="for">Try it on one project.</p><div class="price"><span data-to="0">€0</span><small>/ month</small></div><ul><li><b>1 GB</b> storage</li><li>Personal space</li></ul><a class="btn btn-ghost" href="login.html?new=1">Start free</a></article>
+      <article data-float="0.06" class="plan"><h3>Creator</h3><p class="for">Freelancers and solo creators.</p><div class="price"><span data-to="19.99">€19.99</span><small>/ month</small></div><ul><li><b>250 GB</b> storage</li><li>Personal space</li></ul><a class="btn btn-ghost" href="login.html?new=1">Choose Creator</a></article>
+      <article data-float="0.09" class="plan"><h3>Pro</h3><p class="for">Heavy video work on your own.</p><div class="price"><span data-to="34.99">€34.99</span><small>/ month</small></div><ul><li><b>1 TB</b> storage</li><li>Personal space</li></ul><a class="btn btn-ghost" href="login.html?new=1">Choose Pro</a></article>
+      <article data-float="0.06" class="plan hot"><span class="rec">Recommended</span><h3>Team</h3><p class="for">Studios and small agencies.</p><div class="price"><span data-to="54.99">€54.99</span><small>/ month</small></div><ul><li><b>2 TB</b> storage</li><li>Up to <b>2 teams</b></li><li>Up to <b>5 people</b></li></ul><a class="btn btn-primary mag" href="login.html?new=1">Choose Team</a></article>
+      <article data-float="0.03" class="plan"><h3>Agency</h3><p class="for">Agencies with several teams.</p><div class="price"><span data-to="89.99">€89.99</span><small>/ month</small></div><ul><li><b>5 TB</b> storage</li><li>Up to <b>5 teams</b></li><li>Up to <b>10 people</b></li></ul><a class="btn btn-ghost" href="login.html?new=1">Choose Agency</a></article>
     </div>
   </div>
 </section>
@@ -433,7 +434,7 @@
 <section class="cta" id="cta">
   <div class="cta-glow" id="cta-glow" aria-hidden="true"></div>
   <div class="wrap cta-in rv">
-    <svg class="cta-mark" aria-hidden="true"><use href="#mark"/></svg>
+    <svg class="cta-mark" data-float="0.12" aria-hidden="true"><use href="#mark"/></svg>
     <h2>Run your client work in <em>Deskspace.</em></h2>
     <div class="cta-btns"><a class="btn btn-primary btn-lg mag" href="login.html?demo=1">Try the demo <svg><use href="#i-arrow"/></svg></a><a class="btn btn-quiet btn-lg" href="login.html?new=1">Create an account</a></div>
     <p class="muted">Free plan with 1 GB. No card needed in this demo.</p>
@@ -450,6 +451,6 @@
   </div>
 </footer>
 
-<script src="js/site.js?v=v8-11151422"></script>
+<script src="js/site.js?v=v9-11151432"></script>
 </body>
 </html>

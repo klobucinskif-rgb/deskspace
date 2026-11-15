@@ -63,9 +63,39 @@
       }
       paintStatement();
       paintFlow();
+      paintSky();
+      paintFloat();
     });
   }
   addEventListener('scroll', onScroll, { passive: true });
+
+
+  /* ---------- dark sky: lighter at the top, deep navy at the end ---------- */
+  var sky = $('.page-bg');
+  var SKY_A = [[34, 70, 111], [8, 18, 36]], SKY_B = [[18, 39, 63], [3, 7, 15]];
+  var mix = function (a, b, k) { return 'rgb(' + a.map(function (v, i) { return Math.round(v + (b[i] - v) * k); }).join(',') + ')'; };
+  function paintSky() {
+    if (!sky) return;
+    var max = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+    var k = Math.max(0, Math.min(1, scrollY / max));
+    k = k * k * (3 - 2 * k);
+    sky.style.setProperty('--pg-a', mix(SKY_A[0], SKY_A[1], k));
+    sky.style.setProperty('--pg-b', mix(SKY_B[0], SKY_B[1], k));
+    sky.style.setProperty('--pg-g', (0.32 * (1 - k) + 0.06).toFixed(3));
+  }
+
+  /* ---------- floating: cards drift at their own pace while you scroll ---------- */
+  var floats = reduce ? [] : $$('[data-float]').map(function (el) { return { el: el, s: parseFloat(el.getAttribute('data-float')) || 0, y: 0 }; });
+  function paintFloat() {
+    var vh = innerHeight, k = innerWidth < 700 ? 0.5 : 1;
+    floats.forEach(function (f) {
+      var r = f.el.getBoundingClientRect(), top = r.top - f.y;
+      if (top > vh + 200 || top + r.height < -200) return;
+      var y = Math.max(-70, Math.min(70, ((top + r.height / 2) - vh / 2) * -f.s * k));
+      f.y = y;
+      f.el.style.translate = '0 ' + y.toFixed(1) + 'px';
+    });
+  }
 
   /* ---------- magnetic buttons ---------- */
   if (hover && !reduce) {
