@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var KEY = 'deskspace-demo-v5', USER_KEY = 'deskspace-user';
+  var KEY = 'deskspace-demo-v6', USER_KEY = 'deskspace-user';
   var $ = function (s, r) { return (r || document).querySelector(s); };
   // Demo sign-in: the user is whoever signed in on login.html (stored in this browser only).
   var USER = null;
@@ -181,6 +181,18 @@
         { id: 'forma-brand-film', ws: 'halden', name: 'Forma — Brand film', client: 'forma', due: 'Fri 21 Nov', cover: 'walk', files: [
           { id: 'fo-main', name: 'Forma_Rough_Cut.mp4', kind: 'video', folder: 'Cuts', size: '2.4 GB', dur: 54, version: 1, status: 'draft', thumb: 'walk',
             segs: [{ label: 'Rough cut', len: 54, img: 'walk' }], comments: [] }
+        ] },
+        { id: 'northline-reels', ws: 'halden', name: 'Northline — Reels pack', client: 'northline', due: 'Thu 20 Nov', cover: 'social', folders: ['Cuts', 'Delivery'], files: [
+          { id: 'nr-1', name: 'Northline_Reel_01.mp4', kind: 'video', folder: 'Delivery', size: '84 MB', dur: 22, version: 2, status: 'approved', approvedV: 2, approvedBy: 'Maren', thumb: 'social',
+            segs: [{ label: 'Reel 01', len: 22, img: 'walk-close' }], comments: [] },
+          { id: 'nr-2', name: 'Northline_Reel_02.mp4', kind: 'video', folder: 'Cuts', size: '91 MB', dur: 24, version: 1, status: 'review', thumb: 'bridge-arm',
+            segs: [{ label: 'Reel 02', len: 24, img: 'bridge-arm' }], comments: [{ id: 'c6', who: ME, role: 'Editor', t: 3, v: 1, text: 'First cut of Reel 02 with the new hook.' }] },
+          { id: 'nr-3', name: 'Northline_Reel_03.mp4', kind: 'video', folder: 'Cuts', size: '88 MB', dur: 21, version: 1, status: 'draft', thumb: 'teaser',
+            segs: [{ label: 'Reel 03', len: 21, img: 'walk' }], comments: [] }
+        ] },
+        { id: 'atelier-portraits', ws: 'halden', name: 'Atelier — Portrait series', client: 'atelier', due: 'Tue 25 Nov', cover: 'portrait', folders: ['Selects', 'Delivery'], files: [
+          { id: 'ap-1', name: 'Atelier_Portrait_01.jpg', kind: 'image', folder: 'Selects', size: '22 MB', dur: 0, version: 2, status: 'approved', approvedV: 2, approvedBy: 'Jo', thumb: 'portrait', segs: [], comments: [] },
+          { id: 'ap-2', name: 'Atelier_Portrait_02.jpg', kind: 'image', folder: 'Selects', size: '19 MB', dur: 0, version: 1, status: 'draft', thumb: 'crew', segs: [], comments: [] }
         ] }
       ],
       tasks: [
