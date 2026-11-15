@@ -20,13 +20,13 @@
     addEventListener('keydown', function onKey() { removeEventListener('keydown', onKey); skip(); });
   }
 
-  /* ---------- nav: glass after the top, hides while scrolling down ---------- */
+  /* ---------- nav: always on top, deeper tint after the top, scroll progress ---------- */
   var nav = $('#nav'), lastY = scrollY;
   function onNav() {
     var y = scrollY;
     nav.classList.toggle('scrolled', y > 10);
-    nav.classList.toggle('hide', y > 640 && y > lastY + 4);
-    if (y < lastY - 4 || y < 640) nav.classList.remove('hide');
+    var max = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+    nav.style.setProperty('--sp', Math.min(1, y / max).toFixed(4));
     lastY = y;
   }
   var links = $$('.nav-links a');
@@ -72,16 +72,20 @@
 
   /* ---------- dark sky: lighter at the top, deep navy at the end ---------- */
   var sky = $('.page-bg');
-  var SKY_A = [[34, 70, 111], [8, 18, 36]], SKY_B = [[18, 39, 63], [3, 7, 15]];
+  var SKY = {
+    dark: { a: [[34, 70, 111], [8, 18, 36]], b: [[18, 39, 63], [3, 7, 15]], g: [0.32, 0.06] },
+    light: { a: [[198, 225, 251], [226, 239, 253]], b: [[238, 246, 255], [196, 222, 250]], g: [0.55, 0.25] }
+  };
   var mix = function (a, b, k) { return 'rgb(' + a.map(function (v, i) { return Math.round(v + (b[i] - v) * k); }).join(',') + ')'; };
   function paintSky() {
     if (!sky) return;
     var max = Math.max(1, document.documentElement.scrollHeight - innerHeight);
     var k = Math.max(0, Math.min(1, scrollY / max));
     k = k * k * (3 - 2 * k);
-    sky.style.setProperty('--pg-a', mix(SKY_A[0], SKY_A[1], k));
-    sky.style.setProperty('--pg-b', mix(SKY_B[0], SKY_B[1], k));
-    sky.style.setProperty('--pg-g', (0.32 * (1 - k) + 0.06).toFixed(3));
+    var t = SKY[document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'];
+    sky.style.setProperty('--pg-a', mix(t.a[0], t.a[1], k));
+    sky.style.setProperty('--pg-b', mix(t.b[0], t.b[1], k));
+    sky.style.setProperty('--pg-g', (t.g[0] + (t.g[1] - t.g[0]) * k).toFixed(3));
   }
 
   /* ---------- floating: cards drift at their own pace while you scroll ---------- */
@@ -94,6 +98,46 @@
       var y = Math.max(-70, Math.min(70, ((top + r.height / 2) - vh / 2) * -f.s * k));
       f.y = y;
       f.el.style.translate = '0 ' + y.toFixed(1) + 'px';
+    });
+  }
+
+  /* ---------- interactive touches: letters, window, glow, tilt ---------- */
+  new MutationObserver(function () { paintSky(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  if (hover && !reduce) {
+    // the letters of the wordmark rise toward the pointer
+    var heroEl = $('#hero'), letters = $$('.hl > span');
+    if (heroEl && letters.length) {
+      heroEl.addEventListener('pointermove', function (e) {
+        letters.forEach(function (l) {
+          var r = l.getBoundingClientRect();
+          var dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+          var k = Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy * 0.6) / 280);
+          l.style.setProperty('--ly', (-k * k * 18).toFixed(1) + 'px');
+        });
+        if (win) {
+          var hr = heroEl.getBoundingClientRect();
+          win.style.setProperty('--wx', (((e.clientX - hr.left) / hr.width - 0.5) * 6).toFixed(2) + 'deg');
+          win.style.setProperty('--wy', (-((e.clientY - hr.top) / hr.height - 0.5) * 4).toFixed(2) + 'deg');
+        }
+      });
+      heroEl.addEventListener('pointerleave', function () {
+        letters.forEach(function (l) { l.style.setProperty('--ly', '0px'); });
+        if (win) { win.style.setProperty('--wx', '0deg'); win.style.setProperty('--wy', '0deg'); }
+      });
+    }
+    // a soft light follows the pointer across cards
+    $$('[data-glow]').forEach(function (el) {
+      el.addEventListener('pointermove', function (e) {
+        var r = el.getBoundingClientRect();
+        el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+        if (el.hasAttribute('data-tilt')) {
+          var big = el.classList.contains('fx-stage') ? 4 : 7;
+          el.style.setProperty('--ry', (((e.clientX - r.left) / r.width - 0.5) * big).toFixed(2) + 'deg');
+          el.style.setProperty('--rx', (-((e.clientY - r.top) / r.height - 0.5) * big).toFixed(2) + 'deg');
+        }
+      });
+      el.addEventListener('pointerleave', function () { el.style.setProperty('--rx', '0deg'); el.style.setProperty('--ry', '0deg'); });
     });
   }
 
