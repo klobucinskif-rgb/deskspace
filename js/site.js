@@ -37,7 +37,7 @@
         links.forEach(function (a) { a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id); });
       });
     }, { rootMargin: '-45% 0px -50% 0px' });
-    ['review', 'flow', 'product', 'pricing', 'faq', 'hero', 'problem', 'film', 'cta'].forEach(function (id) { var el = document.getElementById(id); if (el) secIO.observe(el); });
+    ['review', 'flow', 'product', 'pricing', 'faq', 'hero', 'problem', 'time', 'film', 'cta'].forEach(function (id) { var el = document.getElementById(id); if (el) secIO.observe(el); });
   }
 
   /* ---------- reveal on scroll ---------- */
@@ -65,6 +65,7 @@
       paintFlow();
       paintSky();
       paintFloat();
+      paintMess();
     });
   }
   addEventListener('scroll', onScroll, { passive: true });
@@ -153,22 +154,112 @@
     });
   }
 
-  /* ---------- problem: scattered vs sorted ---------- */
-  var board = $('#board'), sorter = $('#sorter'), touched = false;
-  function setSorted(on) {
-    board.classList.toggle('sorted', on);
-    sorter.setAttribute('aria-pressed', String(on));
+  /* ---------- problem: the chaos sorts itself while you scroll ---------- */
+  // [x, y] = centre as a share of the screen, [w, h] in px, rotation, pointer depth
+  var CHAOS = [
+    [0.70, 0.17, 300, 76, -7, 40], [0.93, 0.44, 280, 66, 8, 60], [0.57, 0.62, 280, 70, 5, 30],
+    [0.80, 0.84, 290, 70, -9, 50], [0.12, 0.86, 170, 116, -10, 70], [0.38, 0.11, 230, 66, 6, 35],
+    [0.07, 0.22, 220, 66, -8, 55], [0.47, 0.90, 230, 64, 7, 45], [0.95, 0.12, 170, 104, 9, 65],
+    [0.28, 0.95, 270, 66, -4, 30], [0.62, 0.33, 180, 128, -6, 50], [0.45, 0.76, 260, 64, 10, 60]
+  ];
+  var MOBILE_CHAOS = [
+    [0.3, 0.52, 0, 0, -6], [0.72, 0.57, 0, 0, 8], [0.24, 0.64, 0, 0, 5], [0.76, 0.69, 0, 0, -8], [0.22, 0.87, 0, 0, -10], [0.62, 0.49, 0, 0, 7], [0.8, 0.81, 0, 0, -6], [0.46, 0.94, 0, 0, 6], [0.9, 0.62, 0, 0, 9], [0.33, 0.76, 0, 0, -4], [0.64, 0.88, 0, 0, -7], [0.52, 0.71, 0, 0, 9]
+  ];
+  var ORDER = [1, 3, 5, 7, 9, 11, 0, 2, 4, 6, 8, 10];
+  var mess = $('#problem'), mStage = $('#mess-stage'), mItems = $$('#mess-items .mc'), mSlots = $$('.bd-slots i'), board = $('#board'), sorter = $('#sorter');
+  var pmx = 0, pmy = 0, messQueued = false;
+  var clamp01 = function (v) { return v < 0 ? 0 : v > 1 ? 1 : v; };
+  var ease = function (t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
+  var lerp = function (a, b, t) { return a + (b - a) * t; };
+  mItems.forEach(function (el, i) { el.style.setProperty('--fd', (5 + (i % 4) * 1.3) + 's'); el.style.setProperty('--fdl', (-i * 0.9) + 's'); });
+  function paintMess() {
+    messQueued = false;
+    if (!mess) return;
+    var r = mess.getBoundingClientRect(), vh = innerHeight;
+    if (r.bottom < -50 || r.top > vh + 50) return;
+    var p = clamp01(-r.top / Math.max(1, r.height - vh));
+    var sr = mStage.getBoundingClientRect(), W = sr.width, H = sr.height, small = W < 900;
+    var k = small ? 0.56 : Math.max(0.7, Math.min(1, W / 1350));
+    var br = board.getBoundingClientRect();
+    var bx = br.left - sr.left, by = br.top - sr.top;
+    var slots = mSlots.map(function (s) { var b = s.getBoundingClientRect(); return [b.left - sr.left, b.top - sr.top, b.width, b.height]; });
+    mItems.forEach(function (el, i) {
+      var c = CHAOS[i], pos = small ? MOBILE_CHAOS[i] : c;
+      var w0 = c[2] * k, h0 = c[3] * k;
+      var t = ease(clamp01((p - 0.1 - ORDER[i] * 0.035) / 0.42));
+      var free = 1 - t, depth = (c[5] || 40) * (small ? 0 : 1);
+      var x0 = pos[0] * W - w0 / 2 + pmx * depth, y0 = pos[1] * H - h0 / 2 + pmy * depth;
+      var x, y, w = w0, h = h0, s = 1, o = 1;
+      if (i < 5) {
+        var sl = slots[i];
+        x = lerp(x0, sl[0], t); y = lerp(y0, sl[1], t); w = lerp(w0, sl[2], t); h = lerp(h0, sl[3], t);
+        el.style.setProperty('--cb', clamp01((t - 0.55) / 0.35).toFixed(3));
+      } else {
+        x = lerp(x0, bx + br.width / 2 - w0 / 2, t); y = lerp(y0, by + 34 - h0 / 2, t);
+        s = 1 - 0.75 * t; o = 1 - clamp01((t - 0.55) / 0.4);
+      }
+      el.style.width = w.toFixed(1) + 'px'; el.style.height = h.toFixed(1) + 'px';
+      el.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px) rotate(' + (pos[4] * free).toFixed(2) + 'deg) scale(' + s.toFixed(3) + ')';
+      el.style.opacity = o.toFixed(3);
+      el.style.zIndex = i < 5 ? 2 : 1;
+      el.style.setProperty('--amp', (free * 14).toFixed(1) + 'px');
+    });
+    var sorted = p > 0.6;
+    board.classList.toggle('sorted', sorted);
+    sorter.setAttribute('aria-pressed', String(sorted));
+    mess.classList.toggle('done', p > 0.15);
   }
-  if (board && sorter) {
-    sorter.addEventListener('click', function () { touched = true; setSorted(!board.classList.contains('sorted')); });
-    if ('IntersectionObserver' in window) {
-      var bIO = new IntersectionObserver(function (es) {
-        if (!es[0].isIntersecting) return;
-        bIO.disconnect();
-        setTimeout(function () { if (!touched) setSorted(true); }, 1600);
-      }, { threshold: 0.6 });
-      bIO.observe(board);
+  function queueMess() { if (!messQueued) { messQueued = true; requestAnimationFrame(paintMess); } }
+  if (mess) {
+    sorter.addEventListener('click', function () {
+      var top = mess.getBoundingClientRect().top + scrollY;
+      scrollTo({ top: board.classList.contains('sorted') ? top : top + mess.offsetHeight - innerHeight, behavior: reduce ? 'auto' : 'smooth' });
+    });
+    if (hover && !reduce) {
+      mStage.addEventListener('pointermove', function (e) {
+        var sr = mStage.getBoundingClientRect();
+        pmx = (e.clientX - sr.left) / sr.width - 0.5; pmy = (e.clientY - sr.top) / sr.height - 0.5;
+        queueMess();
+      });
+      mStage.addEventListener('pointerleave', function () { pmx = 0; pmy = 0; queueMess(); });
     }
+    addEventListener('resize', queueMess);
+    addEventListener('load', queueMess);
+  }
+
+  /* ---------- your time: hours back ---------- */
+  var clP = $('#cl-p'), clR = $('#cl-r'), clT = $('#cl-t');
+  if (clP) {
+    var clShown = 0, clRaf = 0, clLive = false;
+    var clCalc = function () {
+      var pj = +clP.value, rd = +clR.value, tm = +clT.value;
+      [clP, clR, clT].forEach(function (inp) { inp.style.setProperty('--v', ((inp.value - inp.min) / (inp.max - inp.min) * 100) + '%'); });
+      $('#cl-pv').textContent = pj; $('#cl-rv').textContent = rd; $('#cl-tv').textContent = tm;
+      if (!clLive) return;
+      var without = pj * (rd * 55 + 30) / 60 * (1 + (tm - 1) * 0.12);
+      var withD = pj * (rd * 12 + 5) / 60 * (1 + (tm - 1) * 0.04);
+      var saved = without - withD;
+      $('#cl-w1').textContent = Math.round(without) + ' h';
+      $('#cl-w2').textContent = Math.round(withD) + ' h';
+      $('#cl-b1').style.width = '100%';
+      $('#cl-b2').style.width = (withD / without * 100).toFixed(1) + '%';
+      $('#cl-d').textContent = (saved / 8).toFixed(1);
+      cancelAnimationFrame(clRaf);
+      var from = clShown, t0 = performance.now(), D = reduce ? 0 : 650;
+      (function step(now) {
+        var q = D ? Math.min(1, (now - t0) / D) : 1, e = 1 - Math.pow(1 - q, 3);
+        clShown = from + (saved - from) * e;
+        $('#cl-h').textContent = Math.round(clShown);
+        if (q < 1) clRaf = requestAnimationFrame(step);
+      })(t0);
+    };
+    [clP, clR, clT].forEach(function (inp) { inp.addEventListener('input', clCalc); });
+    clCalc();
+    var clStart = function () { if (clLive) return; clLive = true; clCalc(); };
+    if ('IntersectionObserver' in window) {
+      var clIO = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { clIO.disconnect(); setTimeout(clStart, 400); } }, { threshold: 0.45 });
+      clIO.observe($('.calc-card'));
+    } else clStart();
   }
 
   /* ---------- review: scrub, leave a note on the frame, approve ---------- */

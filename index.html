@@ -9,9 +9,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="js/theme.js?v=v10-11151436"></script>
-<link rel="stylesheet" href="css/base.css?v=v10-11151436">
-<link rel="stylesheet" href="css/site.css?v=v10-11151436">
+<script src="js/theme.js?v=v11-11151452b"></script>
+<link rel="stylesheet" href="css/base.css?v=v11-11151452b">
+<link rel="stylesheet" href="css/site.css?v=v11-11151452b">
 </head>
 <body class="lock">
 <div class="page-bg" aria-hidden="true"><i></i><i></i></div>
@@ -137,25 +137,38 @@
   </div>
 </section>
 
-<!-- 3. PROBLEM: scattered vs sorted -->
+<!-- 3. PROBLEM: the chaos sorts itself as you scroll -->
 <section class="mess" id="problem">
-  <div class="wrap mess-in">
-    <div class="mess-copy rv">
-      <p class="tag">01 — The problem</p>
-      <h2>The brief is in email. The cut is in a drive. The notes are in a&nbsp;chat.</h2>
-      <p class="lead">And someone has to work out which <code>Final_v3.mp4</code> the client actually approved.</p>
-      <button class="sorter" id="sorter" type="button" aria-pressed="false">
-        <span class="so-track"><span class="so-knob"></span></span>
-        <span class="so-l"><span class="so-off">Without Deskspace</span><span class="so-on">With Deskspace</span></span>
-      </button>
+  <div class="mess-stage" id="mess-stage">
+    <div class="wrap mess-in">
+      <div class="mess-copy">
+        <p class="tag">01 — The problem</p>
+        <h2>The brief is in email. The cut is in a drive. The notes are in a&nbsp;chat.</h2>
+        <p class="lead">And someone has to work out which <code>Final_v3.mp4</code> the client actually approved.</p>
+        <button class="sorter" id="sorter" type="button" aria-pressed="false">
+          <span class="so-track"><span class="so-knob"></span></span>
+          <span class="so-l"><span class="so-off">Without Deskspace</span><span class="so-on">With Deskspace</span></span>
+        </button>
+        <p class="mess-hint" id="mess-hint"><svg><use href="#i-down"/></svg>Keep scrolling to tidy it up</p>
+      </div>
+      <div class="board" data-glow id="board">
+        <div class="bd-panel" aria-hidden="true"><span class="bd-ic">N</span><span><b>Northline Campaign</b><small>One project · one link</small></span><span class="pill review">In Review</span></div>
+        <div class="bd-slots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
     </div>
-    <div class="board rv" data-float="0.07" data-glow id="board" style="--d:2">
-      <div class="bd-panel" aria-hidden="true"><span class="bd-ic">N</span><span><b>Northline Campaign</b><small>One project · one link</small></span><span class="pill review">In Review</span></div>
-      <div class="mc mc1"><div class="c-a"><span class="mi"><svg><use href="#i-mail"/></svg></span><span><small>Maren Holt · 9:38</small><b>“Which version should I approve?”</b></span></div><div class="c-b"><span class="mi g"><svg><use href="#i-check"/></svg></span><span><b>Approved by Maren</b><small>v4 · today 11:42</small></span></div></div>
-      <div class="mc mc2"><div class="c-a"><span class="bub">Can you trim the intro at 00:12?</span></div><div class="c-b"><span class="mi"><svg><use href="#i-chat"/></svg></span><span><b>Trim the intro here.</b><small>Maren · on v3 at 00:12 · resolved in v4</small></span></div></div>
-      <div class="mc mc3"><div class="c-a"><span class="mi"><svg><use href="#i-file"/></svg></span><span><b>Northline_FINAL.mp4</b><small>Drive · edited 2 days ago</small></span></div><div class="c-b"><span class="mi"><svg><use href="#i-file"/></svg></span><span><b>Northline_Campaign.mp4</b><small class="vers"><i>v1</i><i>v2</i><i>v3</i><i class="on">v4</i></small></span></div></div>
-      <div class="mc mc4"><div class="c-a"><span class="mi"><svg><use href="#i-file"/></svg></span><span><b>Northline_FINAL_v3.mp4</b><small>Drive · edited yesterday</small></span></div><div class="c-b"><span class="mi"><svg><use href="#i-file"/></svg></span><span><b>Northline_Teaser_15s.mp4</b><small>v2 · approved</small></span></div></div>
-      <div class="mc mc5"><div class="c-a"><span class="scrawl">which one<br>is final??</span></div><div class="c-b"><span class="mi"><svg><use href="#i-down"/></svg></span><span><b>Final files delivered</b><small>Download all · 2.1 GB</small></span></div></div>
+    <div class="mess-items" id="mess-items" aria-hidden="true">
+      <div class="mc" data-k="0"><div class="c-a"><span class="mi"><svg><use href="#i-mail"/></svg></span><span><small>Maren Holt · 9:38</small><b>“Which version should I approve?”</b></span></div><div class="c-b"><span class="mi g"><svg><use href="#i-check"/></svg></span><span><b>Approved by Maren</b><small>v4 · today 11:42</small></span></div></div>
+      <div class="mc" data-k="1"><div class="c-a"><span class="bub">Can you trim the intro at 00:12?</span></div><div class="c-b"><span class="mi"><svg><use href="#i-chat"/></svg></span><span><b>Trim the intro here.</b><small>Maren · on v3 at 00:12 · resolved in v4</small></span></div></div>
+      <div class="mc" data-k="2"><div class="c-a"><span class="mi"><svg><use href="#i-file"/></svg></span><span><b>Northline_FINAL.mp4</b><small>Drive · edited 2 days ago</small></span></div><div class="c-b"><span class="mi"><svg><use href="#i-file"/></svg></span><span><b>Northline_Campaign.mp4</b><small class="vers"><i>v1</i><i>v2</i><i>v3</i><i class="on">v4</i></small></span></div></div>
+      <div class="mc" data-k="3"><div class="c-a"><span class="mi"><svg><use href="#i-file"/></svg></span><span><b>Northline_FINAL_v3.mp4</b><small>Drive · edited yesterday</small></span></div><div class="c-b"><span class="mi"><svg><use href="#i-file"/></svg></span><span><b>Northline_Teaser_15s.mp4</b><small>v2 · approved</small></span></div></div>
+      <div class="mc note-y" data-k="4"><div class="c-a"><span class="scrawl">which one<br>is final??</span></div><div class="c-b"><span class="mi"><svg><use href="#i-down"/></svg></span><span><b>Final files delivered</b><small>Download all · 2.1 GB</small></span></div></div>
+      <div class="mc x" data-k="5"><div class="c-a"><span class="mi"><svg><use href="#i-chat"/></svg></span><span><b>Voice message</b><small class="wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i> 0:42</small></span></div></div>
+      <div class="mc x" data-k="6"><div class="c-a"><span class="mi"><svg><use href="#i-cal"/></svg></span><span><b>Review call?</b><small>Thu 15:00 · no reply yet</small></span></div></div>
+      <div class="mc x" data-k="7"><div class="c-a"><span class="mi r"><svg><use href="#i-file"/></svg></span><span><b>Brief_v2_NEW.pdf</b><small>Attachment · 3.4 MB</small></span></div></div>
+      <div class="mc x note-p" data-k="8"><div class="c-a"><span class="scrawl">ask Leo about<br>the music license!</span></div></div>
+      <div class="mc x" data-k="9"><div class="c-a"><span class="mi"><svg><use href="#i-mail"/></svg></span><span><b>Re: Re: Fwd: Northline cut</b><small>14 messages in this thread</small></span></div></div>
+      <div class="mc x shot" data-k="10"><div class="c-a"><img src="img/walk-close.jpg" alt=""><small>Screenshot 2026-11-12.png</small></div></div>
+      <div class="mc x" data-k="11"><div class="c-a"><span class="mi"><svg><use href="#i-file"/></svg></span><span><b>Northline_FINAL_FINAL_v7.mov</b><small>WeTransfer · expires tomorrow</small></span></div></div>
     </div>
   </div>
 </section>
@@ -376,11 +389,37 @@
   </div>
 </section>
 
+<!-- 6b. TIME: how many hours come back -->
+<section class="calc" id="time">
+  <div class="wrap calc-in">
+    <div class="calc-copy rv" data-float="-0.03">
+      <p class="tag">05 — Your time</p>
+      <h2>How many hours do you <em>get back?</em></h2>
+      <p class="lead">Move the sliders to match your studio. The hours are what goes into chasing notes in email and chat, finding the right file, and sending the finals.</p>
+    </div>
+    <div class="calc-card rv" data-float="0.05" data-glow style="--d:1">
+      <div class="cl-in">
+        <label class="cl-row"><span class="cl-l">Client projects a month <b id="cl-pv">8</b></span><input type="range" id="cl-p" min="1" max="40" value="8"></label>
+        <label class="cl-row"><span class="cl-l">Review rounds per project <b id="cl-rv">3</b></span><input type="range" id="cl-r" min="1" max="8" value="3"></label>
+        <label class="cl-row"><span class="cl-l">People on the team <b id="cl-tv">3</b></span><input type="range" id="cl-t" min="1" max="10" value="3"></label>
+      </div>
+      <div class="cl-out">
+        <p class="cl-big"><span id="cl-h">0</span><small>hours back<br>every month</small></p>
+        <div class="cl-bars">
+          <div class="cl-bar"><span>Without Deskspace</span><i><b id="cl-b1"></b></i><em id="cl-w1">0 h</em></div>
+          <div class="cl-bar on"><span>With Deskspace</span><i><b id="cl-b2"></b></i><em id="cl-w2">0 h</em></div>
+        </div>
+        <p class="cl-note">About <b id="cl-d">0</b> working days. A rough estimate: 40 minutes per round to collect and sort notes, 15 minutes to find the right file, 30 minutes per delivery, shared across the team.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- 7. FILM: plays by itself when it scrolls into view -->
 <section class="film" id="film">
   <div class="film-in">
     <div class="film-copy rv" data-float="-0.03">
-      <p class="tag">05 — The film</p>
+      <p class="tag">06 — The film</p>
       <h2>See the whole flow in fifty&nbsp;seconds.</h2>
     </div>
     <div class="film-frame rv" data-float="0.05" style="--d:1">
@@ -403,7 +442,7 @@
 <section class="pricing" id="pricing">
   <div class="wrap">
     <div class="sec-head rv" data-float="-0.03">
-      <p class="tag">06 — Pricing</p>
+      <p class="tag">07 — Pricing</p>
       <h2>Start free. Grow into a team.</h2>
       <p class="lead">Monthly plans. Pick by storage and by how many people work inside. Clients review by link and never take a seat.</p>
     </div>
@@ -420,7 +459,7 @@
 <!-- 10. FAQ -->
 <section class="faq" id="faq">
   <div class="wrap faq-in">
-    <div class="rv"><p class="tag">07 — Questions</p><h2>Good to know before you start.</h2></div>
+    <div class="rv"><p class="tag">08 — Questions</p><h2>Good to know before you start.</h2></div>
     <div class="faq-list rv" style="--d:1">
       <details open><summary>Do clients need an account?<span class="fq-i"><svg><use href="#i-plus"/></svg></span></summary><p>No. A client opens the review link you send, watches the file, comments and approves. Clients don't take a seat on your plan.</p></details>
       <details><summary>What can a client do on the review link?<span class="fq-i"><svg><use href="#i-plus"/></svg></span></summary><p>Comment on a file or on the exact second of a video, ask for changes, and approve the version. Once it is approved, the final files are on that same link.</p></details>
@@ -452,6 +491,6 @@
   </div>
 </footer>
 
-<script src="js/site.js?v=v10-11151436"></script>
+<script src="js/site.js?v=v11-11151452b"></script>
 </body>
 </html>
