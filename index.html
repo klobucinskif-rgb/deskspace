@@ -9,9 +9,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="js/theme.js?v=v17-11151942"></script>
-<link rel="stylesheet" href="css/base.css?v=v17-11151942">
-<link rel="stylesheet" href="css/site.css?v=v17-11151942">
+<script src="js/theme.js?v=v18-11151951"></script>
+<link rel="stylesheet" href="css/base.css?v=v18-11151951">
+<link rel="stylesheet" href="css/site.css?v=v18-11151951">
 </head>
 <body class="lock">
 <div class="page-bg" aria-hidden="true"><i></i><i></i></div>
@@ -302,59 +302,75 @@
   <div class="wrap">
     <div class="feats-head rv" data-float="-0.03">
       <h2>Everything a client project needs, and nothing it doesn't.</h2>
+      <p>Six parts that work together. Each one below is live, so try them.</p>
     </div>
-    <div class="fx rv" id="fx" style="--d:1">
-      <div class="fx-list" role="tablist" aria-label="Features">
-        <button class="fx-it on" type="button" role="tab" id="fxt-0" aria-controls="fxp-0" aria-selected="true"><span class="fx-t">Files &amp; versions</span><span class="fx-d"><span>Upload videos, photos and documents into the client's project. v1 to v4 stay on one file, so nobody hunts for the latest.</span></span><span class="fx-bar"><i></i></span></button>
-        <button class="fx-it" type="button" role="tab" id="fxt-1" aria-controls="fxp-1" aria-selected="false" tabindex="-1"><span class="fx-t">Client review</span><span class="fx-d"><span>One link per file. The client pauses, writes the note on the frame, and asks for changes or approves. No account needed.</span></span><span class="fx-bar"><i></i></span></button>
-        <button class="fx-it" type="button" role="tab" id="fxt-2" aria-controls="fxp-2" aria-selected="false" tabindex="-1"><span class="fx-t">Approval &amp; delivery</span><span class="fx-d"><span>See what is waiting, what needs changes and what is approved. The finals go out in original quality on the same link.</span></span><span class="fx-bar"><i></i></span></button>
-        <button class="fx-it" type="button" role="tab" id="fxt-3" aria-controls="fxp-3" aria-selected="false" tabindex="-1"><span class="fx-t">Team chat &amp; roles</span><span class="fx-d"><span>Group chats next to the work. Add people with a QR code or a join code, and give each person a role.</span></span><span class="fx-bar"><i></i></span></button>
-        <button class="fx-it" type="button" role="tab" id="fxt-4" aria-controls="fxp-4" aria-selected="false" tabindex="-1"><span class="fx-t">Calendar</span><span class="fx-d"><span>Delivery windows, shoots and pay days in one month, next to the tasks that are due.</span></span><span class="fx-bar"><i></i></span></button>
-        <button class="fx-it" type="button" role="tab" id="fxt-5" aria-controls="fxp-5" aria-selected="false" tabindex="-1"><span class="fx-t">Tasks &amp; notes</span><span class="fx-d"><span>Tasks with dates, in a project or in My Tasks. Notes that read like a chat, with images and video attached.</span></span><span class="fx-bar"><i></i></span></button>
-      </div>
+    <div class="bento" id="bento">
 
-      <div class="fx-stage" data-float="0.06" data-glow data-tilt>
-        <!-- 0 files & versions -->
-        <div class="fx-pane on" id="fxp-0" role="tabpanel" aria-labelledby="fxt-0">
-          <div class="pv">
+      <!-- files & versions -->
+      <article class="bt bt-files rv" data-glow>
+        <div class="bt-tx"><h3>Files &amp; versions</h3><p>v1 to v4 stay on one file, so nobody hunts for the latest.</p></div>
+        <div class="bt-v fx-pane">
+          <div class="pv" id="pv">
             <div class="pv-c k3"><img src="img/bridge-wide.jpg" alt=""></div>
             <div class="pv-c k2"><img src="img/bridge-wide.jpg" alt=""></div>
             <div class="pv-c k1"><img src="img/bridge-wide.jpg" alt=""></div>
-            <div class="pv-c k0"><img src="img/bridge-wide.jpg" alt="Northline campaign frame"><div class="pv-cap"><span><b>Northline_Campaign.mp4</b><small>4 versions · 1.8 GB</small></span><span class="pv-vs"><i>v1</i><i>v2</i><i>v3</i><i class="on">v4</i></span></div></div>
+            <div class="pv-c k0" data-v="4"><img src="img/bridge-wide.jpg" alt="Northline campaign frame"><div class="pv-cap"><span><b>Northline_Campaign.mp4</b><small id="pv-note">v4 · final grade</small></span><span class="pv-vs" role="group" aria-label="Versions"><button type="button" data-v="1">v1</button><button type="button" data-v="2">v2</button><button type="button" data-v="3">v3</button><button type="button" data-v="4" class="on">v4</button></span></div></div>
           </div>
         </div>
-        <!-- 1 client review -->
-        <div class="fx-pane" id="fxp-1" role="tabpanel" aria-labelledby="fxt-1">
-          <div class="pr">
-            <div class="pr-f"><img src="img/bridge-arm.jpg" alt="Frame with a client note"><span class="pr-ring"></span>
-              <div class="pr-bub"><span class="av">M</span><span><b>Maren <em>Client</em><span class="tc">00:12</span></b>Trim the intro here.</span></div>
-            </div>
-            <div class="pr-tl"><i class="pr-fill"></i><span class="pin" style="left:10%">A</span><span class="pin m" style="left:29%">M</span><span class="pin l" style="left:64%">L</span><span class="pin m" style="left:86%">M</span></div>
-            <div class="pr-btns"><span class="pr-b">Request changes</span><span class="pr-b ok"><svg><use href="#i-check"/></svg>Approve</span></div>
-          </div>
-        </div>
-        <!-- 2 approval & delivery -->
-        <div class="fx-pane" id="fxp-2" role="tabpanel" aria-labelledby="fxt-2">
-          <div class="pa">
+        <span class="bt-try">Click a version</span>
+      </article>
+
+      <!-- approval & delivery -->
+      <article class="bt bt-appr rv" style="--d:1" data-glow>
+        <div class="bt-tx"><h3>Approval &amp; delivery</h3><p>See what is waiting and what is approved. Finals go out in original quality.</p></div>
+        <div class="bt-v fx-pane">
+          <div class="pa" id="pa">
             <div class="pa-r"><img src="img/bridge-wide.jpg" alt=""><span><b>Northline_Campaign.mp4</b><small>v4 · Maren · 11:42</small></span><span class="pill approved">Approved</span></div>
             <div class="pa-r"><img src="img/social.jpg" alt=""><span><b>Northline_Social_9x16.mp4</b><small>v2 · Maren · 11:40</small></span><span class="pill approved">Approved</span></div>
-            <div class="pa-r"><img src="img/teaser.jpg" alt=""><span><b>Northline_Teaser_15s.mp4</b><small>v1 · waiting on client</small></span><span class="pill review">In Review</span></div>
-            <div class="pa-dl"><span class="ic"><svg><use href="#i-down"/></svg></span><span><b>Download finals</b><small>2 files · 1.9 GB · original quality</small><i class="bar"><i></i></i></span></div>
+            <button type="button" class="pa-r pa-go" aria-pressed="false"><img src="img/teaser.jpg" alt=""><span><b>Northline_Teaser_15s.mp4</b><small>v1 · waiting on client</small></span><span class="pill review">In Review</span></button>
+            <div class="pa-dl"><span class="ic"><svg><use href="#i-down"/></svg></span><span><b>Download finals</b><small id="pa-sum">2 files · 1.9 GB · original quality</small><i class="bar"><i></i></i></span></div>
           </div>
         </div>
-        <!-- 3 team chat -->
-        <div class="fx-pane" id="fxp-3" role="tabpanel" aria-labelledby="fxt-3">
-          <div class="pt">
+        <span class="bt-try">Approve the teaser</span>
+      </article>
+
+      <!-- team chat & roles -->
+      <article class="bt bt-team rv" data-glow>
+        <div class="bt-tx"><h3>Team chat &amp; roles</h3><p>Group chats next to the work. Add people with a code and give each a role.</p></div>
+        <div class="bt-v fx-pane">
+          <div class="pt" id="pt">
             <div class="pt-h"><span class="pt-g">N</span><span><b>Northline crew</b><small>4 members</small></span><span class="pt-avs"><i>A</i><i>L</i><i>S</i><i>M</i></span></div>
-            <div class="pt-m"><span class="av l">L</span><span class="bb"><b>Leo <em>Admin</em></b>v4 is up. Grade fixed on the bridge.</span></div>
-            <div class="pt-m me"><span class="bb">Sending it to Maren now.</span></div>
-            <div class="pt-m"><span class="av s">S</span><span class="bb"><b>Sam <em>Editor</em></b>Teaser export is done too.</span></div>
-            <div class="pt-ty"><i></i><i></i><i></i></div>
-            <div class="pt-join"><svg><use href="#i-qr"/></svg><span><small>Join code</small><code>HLD–7K2–Q9X</code></span></div>
+            <div class="pt-feed" id="pt-feed">
+              <div class="pt-m"><span class="av l">L</span><span class="bb"><b>Leo <em>Admin</em></b>v4 is up. Grade fixed on the bridge.</span></div>
+              <div class="pt-m"><span class="av s">S</span><span class="bb"><b>Sam <em>Editor</em></b>Teaser export is done too.</span></div>
+            </div>
+            <div class="pt-qr"><button type="button">Looks great</button><button type="button">Sending it to Maren</button></div>
           </div>
         </div>
-        <!-- 4 calendar -->
-        <div class="fx-pane" id="fxp-4" role="tabpanel" aria-labelledby="fxt-4">
+        <span class="bt-try">Send a reply</span>
+      </article>
+
+      <!-- client review -->
+      <article class="bt bt-rev rv" style="--d:1" data-glow>
+        <div class="bt-tx"><h3>Client review</h3><p>One link per file. The client leaves the note on the frame and approves. No account needed.</p></div>
+        <div class="bt-v fx-pane">
+          <div class="pr" id="pr">
+            <div class="pr-f" id="pr-f"><img src="img/bridge-arm.jpg" alt="Frame with a client note"><span class="pr-ring"></span>
+              <div class="pr-bub"><span class="av">M</span><span><b>Maren <em>Client</em><span class="tc">00:12</span></b><span class="pr-txt">Trim the intro here.</span></span></div>
+            </div>
+            <div class="pr-row">
+              <div class="pr-tl" id="pr-tl"><i class="pr-fill"></i><span class="pin" style="left:10%">A</span><span class="pin m" style="left:29%">M</span><span class="pin l" style="left:64%">L</span></div>
+              <div class="pr-btns"><button type="button" class="pr-b" id="pr-ch">Request changes</button><button type="button" class="pr-b ok" id="pr-ok"><svg><use href="#i-check"/></svg><span>Approve</span></button></div>
+            </div>
+          </div>
+        </div>
+        <span class="bt-try">Click the frame to leave a note</span>
+      </article>
+
+      <!-- calendar -->
+      <article class="bt bt-cal rv" data-glow>
+        <div class="bt-tx"><h3>Calendar</h3><p>Deliveries, shoots and pay days in one month, next to the tasks that are due.</p></div>
+        <div class="bt-v fx-pane">
           <div class="pc">
             <div class="pc-h"><b>November 2026</b><span class="pc-lg"><i class="a"></i>Delivery<i class="b"></i>Shoot<i class="c"></i>Pay day</span></div>
             <div class="pc-wd"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
@@ -370,19 +386,26 @@
             </div>
           </div>
         </div>
-        <!-- 5 tasks & notes -->
-        <div class="fx-pane" id="fxp-5" role="tabpanel" aria-labelledby="fxt-5">
-          <div class="pk">
+        <span class="bt-try">Pick a day</span>
+      </article>
+
+      <!-- tasks & notes -->
+      <article class="bt bt-tasks rv" style="--d:1" data-glow>
+        <div class="bt-tx"><h3>Tasks &amp; notes</h3><p>Tasks with dates, and notes that read like a chat, with images attached.</p></div>
+        <div class="bt-v fx-pane">
+          <div class="pk" id="pk">
             <div class="pk-l">
-              <div class="pk-h"><b>My Tasks</b><small>3 open</small></div>
-              <div class="pk-t t1"><i class="cb"><svg><use href="#i-check"/></svg></i><span>Send v3 to Maren</span><small>Today</small></div>
-              <div class="pk-t"><i class="cb"></i><span>Export the 9x16 teaser</span><small>Tue 17</small></div>
-              <div class="pk-t"><i class="cb"></i><span>Book the colour session</span><small>Thu 19</small></div>
+              <div class="pk-h"><b>My Tasks</b><small id="pk-n">3 open</small></div>
+              <button type="button" class="pk-t"><i class="cb"><svg><use href="#i-check"/></svg></i><span>Send v3 to Maren</span><small>Today</small></button>
+              <button type="button" class="pk-t"><i class="cb"><svg><use href="#i-check"/></svg></i><span>Export the 9x16 teaser</span><small>Tue 17</small></button>
+              <button type="button" class="pk-t"><i class="cb"><svg><use href="#i-check"/></svg></i><span>Book the colour session</span><small>Thu 19</small></button>
             </div>
             <div class="pk-n"><img src="img/lookbook.jpg" alt=""><span><b>Shoot notes · Atelier</b>Warm light from the left, keep the background soft.</span></div>
           </div>
         </div>
-      </div>
+        <span class="bt-try">Tick a task</span>
+      </article>
+
     </div>
   </div>
 </section>
@@ -486,6 +509,6 @@
   </div>
 </footer>
 
-<script src="js/site.js?v=v17-11151942"></script>
+<script src="js/site.js?v=v18-11151951"></script>
 </body>
 </html>

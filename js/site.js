@@ -134,7 +134,7 @@
         el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
         el.style.setProperty('--my', (e.clientY - r.top) + 'px');
         if (el.hasAttribute('data-tilt')) {
-          var big = el.classList.contains('fx-stage') ? 4 : 7;
+          var big = 7;
           el.style.setProperty('--ry', (((e.clientX - r.left) / r.width - 0.5) * big).toFixed(2) + 'deg');
           el.style.setProperty('--rx', (-((e.clientY - r.top) / r.height - 0.5) * big).toFixed(2) + 'deg');
         }
@@ -512,34 +512,92 @@
   addEventListener('resize', function () { sizeLine(); paintFlow(); if (sIdx > -1) moveCursor(sIdx); });
   addEventListener('load', sizeLine);
 
-  /* ---------- product: pick a feature, the preview follows ---------- */
-  var fx = $('#fx');
-  if (fx) {
-    var fxIts = $$('.fx-it', fx), fxPanes = $$('.fx-pane', fx), fxK = 0;
-    var fxSel = function (i, focus) {
-      fxK = i;
-      fxIts.forEach(function (b, j) { var on = j === i; b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; });
-      fxPanes.forEach(function (p, j) { p.classList.toggle('on', j === i); });
-      if (focus) fxIts[i].focus();
-    };
-    fxIts.forEach(function (b, i) {
-      b.addEventListener('click', function () { fxSel(i); });
-      $('.fx-bar i', b).addEventListener('animationend', function () { if (fxK === i) fxSel((i + 1) % fxIts.length); });
-      b.addEventListener('keydown', function (e) {
-        var d = e.key === 'ArrowDown' || e.key === 'ArrowRight' ? 1 : e.key === 'ArrowUp' || e.key === 'ArrowLeft' ? -1 : 0;
-        if (d) { e.preventDefault(); fxSel((i + d + fxIts.length) % fxIts.length, true); }
+  /* ---------- product: a bento of small live demos ---------- */
+  var bento = $('#bento');
+  if (bento) {
+    var used = function (el) { var t = el.closest('.bt'); if (t) t.classList.add('used'); };
+    var again = function (el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
+    // each tile plays its entrance when it comes into view, and again next time
+    var panes = $$('.bt .fx-pane', bento);
+    if ('IntersectionObserver' in window) {
+      var bio = new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (e.isIntersecting && e.intersectionRatio > 0.3) e.target.classList.add('on');
+          else if (!e.isIntersecting) e.target.classList.remove('on');
+        });
+      }, { threshold: [0, 0.3] });
+      panes.forEach(function (p) { bio.observe(p); });
+    } else panes.forEach(function (p) { p.classList.add('on'); });
+
+    // files: pick a version
+    var pvTop = $('.pv-c.k0'), pvNote = $('#pv-note'), pvBtns = $$('.pv-vs button');
+    var PV = { 1: 'v1 · rough cut', 2: 'v2 · new music', 3: 'v3 · colour pass', 4: 'v4 · final grade' };
+    pvBtns.forEach(function (bt) {
+      bt.addEventListener('click', function () {
+        var v = bt.getAttribute('data-v');
+        pvBtns.forEach(function (x) { x.classList.toggle('on', x === bt); });
+        pvTop.setAttribute('data-v', v); pvNote.textContent = PV[v];
+        again(pvTop, 'swap'); used(bt);
       });
     });
-    if (hover) {
-      fx.addEventListener('mouseenter', function () { fx.classList.add('hold'); });
-      fx.addEventListener('mouseleave', function () { fx.classList.remove('hold'); });
+
+    // approval: approve the teaser, the finals grow
+    var paGo = $('.pa-go'), paSum = $('#pa-sum'), paDl = $('.pa-dl');
+    if (paGo) paGo.addEventListener('click', function () {
+      var on = paGo.getAttribute('aria-pressed') !== 'true';
+      paGo.setAttribute('aria-pressed', String(on));
+      var pill = $('.pill', paGo);
+      pill.className = 'pill ' + (on ? 'approved' : 'review'); pill.textContent = on ? 'Approved' : 'In Review';
+      $('small', paGo).textContent = on ? 'v1 · Maren · just now' : 'v1 · waiting on client';
+      paSum.textContent = on ? '3 files · 2.3 GB · original quality' : '2 files · 1.9 GB · original quality';
+      again(pill, 'again'); again(paDl, 'again'); used(paGo);
+    });
+
+    // team: quick replies land in the feed
+    var feed = $('#pt-feed');
+    $$('.pt-qr button').forEach(function (bt) {
+      bt.addEventListener('click', function () {
+        var m = document.createElement('div');
+        m.className = 'pt-m me new';
+        m.innerHTML = '<span class="bb"></span>';
+        m.firstChild.textContent = bt.textContent;
+        feed.appendChild(m);
+        while (feed.children.length > 3) feed.removeChild(feed.firstElementChild);
+        used(bt);
+      });
+    });
+
+    // review: click the frame to place the note, approve or ask for changes
+    var pr = $('#pr'), prF = $('#pr-f'), prTl = $('#pr-tl');
+    if (pr && prF) {
+      var ring = $('.pr-ring', prF), bub = $('.pr-bub', prF), txt = $('.pr-txt', prF), tc = $('.tc', prF), fill = $('.pr-fill', prTl);
+      var NOTES = ['Warmer here, please.', 'Logo a bit smaller.', 'Hold this shot longer.', 'Trim the intro here.'], nk = 0;
+      prF.addEventListener('click', function (e) {
+        var r = prF.getBoundingClientRect();
+        var x = Math.min(90, Math.max(8, (e.clientX - r.left) / r.width * 100)), y = Math.min(86, Math.max(14, (e.clientY - r.top) / r.height * 100));
+        ring.style.left = x + '%'; ring.style.top = y + '%';
+        bub.style.left = 'calc(' + x + '% + 34px)'; bub.style.top = y + '%';
+        bub.classList.toggle('left', x > 52);
+        txt.textContent = NOTES[nk++ % NOTES.length];
+        var sec = Math.round(4 + x / 100 * 26);
+        tc.textContent = '00:' + (sec < 10 ? '0' : '') + sec;
+        fill.style.width = x + '%';
+        var pin = document.createElement('span'); pin.className = 'pin m new'; pin.textContent = 'M'; pin.style.left = x + '%';
+        prTl.appendChild(pin);
+        while ($$('.pin', prTl).length > 6) prTl.removeChild($('.pin', prTl));
+        again(bub, 'again'); pr.classList.remove('ok'); used(prF);
+      });
+      $('#pr-ok').addEventListener('click', function () {
+        var on = !pr.classList.contains('ok');
+        pr.classList.toggle('ok', on); pr.classList.remove('ch');
+        $('#pr-ok span').textContent = on ? 'Approved' : 'Approve'; used(pr);
+      });
+      $('#pr-ch').addEventListener('click', function () {
+        pr.classList.toggle('ch'); pr.classList.remove('ok'); $('#pr-ok span').textContent = 'Approve'; used(pr);
+      });
     }
-    fx.addEventListener('focusin', function () { fx.classList.add('hold'); });
-    fx.addEventListener('focusout', function () { fx.classList.remove('hold'); });
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver(function (es) { fx.classList.toggle('live', es[0].isIntersecting); }, { threshold: 0.4 }).observe(fx);
-    }
-    // calendar days for the preview (November 2026 starts on a Sunday)
+
+    // calendar days (November 2026 starts on a Sunday); click to pick one
     var days = $('#pc-days');
     if (days) {
       var html = '';
@@ -547,10 +605,27 @@
         var d = c - 5, label, cl = '';
         if (d < 1) { label = 31 + d; cl = 'o'; } else if (d > 30) { label = d - 30; cl = 'o'; } else label = d;
         if (d === 15) cl = 't';
-        html += '<span class="' + cl + '">' + (cl === 't' ? '<b>' + label + '</b>' : label) + '</span>';
+        html += '<span class="' + cl + '"><b>' + label + '</b></span>';
       }
       days.innerHTML = html;
+      days.addEventListener('click', function (e) {
+        var s = e.target.closest('span');
+        if (!s || s.classList.contains('o')) return;
+        $$('span', days).forEach(function (x) { x.classList.remove('t'); });
+        s.classList.add('t'); used(days);
+      });
     }
+
+    // tasks: tick them off
+    var pkN = $('#pk-n'), pkT = $$('.pk-t');
+    pkT.forEach(function (t) {
+      t.addEventListener('click', function () {
+        t.classList.toggle('done');
+        var open = pkT.filter(function (x) { return !x.classList.contains('done'); }).length;
+        pkN.textContent = open ? open + ' open' : 'All done';
+        used(t);
+      });
+    });
   }
 
   /* ---------- film: plays muted when it scrolls into view ---------- */
