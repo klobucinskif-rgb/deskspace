@@ -74,7 +74,7 @@
   /* ---------- dark sky: lighter at the top, deep navy at the end ---------- */
   var sky = $('.page-bg');
   var SKY = {
-    dark: { a: [[46, 92, 142], [20, 40, 70]], b: [[26, 56, 90], [13, 27, 50]], g: [0.42, 0.16] },
+    dark: { a: [[34, 70, 111], [15, 29, 52]], b: [[18, 39, 63], [7, 14, 28]], g: [0.32, 0.1] },
     light: { a: [[198, 225, 251], [226, 239, 253]], b: [[238, 246, 255], [196, 222, 250]], g: [0.55, 0.25] }
   };
   var mix = function (a, b, k) { return 'rgb(' + a.map(function (v, i) { return Math.round(v + (b[i] - v) * k); }).join(',') + ')'; };
