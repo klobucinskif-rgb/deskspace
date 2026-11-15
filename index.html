@@ -9,9 +9,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="js/theme.js?v=v7-11151400"></script>
-<link rel="stylesheet" href="css/base.css?v=v7-11151400">
-<link rel="stylesheet" href="css/site.css?v=v7-11151400">
+<script src="js/theme.js?v=v8-11151422"></script>
+<link rel="stylesheet" href="css/base.css?v=v8-11151422">
+<link rel="stylesheet" href="css/site.css?v=v8-11151422">
 </head>
 <body class="lock">
 
@@ -41,6 +41,8 @@
   <symbol id="i-tasks" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="M8.5 12.5l2.4 2.4 4.6-5"/></symbol>
   <symbol id="i-people" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3.2"/><path d="M3 19.5c.6-3.2 3-5 6-5s5.4 1.8 6 5"/><circle cx="17.5" cy="9.5" r="2.4"/><path d="M16.5 14.6c2.4.2 4 1.7 4.5 4.4"/></symbol>
   <symbol id="i-qr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2v2h-2zM18 18h2v2h-2zM14 18h2M18 14h2"/></symbol>
+  <symbol id="i-vol-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></symbol>
+  <symbol id="i-vol-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></symbol>
 </svg>
 
 <!-- INTRO: the mark, then the letters -->
@@ -85,24 +87,16 @@
 <!-- 1. HERO -->
 <section class="hero" id="hero">
   <div class="sky" aria-hidden="true"><i></i><i></i><i></i></div>
-  <div class="ruler" aria-hidden="true"></div>
   <div class="wrap hero-in">
-    <p class="kick enter"><span class="rec-dot"></span>For creative and marketing agencies</p>
-    <h1 class="hero-h">
-      <span class="ln"><span>Client work,</span></span>
-      <span class="ln"><span>from first cut</span></span>
-      <span class="ln"><span>to <em>final</em> delivery.</span></span>
-    </h1>
-    <div class="hero-row enter" style="--d:5">
-      <p class="lead">One project holds the files, versions and tasks. Your client comments on the exact second, approves, and downloads the finals from the same link.</p>
-      <div class="hero-cta">
-        <a class="btn btn-primary btn-lg mag" href="login.html?demo=1">Try the demo <svg><use href="#i-arrow"/></svg></a>
-        <a class="btn btn-quiet btn-lg" href="#review">See how review works</a>
-      </div>
+    <h1 class="hero-h" aria-label="Deskspace"><span class="hl" aria-hidden="true"><span style="--i:0">D</span><span style="--i:1">e</span><span style="--i:2">s</span><span style="--i:3">k</span><span class="sp" style="--i:4">s</span><span class="sp" style="--i:5">p</span><span class="sp" style="--i:6">a</span><span class="sp" style="--i:7">c</span><span class="sp" style="--i:8">e</span></span></h1>
+    <p class="hero-sl enter" style="--d:5">Client work, from first cut to <em>final</em> delivery.</p>
+    <div class="hero-cta enter" style="--d:7">
+      <a class="btn btn-primary btn-lg mag" href="login.html?demo=1">Try the demo <svg><use href="#i-arrow"/></svg></a>
+      <a class="btn btn-quiet btn-lg" href="#review">See how review works</a>
     </div>
   </div>
 
-  <div class="stage enter" style="--d:7" id="stage">
+  <div class="stage enter" style="--d:9" id="stage">
     <div class="win" id="win" role="img" aria-label="The Deskspace app with the Northline Campaign project open">
       <div class="win-bar"><i></i><i></i><i></i><span>Deskspace — Northline Campaign</span></div>
       <div class="win-body">
@@ -141,14 +135,6 @@
   </div>
 </section>
 
-<!-- 2. TICKER -->
-<section class="ticker" aria-label="What agencies run in Deskspace">
-  <div class="tk-track">
-    <span>Campaign films</span><i></i><span class="o">Reels packs</span><i></i><span>Lookbooks</span><i></i><span class="o">Brand films</span><i></i><span>Product shoots</span><i></i><span class="o">Social cuts</span><i></i><span>Event recaps</span><i></i><span class="o">Podcast clips</span><i></i>
-    <span aria-hidden="true">Campaign films</span><i></i><span class="o" aria-hidden="true">Reels packs</span><i></i><span aria-hidden="true">Lookbooks</span><i></i><span class="o" aria-hidden="true">Brand films</span><i></i><span aria-hidden="true">Product shoots</span><i></i><span class="o" aria-hidden="true">Social cuts</span><i></i><span aria-hidden="true">Event recaps</span><i></i><span class="o" aria-hidden="true">Podcast clips</span><i></i>
-  </div>
-</section>
-
 <!-- 3. PROBLEM: scattered vs sorted -->
 <section class="mess" id="problem">
   <div class="wrap mess-in">
@@ -172,22 +158,43 @@
   </div>
 </section>
 
-<!-- 4. REVIEW: scrub the cut -->
+<!-- 4. REVIEW: scrub the cut, leave a note, approve -->
 <section class="rev-sec" id="review">
   <div class="wrap">
-    <div class="sec-head rv">
-      <p class="tag">02 — Review</p>
-      <h2>Feedback lands on the <em>exact</em> frame.</h2>
-      <p class="lead">Drag through the cut. Every note is pinned to its version and its second, so nobody has to guess which shot the client meant.</p>
+    <div class="sec-head rev-head rv">
+      <div>
+        <p class="tag">02 — Review</p>
+        <h2>Feedback lands on the <em>exact</em> frame.</h2>
+      </div>
+      <ol class="rev-try" aria-label="Try it">
+        <li><b>Drag</b> the timeline</li>
+        <li><b>Click</b> the frame to leave a note</li>
+        <li><b>Approve</b> the cut</li>
+      </ol>
     </div>
   </div>
   <div class="wrap wide">
-    <div class="pd rv" id="pd" style="--d:1">
+    <div class="pd rv" id="pd" data-state="review" style="--d:1">
       <div class="pd-main">
-        <div class="pd-screen">
-          <img id="pd-img" src="img/bridge-wide.jpg" alt="Frame from the Northline campaign film">
+        <div class="pd-screen" id="pd-screen">
+          <div class="pd-frames">
+            <img class="on" src="img/bridge-wide.jpg" alt="Frame from the Northline campaign film">
+            <img src="img/bridge-arm.jpg" alt="" loading="lazy">
+            <img src="img/walk.jpg" alt="" loading="lazy">
+            <img src="img/walk-close.jpg" alt="" loading="lazy">
+          </div>
           <span class="pd-ver">Northline_Campaign.mp4 · v3</span>
+          <span class="pill review pd-status" id="pd-status">In Review</span>
+          <span class="pd-hint" id="pd-hint"><svg><use href="#i-plus"/></svg>Click anywhere on the frame to leave a note</span>
+          <span class="pd-mark" id="pd-mark" aria-hidden="true"></span>
           <div class="pd-pop" id="pd-pop" aria-live="polite"></div>
+          <form class="pd-compose" id="pd-compose" autocomplete="off">
+            <span class="av">Y</span>
+            <span class="pc-tc" id="pc-tc">00:00</span>
+            <input id="pc-in" type="text" maxlength="90" placeholder="Write a note for this frame" aria-label="Your note">
+            <button type="submit" aria-label="Post note"><svg><use href="#i-arrow"/></svg></button>
+          </form>
+          <div class="pd-stamp" id="pd-stamp" aria-hidden="true"><svg><use href="#i-check"/></svg><span>Approved<small>v3 · by you · just now</small></span></div>
         </div>
         <div class="pd-bar">
           <button class="pd-play" id="pd-play" type="button" aria-label="Play"><svg><use href="#i-play"/></svg></button>
@@ -196,90 +203,178 @@
             <div class="pd-segs"><i style="flex:12"></i><i style="flex:10"></i><i style="flex:10"></i><i style="flex:10"></i></div>
             <div class="pd-fill" id="pd-fill"></div>
             <div class="pd-head" id="pd-head"></div>
+            <div class="pd-prev" id="pd-prev" aria-hidden="true"><img alt="" src="img/bridge-wide.jpg"><span>00:00</span></div>
           </div>
           <span class="pd-tc dim">00:42</span>
         </div>
       </div>
-      <aside class="pd-notes" id="pd-notes">
-        <p class="pd-nh">Comments on v3</p>
+      <aside class="pd-side">
+        <div class="pd-side-in">
+          <p class="pd-nh"><span>Comments on v3</span><span class="pd-count" id="pd-count">4</span></p>
+          <div class="pd-notes" id="pd-notes"></div>
+          <div class="pd-act">
+            <button class="btn btn-quiet" type="button" id="pd-changes">Request changes</button>
+            <button class="btn btn-primary" type="button" id="pd-approve"><svg><use href="#i-check"/></svg><span>Approve v3</span></button>
+          </div>
+        </div>
       </aside>
     </div>
   </div>
 </section>
 
-<!-- 5. FLOW: sticky steps -->
+<!-- 5. FLOW: a live scene that plays each step while you scroll -->
 <section class="flow" id="flow">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="tag">03 — How it works</p>
+      <h2>One link from <em>first upload</em> to final delivery.</h2>
+    </div>
+  </div>
   <div class="wrap flow-in">
-    <div class="flow-side">
+    <div class="flow-side" aria-hidden="true">
       <div class="flow-stick">
-        <p class="tag">03 — How it works</p>
-        <h2>One link from <em>first upload</em> to final delivery.</h2>
-        <div class="flow-count" aria-hidden="true"><span id="fc">01</span><small>/ 05</small></div>
-        <div class="flow-prog" aria-hidden="true"><i id="fp"></i></div>
+        <div class="scene s-1 at1" id="scene">
+          <div class="sc-top"><span class="sc-n"><b id="fc">01</b><small>/ 05</small></span><span class="sc-lbl" id="fl">Upload</span><span class="sc-prog"><i id="fp"></i></span></div>
+          <div class="sc-card">
+            <div class="sc-th">
+              <img src="img/bridge-wide.jpg" alt="">
+              <div class="sc-up"><b id="sc-pct">0%</b><small>Uploading · ProRes 422 · 1.8 GB</small><i><i id="sc-bar"></i></i></div>
+              <div class="sc-cm"><span class="av">M</span><span><b>Maren · <span class="tc">00:12</span></b>Trim the intro here.</span><span class="ok"><svg><use href="#i-check"/></svg></span></div>
+              <div class="sc-stamp"><svg><use href="#i-check"/></svg>Approved</div>
+            </div>
+            <div class="sc-meta">
+              <span><b>Northline_Campaign.mp4</b><span class="sc-vers"><i>v1</i><i>v2</i><i class="v3">v3</i><i class="v4">v4</i></span></span>
+              <span class="sc-pill" id="sc-pill">Uploading</span>
+            </div>
+          </div>
+          <div class="sc-rows">
+            <div class="sc-row sc-link"><span class="lk">deskspace.app/r/northline-v3</span><span class="sc-btn"><span class="a">Send link</span><span class="b"><svg><use href="#i-check"/></svg>Sent to Maren</span></span></div>
+            <div class="sc-row sc-dl"><span class="dl-ic"><svg><use href="#i-down"/></svg></span><span class="dl-tx"><b>Final files</b><small>3 files · 2.1 GB · original quality</small><i class="dbar"><i></i></i></span><span class="sc-done"><svg><use href="#i-check"/></svg>Delivered</span></div>
+          </div>
+          <svg class="sc-cur" viewBox="0 0 24 24"><path d="M5.5 3.2l13.3 8.1-5.9 1.3-3 5.6z"/></svg>
+        </div>
       </div>
     </div>
-    <ol class="flow-steps">
-      <li class="fs" data-n="01">
-        <p class="fs-t">Upload</p><h3>Drop the cut into the client's project.</h3><p>Videos, photos and documents land in folders. Every file keeps its own versions.</p>
-        <div class="fs-vis v-up"><span class="th"><img src="img/bridge-wide.jpg" alt=""></span><span><b>Northline_v3.mp4</b><small>Uploading · ProRes 422 · 1.8 GB</small><i class="bar"><i></i></i></span></div>
-      </li>
-      <li class="fs" data-n="02">
-        <p class="fs-t">Share</p><h3>Send one review link.</h3><p>No account for the client. They open the link, watch, and comment on the frame.</p>
-        <div class="fs-vis v-link"><span class="lk">deskspace.app/r/northline-v3</span><span class="sent"><svg><use href="#i-check"/></svg>Sent to Maren</span></div>
-      </li>
-      <li class="fs" data-n="03">
-        <p class="fs-t">Revise</p><h3>Fix it, upload v4, keep the thread.</h3><p>Click a comment to jump to its frame. When the new version is up, the note is marked resolved.</p>
-        <div class="fs-vis v-vers"><i>v1</i><i>v2</i><i>v3</i><i class="new">v4</i><span class="res"><svg><use href="#i-check"/></svg>Resolved in v4</span></div>
-      </li>
-      <li class="fs" data-n="04">
-        <p class="fs-t">Approve</p><h3>The client clicks Approve.</h3><p>Everyone sees which version was approved, by whom, and when. No more “the newest one, I think”.</p>
-        <div class="fs-vis v-ok"><span class="stamp"><svg><use href="#i-check"/></svg>Approved</span><span><b>Maren Holt</b><small>v4 · today 11:42</small></span></div>
-      </li>
-      <li class="fs" data-n="05">
-        <p class="fs-t">Deliver</p><h3>The finals go out on the same link.</h3><p>Original quality, exactly as uploaded. Every comment from v1 to v4 stays with the project.</p>
-        <div class="fs-vis v-dl"><span><b>Northline_Campaign_v4.mov</b><small>ProRes 422 · 1.8 GB</small></span><span class="dl"><svg><use href="#i-down"/></svg></span></div>
-      </li>
-    </ol>
+    <div class="flow-col">
+      <span class="fl-line" aria-hidden="true"><i id="fl-fill"></i></span>
+      <ol class="flow-steps">
+        <li class="fs" data-n="01">
+          <p class="fs-t">Upload</p><h3>Drop the cut into the client's project.</h3><p>Videos, photos and documents land in folders. Every file keeps its own versions.</p>
+          <div class="fs-vis v-up"><span class="th"><img src="img/bridge-wide.jpg" alt=""></span><span><b>Northline_v3.mp4</b><small>Uploading · ProRes 422 · 1.8 GB</small><i class="bar"><i></i></i></span></div>
+        </li>
+        <li class="fs" data-n="02">
+          <p class="fs-t">Share</p><h3>Send one review link.</h3><p>No account for the client. They open the link, watch, and comment on the frame.</p>
+          <div class="fs-vis v-link"><span class="lk">deskspace.app/r/northline-v3</span><span class="sent"><svg><use href="#i-check"/></svg>Sent to Maren</span></div>
+        </li>
+        <li class="fs" data-n="03">
+          <p class="fs-t">Revise</p><h3>Fix it, upload v4, keep the thread.</h3><p>Click a comment to jump to its frame. When the new version is up, the note is marked resolved.</p>
+          <div class="fs-vis v-vers"><i>v1</i><i>v2</i><i>v3</i><i class="new">v4</i><span class="res"><svg><use href="#i-check"/></svg>Resolved in v4</span></div>
+        </li>
+        <li class="fs" data-n="04">
+          <p class="fs-t">Approve</p><h3>The client clicks Approve.</h3><p>Everyone sees which version was approved, by whom, and when. No more “the newest one, I think”.</p>
+          <div class="fs-vis v-ok"><span class="stamp"><svg><use href="#i-check"/></svg>Approved</span><span><b>Maren Holt</b><small>v4 · today 11:42</small></span></div>
+        </li>
+        <li class="fs" data-n="05">
+          <p class="fs-t">Deliver</p><h3>The finals go out on the same link.</h3><p>Original quality, exactly as uploaded. Every comment from v1 to v4 stays with the project.</p>
+          <div class="fs-vis v-dl"><span><b>Northline_Campaign_v4.mov</b><small>ProRes 422 · 1.8 GB</small></span><span class="dl"><svg><use href="#i-down"/></svg></span></div>
+        </li>
+      </ol>
+    </div>
   </div>
 </section>
 
-<!-- 6. PRODUCT: expanding rows -->
+<!-- 6. PRODUCT: pick a feature, see it -->
 <section class="feats" id="product">
   <div class="wrap">
     <div class="feats-head rv">
       <p class="tag">04 — In the app</p>
       <h2>Everything a client project needs, and nothing it doesn't.</h2>
     </div>
-    <div class="rows">
-      <article class="rx open rv">
-        <button class="rx-h" type="button" aria-expanded="true"><span class="rx-n">01</span><span class="rx-t">Files &amp; versions</span><span class="rx-k">v1 → v4</span><span class="rx-i"><svg><use href="#i-plus"/></svg></span></button>
-        <div class="rx-b"><div class="rx-in"><p>Upload videos, photos and documents into the client's project and its folders. v1, v2 and v3 stay on one file, so nobody hunts for the latest.</p><div class="rx-vis vv"><i>v1</i><i>v2</i><i>v3</i><i class="on">v4</i></div></div></div>
-      </article>
-      <article class="rx rv">
-        <button class="rx-h" type="button" aria-expanded="false"><span class="rx-n">02</span><span class="rx-t">Client review</span><span class="rx-k">00:12</span><span class="rx-i"><svg><use href="#i-plus"/></svg></span></button>
-        <div class="rx-b"><div class="rx-in"><p>One link per file. The client pauses, writes the note, and asks for changes or approves. They never need an account.</p><div class="rx-vis vr"><span class="tc">00:12</span>Trim the intro here.</div></div></div>
-      </article>
-      <article class="rx rv">
-        <button class="rx-h" type="button" aria-expanded="false"><span class="rx-n">03</span><span class="rx-t">Approval &amp; delivery</span><span class="rx-k">2.1 GB</span><span class="rx-i"><svg><use href="#i-plus"/></svg></span></button>
-        <div class="rx-b"><div class="rx-in"><p>See what is waiting, what needs changes and what is approved. The finals go out in original quality on the link the client already has.</p><div class="rx-vis vd"><svg><use href="#i-check"/></svg>Approved · v4 · ready to deliver</div></div></div>
-      </article>
-      <article class="rx rv">
-        <button class="rx-h" type="button" aria-expanded="false"><span class="rx-n">04</span><span class="rx-t">Team chat &amp; roles</span><span class="rx-k">Owner · Admin · Editor</span><span class="rx-i"><svg><use href="#i-plus"/></svg></span></button>
-        <div class="rx-b"><div class="rx-in"><p>Group chats and direct messages next to the work. Add people with a QR code or a join code, and give each person a role.</p><div class="rx-vis vq"><svg><use href="#i-qr"/></svg><code>HLD–7K2–Q9X</code></div></div></div>
-      </article>
-      <article class="rx rv">
-        <button class="rx-h" type="button" aria-expanded="false"><span class="rx-n">05</span><span class="rx-t">Calendar</span><span class="rx-k">Delivery · Pay day</span><span class="rx-i"><svg><use href="#i-plus"/></svg></span></button>
-        <div class="rx-b"><div class="rx-in"><p>Delivery windows, finish dates, shoots and pay days in one month view, next to the tasks that are due.</p><div class="rx-vis vc"><span class="b1">Northline delivery</span><span class="b2">Invoice paid</span></div></div></div>
-      </article>
-      <article class="rx rv">
-        <button class="rx-h" type="button" aria-expanded="false"><span class="rx-n">06</span><span class="rx-t">Tasks &amp; notes</span><span class="rx-k">My Tasks</span><span class="rx-i"><svg><use href="#i-plus"/></svg></span></button>
-        <div class="rx-b"><div class="rx-in"><p>Tasks with dates, in a project or in My Tasks. Notes that read like a chat, with images and video attached.</p><div class="rx-vis vt"><span><i></i>Export 9x16 teaser</span><span class="done"><i><svg><use href="#i-check"/></svg></i>Send v3 to Maren</span></div></div></div>
-      </article>
+    <div class="fx rv" id="fx" style="--d:1">
+      <div class="fx-list" role="tablist" aria-label="Features">
+        <button class="fx-it on" type="button" role="tab" id="fxt-0" aria-controls="fxp-0" aria-selected="true"><span class="fx-t">Files &amp; versions</span><span class="fx-d"><span>Upload videos, photos and documents into the client's project. v1 to v4 stay on one file, so nobody hunts for the latest.</span></span><span class="fx-bar"><i></i></span></button>
+        <button class="fx-it" type="button" role="tab" id="fxt-1" aria-controls="fxp-1" aria-selected="false" tabindex="-1"><span class="fx-t">Client review</span><span class="fx-d"><span>One link per file. The client pauses, writes the note on the frame, and asks for changes or approves. No account needed.</span></span><span class="fx-bar"><i></i></span></button>
+        <button class="fx-it" type="button" role="tab" id="fxt-2" aria-controls="fxp-2" aria-selected="false" tabindex="-1"><span class="fx-t">Approval &amp; delivery</span><span class="fx-d"><span>See what is waiting, what needs changes and what is approved. The finals go out in original quality on the same link.</span></span><span class="fx-bar"><i></i></span></button>
+        <button class="fx-it" type="button" role="tab" id="fxt-3" aria-controls="fxp-3" aria-selected="false" tabindex="-1"><span class="fx-t">Team chat &amp; roles</span><span class="fx-d"><span>Group chats next to the work. Add people with a QR code or a join code, and give each person a role.</span></span><span class="fx-bar"><i></i></span></button>
+        <button class="fx-it" type="button" role="tab" id="fxt-4" aria-controls="fxp-4" aria-selected="false" tabindex="-1"><span class="fx-t">Calendar</span><span class="fx-d"><span>Delivery windows, shoots and pay days in one month, next to the tasks that are due.</span></span><span class="fx-bar"><i></i></span></button>
+        <button class="fx-it" type="button" role="tab" id="fxt-5" aria-controls="fxp-5" aria-selected="false" tabindex="-1"><span class="fx-t">Tasks &amp; notes</span><span class="fx-d"><span>Tasks with dates, in a project or in My Tasks. Notes that read like a chat, with images and video attached.</span></span><span class="fx-bar"><i></i></span></button>
+      </div>
+
+      <div class="fx-stage">
+        <!-- 0 files & versions -->
+        <div class="fx-pane on" id="fxp-0" role="tabpanel" aria-labelledby="fxt-0">
+          <div class="pv">
+            <div class="pv-c k3"><img src="img/bridge-wide.jpg" alt=""></div>
+            <div class="pv-c k2"><img src="img/bridge-wide.jpg" alt=""></div>
+            <div class="pv-c k1"><img src="img/bridge-wide.jpg" alt=""></div>
+            <div class="pv-c k0"><img src="img/bridge-wide.jpg" alt="Northline campaign frame"><div class="pv-cap"><span><b>Northline_Campaign.mp4</b><small>4 versions · 1.8 GB</small></span><span class="pv-vs"><i>v1</i><i>v2</i><i>v3</i><i class="on">v4</i></span></div></div>
+          </div>
+        </div>
+        <!-- 1 client review -->
+        <div class="fx-pane" id="fxp-1" role="tabpanel" aria-labelledby="fxt-1">
+          <div class="pr">
+            <div class="pr-f"><img src="img/bridge-arm.jpg" alt="Frame with a client note"><span class="pr-ring"></span>
+              <div class="pr-bub"><span class="av">M</span><span><b>Maren <em>Client</em><span class="tc">00:12</span></b>Trim the intro here.</span></div>
+            </div>
+            <div class="pr-tl"><i class="pr-fill"></i><span class="pin" style="left:10%">A</span><span class="pin m" style="left:29%">M</span><span class="pin l" style="left:64%">L</span><span class="pin m" style="left:86%">M</span></div>
+            <div class="pr-btns"><span class="pr-b">Request changes</span><span class="pr-b ok"><svg><use href="#i-check"/></svg>Approve</span></div>
+          </div>
+        </div>
+        <!-- 2 approval & delivery -->
+        <div class="fx-pane" id="fxp-2" role="tabpanel" aria-labelledby="fxt-2">
+          <div class="pa">
+            <div class="pa-r"><img src="img/bridge-wide.jpg" alt=""><span><b>Northline_Campaign.mp4</b><small>v4 · Maren · 11:42</small></span><span class="pill approved">Approved</span></div>
+            <div class="pa-r"><img src="img/social.jpg" alt=""><span><b>Northline_Social_9x16.mp4</b><small>v2 · Maren · 11:40</small></span><span class="pill approved">Approved</span></div>
+            <div class="pa-r"><img src="img/teaser.jpg" alt=""><span><b>Northline_Teaser_15s.mp4</b><small>v1 · waiting on client</small></span><span class="pill review">In Review</span></div>
+            <div class="pa-dl"><span class="ic"><svg><use href="#i-down"/></svg></span><span><b>Download finals</b><small>2 files · 1.9 GB · original quality</small><i class="bar"><i></i></i></span></div>
+          </div>
+        </div>
+        <!-- 3 team chat -->
+        <div class="fx-pane" id="fxp-3" role="tabpanel" aria-labelledby="fxt-3">
+          <div class="pt">
+            <div class="pt-h"><span class="pt-g">N</span><span><b>Northline crew</b><small>4 members</small></span><span class="pt-avs"><i>A</i><i>L</i><i>S</i><i>M</i></span></div>
+            <div class="pt-m"><span class="av l">L</span><span class="bb"><b>Leo <em>Admin</em></b>v4 is up. Grade fixed on the bridge.</span></div>
+            <div class="pt-m me"><span class="bb">Sending it to Maren now.</span></div>
+            <div class="pt-m"><span class="av s">S</span><span class="bb"><b>Sam <em>Editor</em></b>Teaser export is done too.</span></div>
+            <div class="pt-ty"><i></i><i></i><i></i></div>
+            <div class="pt-join"><svg><use href="#i-qr"/></svg><span><small>Join code</small><code>HLD–7K2–Q9X</code></span></div>
+          </div>
+        </div>
+        <!-- 4 calendar -->
+        <div class="fx-pane" id="fxp-4" role="tabpanel" aria-labelledby="fxt-4">
+          <div class="pc">
+            <div class="pc-h"><b>November 2026</b><span class="pc-lg"><i class="a"></i>Delivery<i class="b"></i>Shoot<i class="c"></i>Pay day</span></div>
+            <div class="pc-wd"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+            <div class="pc-body">
+              <div class="pc-days" id="pc-days"></div>
+              <div class="pc-ev">
+                <span class="e b" style="grid-row:3;grid-column:4/6">Atelier shoot</span>
+                <span class="e a" style="grid-row:4;grid-column:2/4">Northline delivery</span>
+                <span class="e c" style="grid-row:4;grid-column:5">Pay day</span>
+                <span class="e a" style="grid-row:5;grid-column:3/6">Forma review</span>
+                <span class="e c" style="grid-row:6;grid-column:1">Invoice</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 5 tasks & notes -->
+        <div class="fx-pane" id="fxp-5" role="tabpanel" aria-labelledby="fxt-5">
+          <div class="pk">
+            <div class="pk-l">
+              <div class="pk-h"><b>My Tasks</b><small>3 open</small></div>
+              <div class="pk-t t1"><i class="cb"><svg><use href="#i-check"/></svg></i><span>Send v3 to Maren</span><small>Today</small></div>
+              <div class="pk-t"><i class="cb"></i><span>Export the 9x16 teaser</span><small>Tue 17</small></div>
+              <div class="pk-t"><i class="cb"></i><span>Book the colour session</span><small>Thu 19</small></div>
+            </div>
+            <div class="pk-n"><img src="img/lookbook.jpg" alt=""><span><b>Shoot notes · Atelier</b>Warm light from the left, keep the background soft.</span></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- 7. FILM -->
+<!-- 7. FILM: plays by itself when it scrolls into view -->
 <section class="film" id="film">
   <div class="film-in">
     <div class="film-copy rv">
@@ -287,11 +382,12 @@
       <h2>See the whole flow in fifty&nbsp;seconds.</h2>
     </div>
     <div class="film-frame rv" style="--d:1">
-      <video id="film-v" src="media/deskspace-reveal.mp4" poster="img/poster.jpg" playsinline preload="none"></video>
-      <button class="film-play" id="film-play" type="button" aria-label="Play the film with sound">
-        <svg class="ring" viewBox="0 0 120 120" aria-hidden="true"><defs><path id="fr" d="M60 60 m-46 0 a46 46 0 1 1 92 0 a46 46 0 1 1 -92 0"/></defs><text><textPath href="#fr">PLAY THE FILM · WITH SOUND · PLAY THE FILM · WITH SOUND ·</textPath></text></svg>
-        <span class="fp-in"><svg><use href="#i-play"/></svg></span>
-      </button>
+      <video id="film-v" src="media/deskspace-reveal.mp4" poster="img/poster.jpg" muted loop playsinline preload="metadata"></video>
+      <div class="film-ui">
+        <button class="film-btn" id="film-pp" type="button" aria-label="Pause"><svg class="i-pa"><use href="#i-pause"/></svg><svg class="i-pl"><use href="#i-play"/></svg></button>
+        <button class="film-btn film-snd" id="film-snd" type="button" aria-pressed="false"><svg class="i-off"><use href="#i-vol-off"/></svg><svg class="i-on"><use href="#i-vol-on"/></svg><span>Sound on</span></button>
+        <span class="film-prog"><i id="film-prog"></i></span>
+      </div>
     </div>
   </div>
 </section>
@@ -354,6 +450,6 @@
   </div>
 </footer>
 
-<script src="js/site.js?v=v7-11151400"></script>
+<script src="js/site.js?v=v8-11151422"></script>
 </body>
 </html>
