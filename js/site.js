@@ -13,8 +13,8 @@
   function done() { if (intro && intro.parentNode) intro.parentNode.removeChild(intro); ready(); }
   if (reduce || !intro) done();
   else {
-    setTimeout(ready, 2650);
-    setTimeout(done, 3550);
+    setTimeout(ready, 2250);
+    setTimeout(done, 3150);
     var skip = function () { if (!intro.parentNode) return; intro.classList.add('skip'); ready(); setTimeout(done, 320); };
     intro.addEventListener('click', skip);
     addEventListener('keydown', function onKey() { removeEventListener('keydown', onKey); skip(); });
