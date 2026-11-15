@@ -102,29 +102,30 @@
     });
   }
 
-  /* ---------- interactive touches: letters, window, glow, tilt ---------- */
+  /* ---------- hero: a light passes across the wordmark ---------- */
+  var hl = $('.hl');
+  function measureWord() {
+    if (!hl) return;
+    hl.style.setProperty('--hw', hl.offsetWidth + 'px');
+    var x0 = hl.getBoundingClientRect().left;
+    $$('.hl > span').forEach(function (s) { s.style.setProperty('--o', (s.getBoundingClientRect().left - x0).toFixed(1) + 'px'); });
+  }
+  measureWord();
+  addEventListener('resize', measureWord);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measureWord);
+
+  /* ---------- interactive touches: window, glow, tilt ---------- */
   new MutationObserver(function () { paintSky(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   if (hover && !reduce) {
-    // the letters of the wordmark rise toward the pointer
-    var heroEl = $('#hero'), letters = $$('.hl > span');
-    if (heroEl && letters.length) {
+    // the window tilts a touch toward the pointer
+    var heroEl = $('#hero');
+    if (heroEl && win) {
       heroEl.addEventListener('pointermove', function (e) {
-        letters.forEach(function (l) {
-          var r = l.getBoundingClientRect();
-          var dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
-          var k = Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy * 0.6) / 280);
-          l.style.setProperty('--ly', (-k * k * 18).toFixed(1) + 'px');
-        });
-        if (win) {
-          var hr = heroEl.getBoundingClientRect();
-          win.style.setProperty('--wx', (((e.clientX - hr.left) / hr.width - 0.5) * 6).toFixed(2) + 'deg');
-          win.style.setProperty('--wy', (-((e.clientY - hr.top) / hr.height - 0.5) * 4).toFixed(2) + 'deg');
-        }
+        var hr = heroEl.getBoundingClientRect();
+        win.style.setProperty('--wx', (((e.clientX - hr.left) / hr.width - 0.5) * 6).toFixed(2) + 'deg');
+        win.style.setProperty('--wy', (-((e.clientY - hr.top) / hr.height - 0.5) * 4).toFixed(2) + 'deg');
       });
-      heroEl.addEventListener('pointerleave', function () {
-        letters.forEach(function (l) { l.style.setProperty('--ly', '0px'); });
-        if (win) { win.style.setProperty('--wx', '0deg'); win.style.setProperty('--wy', '0deg'); }
-      });
+      heroEl.addEventListener('pointerleave', function () { win.style.setProperty('--wx', '0deg'); win.style.setProperty('--wy', '0deg'); });
     }
     // a soft light follows the pointer across cards
     $$('[data-glow]').forEach(function (el) {
