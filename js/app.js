@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var KEY = 'deskspace-demo-v4', USER_KEY = 'deskspace-user';
+  var KEY = 'deskspace-demo-v5', USER_KEY = 'deskspace-user';
   var $ = function (s, r) { return (r || document).querySelector(s); };
   // Demo sign-in: the user is whoever signed in on login.html (stored in this browser only).
   var USER = null;
@@ -51,6 +51,10 @@
     clip: '<path d="M20.5 11.5l-8.2 8.2a5.2 5.2 0 0 1-7.4-7.4l8.5-8.5a3.5 3.5 0 0 1 5 5l-8.5 8.5a1.8 1.8 0 0 1-2.5-2.5l7.8-7.8"/>',
     trash: '<path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 12.6a1.5 1.5 0 0 0 1.5 1.4h6a1.5 1.5 0 0 0 1.5-1.4L17.5 7"/>',
     chevR: '<path d="M9 6l6 6-6 6"/>',
+    bell: '<path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>',
+    qr: '<rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2v2h-2zM18 18h2v2h-2zM14 18h2M18 14h2"/>',
+    mail: '<rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="M4 7l8 6 8-6"/>',
+    key: '<circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16 7l2 2M14 9l2 2"/>',
     people: '<circle cx="9" cy="8.5" r="3.2"/><path d="M3 19.5c.6-3.2 3-5 6-5s5.4 1.8 6 5"/><circle cx="17.5" cy="9.5" r="2.4"/><path d="M16.5 14.6c2.4.2 4 1.7 4.5 4.4"/>',
     camera: '<path d="M4 8.5A2 2 0 0 1 6 6.5h2l1.5-2h5L16 6.5h2a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><circle cx="12" cy="12.5" r="3.5"/>',
     bolt: '<path d="M13 3L5 13.5h6L10 21l8-10.5h-6z"/>',
@@ -111,7 +115,7 @@
   /* ---------- seed data ---------- */
   function seed() {
     return {
-      ws: 'halden', collapsed: false, plan: 'team',
+      ws: 'halden', collapsed: false, plan: 'team', seenAt: ts(-1, 12, 0),
       notes: [
         { id: 'n1', ws: 'halden', project: 'northline-campaign', title: 'Frames for the 9x16 cut', date: dayOffset(0), created: ts(-1, 9, 40), entries: [
           { id: 'e1', who: ME, at: ts(-1, 9, 40), text: 'Maren wants the vertical version first. These two frames hold up best in 9x16.', media: [{ id: 'm1', kind: 'image', src: 'social', name: 'social_frame.jpg' }, { id: 'm2', kind: 'image', src: 'walk-close', name: 'walk_close.jpg' }] },
@@ -130,14 +134,13 @@
         ] }
       ],
       workspaces: [
-        { id: 'halden', name: 'Halden Studio', letter: 'H', usedGb: 1240, members: [
+        { id: 'halden', name: 'Halden Studio', letter: 'H', code: 'HLD-7K2-Q9X', usedGb: 1240, members: [
           { id: 'u-me', me: true, name: ME, full: USER.name, email: USER.email, role: 'Owner', job: 'Producer. Runs the client projects and signs off deliveries.' },
           { id: 'u-leo', name: 'Leo', full: 'Leo Brandt', email: 'leo@haldenstudio.co', role: 'Admin', job: 'Lead editor. Cuts the films and manages versions.' },
           { id: 'u-sam', name: 'Sam', full: 'Sam Okafor', email: 'sam@haldenstudio.co', role: 'Editor', job: 'Colourist and finishing.' },
-          { id: 'u-mira', name: 'Mira', full: 'Mira Kos', email: 'mira@haldenstudio.co', role: 'Editor', job: 'Motion design and titles.' },
-          { id: 'u-kai', name: 'Kai', full: 'Kai Lund', email: 'kai@haldenstudio.co', role: 'Viewer', job: 'Accounts and invoicing.' }
+          { id: 'u-mira', name: 'Mira', full: 'Mira Kos', email: 'mira@haldenstudio.co', role: 'Editor', job: 'Motion design and titles.' }
         ] },
-        { id: 'films', name: 'Halden Films', letter: 'F', cls: 'f', usedGb: 160, members: [
+        { id: 'films', name: 'Halden Films', letter: 'F', cls: 'f', code: 'FLM-4PZ-8RT', usedGb: 160, members: [
           { id: 'u-me', me: true, name: ME, full: USER.name, email: USER.email, role: 'Owner', job: 'Producer.' },
           { id: 'u-leo', name: 'Leo', full: 'Leo Brandt', email: 'leo@haldenstudio.co', role: 'Admin', job: 'Lead editor.' },
           { id: 'u-kai', name: 'Kai', full: 'Kai Lund', email: 'kai@haldenstudio.co', role: 'Editor', job: 'Assistant editor.' }
@@ -195,11 +198,19 @@
           { id: 'c-2', who: 'Sam', at: ts(-1, 9, 20), text: 'Grade on the bridge scene, before and after:', media: [{ id: 'cm1', kind: 'image', src: 'bridge-wide', name: 'before.jpg' }, { id: 'cm2', kind: 'image', src: 'bridge-arm', name: 'after.jpg' }] },
           { id: 'c-3', who: ME, at: ts(-1, 11, 45), text: 'Looks great. Sharing the vertical frames note so everyone has it.', media: [], noteRef: 'n1' },
           { id: 'c-4', who: 'Mira', at: ts(0, 8, 58), text: 'Titles for the Forma film are ready for review this afternoon.', media: [] },
-          { id: 'c-5', who: 'Kai', at: ts(0, 9, 30), text: 'Northline invoice goes out after delivery. The pay day is in the calendar.', media: [] }
+          { id: 'c-5', who: 'Sam', at: ts(0, 9, 30), text: 'Northline invoice goes out after delivery. The pay day is in the calendar.', media: [] }
         ] },
         { id: 'dm:halden:u-leo', ws: 'halden', kind: 'dm', member: 'u-leo', entries: [
           { id: 'd-1', who: 'Leo', at: ts(0, 8, 40), text: 'Can you check the trim at 00:12 before I send v4?', media: [] },
           { id: 'd-2', who: ME, at: ts(0, 8, 52), text: 'Yes, give me ten minutes.', media: [] }
+        ] },
+        { id: 'grp:halden:northline', ws: 'halden', kind: 'group', name: 'Northline crew', color: 'teal', members: ['u-me', 'u-leo', 'u-sam'], unread: 2, entries: [
+          { id: 'g-1', who: 'Sam', at: ts(-1, 15, 10), text: 'Final grade for the bridge scene is exported.', media: [] },
+          { id: 'g-2', who: 'Leo', at: ts(0, 10, 2), text: 'Cutting it into v4 now. Maren gets it before lunch.', media: [] }
+        ] },
+        { id: 'grp:halden:edit', ws: 'halden', kind: 'group', name: 'Edit bay', color: 'violet', members: ['u-me', 'u-leo', 'u-mira'], entries: [
+          { id: 'g-3', who: 'Mira', at: ts(-2, 17, 40), text: 'Who has the Forma title template?', media: [] },
+          { id: 'g-4', who: ME, at: ts(-2, 17, 52), text: 'It is in Forma, in the Selects folder.', media: [] }
         ] }
       ],
       events: [
@@ -211,10 +222,10 @@
         { id: 'ev6', ws: 'halden', title: 'Team pay day', type: 'payday', project: '', start: dayOffset(16), end: dayOffset(16) }
       ],
       activity: [
-        { who: 'Maren', text: 'approved Northline_Social_9x16.mp4', when: '2 h ago' },
-        { who: 'Leo', text: 'uploaded v2 of Spring_Teaser.mp4', when: 'Yesterday' },
-        { who: ME, text: 'uploaded v3 of Northline_Campaign.mp4', when: 'Yesterday' },
-        { who: 'Jo', text: 'requested 2 changes on Lookbook 01', when: '2 days ago' }
+        { who: 'Maren', text: 'approved Northline_Social_9x16.mp4', when: '2 h ago', at: Date.now() - 2 * 3600e3 },
+        { who: 'Leo', text: 'uploaded v2 of Spring_Teaser.mp4', when: 'Yesterday', at: ts(-1, 16, 0) },
+        { who: ME, text: 'uploaded v3 of Northline_Campaign.mp4', when: 'Yesterday', at: ts(-1, 11, 0) },
+        { who: 'Jo', text: 'requested 2 changes on Lookbook 01', when: '2 days ago', at: ts(-2, 15, 0) }
       ]
     };
   }
@@ -233,6 +244,7 @@
       if (w.usedGb == null) w.usedGb = 0;
     });
     if (!S.chats) S.chats = [];
+    S.workspaces.forEach(function (w) { if (!w.code) w.code = genCode(); });
     if (!S.events) S.events = [];
     S.tasks.forEach(function (t) {
       if (!t.ws) { var tp = t.project && project(t.project); t.ws = tp ? tp.ws : S.ws; }
@@ -247,9 +259,11 @@
   migrate();
   var reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  var ui = { taskId: '', preset: '', qaLoc: '', noteId: '', pend: {}, reading: '', attachFor: '', shareFor: '', teamTab: 'chat', chatId: '', calMonth: '', evId: '', sq: '', si: 0, sres: [], lb: null, freshNote: '', freshEntry: '', freshTask: '', doneOpen: false, wsOpen: false, acct: false, share: false, shareDl: true, modal: null, as: 'team', folder: '', q: '', t: 0, playing: false, sel: 0, hot: '' };
+  var ui = { bell: false, invTab: 'qr', chatQ: '', calView: 'month', calOff: {}, calDir: 0, replying: {}, taskId: '', preset: '', qaLoc: '', noteId: '', pend: {}, reading: '', attachFor: '', shareFor: '', teamTab: 'chat', chatId: '', calMonth: '', evId: '', sq: '', si: 0, sres: [], lb: null, freshNote: '', freshEntry: '', freshTask: '', doneOpen: false, wsOpen: false, acct: false, share: false, shareDl: true, modal: null, as: 'team', folder: '', q: '', t: 0, playing: false, sel: 0, hot: '' };
   var blobs = {};      // fileId -> object URL of a file uploaded in this session
   var mediaBlobs = {}; // note media id -> object URL of a video attached in this session
+  var sky = document.createElement('div'); sky.className = 'app-sky'; sky.setAttribute('aria-hidden', 'true'); sky.innerHTML = '<i></i><i></i><i></i>';
+  document.body.insertBefore(sky, document.body.firstChild);
   var lbEl = document.createElement('div'); lbEl.id = 'lb'; document.body.appendChild(lbEl);
   var notePicker = document.createElement('input');
   notePicker.type = 'file'; notePicker.multiple = true; notePicker.accept = 'image/*,video/*'; notePicker.hidden = true;
@@ -273,7 +287,7 @@
     if (st.indexOf('approved') > -1 && st.indexOf('review') < 0) return 'approved';
     return 'draft';
   }
-  function log(who, text) { S.activity.unshift({ who: who, text: text, when: 'Just now' }); S.activity = S.activity.slice(0, 30); }
+  function log(who, text) { S.activity.unshift({ who: who, text: text, when: 'Just now', at: Date.now() }); S.activity = S.activity.slice(0, 30); }
 
   /* ---------- routing ---------- */
   function route() {
@@ -300,9 +314,9 @@
     ps.forEach(function (p) { p.files.forEach(function (f) { if (f.status === 'review' || f.status === 'changes') inReview++; }); });
     var ids = ps.map(function (p) { return p.id; });
     var open = wsTasks().filter(function (t) { return !t.done; }).length;
-    function item(v, icon, label, count) {
+    function item(v, icon, label, count, hot) {
       var on = r.v === v || (v === 'projects' && (r.v === 'p' || r.v === 'f'));
-      return '<button class="nav-item' + (on ? ' on' : '') + '" data-go="' + v + '" title="' + label + '">' + ic(icon) + '<span>' + label + '</span>' + (count != null ? '<span class="count">' + count + '</span>' : '') + '</button>';
+      return '<button class="nav-item' + (on ? ' on' : '') + '" data-go="' + v + '" title="' + label + '">' + ic(icon) + '<span>' + label + '</span>' + (count != null ? '<span class="count' + (hot ? ' hot' : '') + '">' + count + '</span>' : '') + '</button>';
     }
     var h = '<div class="side-top"><a class="logo" href="#/home" title="Deskspace"><svg><use href="#mark"/></svg><span>Desk<span class="space">space</span></span></a>' +
       '<button class="icon-btn" data-act="collapse" title="Collapse sidebar" aria-label="Collapse sidebar">' + ic('panel') + '</button></div>';
@@ -314,7 +328,7 @@
       }).join('') + '</div>';
     }
     h += '</div>';
-    h += item('home', 'home', 'Home') + item('projects', 'folder', 'Projects', ps.length) + item('review', 'review', 'In review', inReview) + item('tasks', 'tasks', 'Tasks', open) + item('notes', 'notes', 'Notes', wsNotes().length) + item('calendar', 'cal', 'Calendar') + item('team', 'people', 'Team', (w.members || []).length) + item('activity', 'activity', 'Activity') + item('plans', 'plans', 'Plans');
+    h += item('home', 'home', 'Home') + item('projects', 'folder', 'Projects', ps.length) + item('review', 'review', 'In review', inReview) + item('tasks', 'tasks', 'Tasks', open) + item('notes', 'notes', 'Notes', wsNotes().length) + item('calendar', 'cal', 'Calendar') + item('team', 'people', 'Team', unreadTotal() || null, true) + item('activity', 'activity', 'Activity');
     var cs = clients();
     if (cs.length) {
       h += '<div class="side-label">Clients</div>' + cs.map(function (c) {
@@ -322,11 +336,67 @@
         return '<button class="nav-item' + (r.v === 'c' && r.a === c.id ? ' on' : '') + '" data-go="c/' + c.id + '" title="' + esc(c.name) + '"><span class="dot" style="background:' + c.color + '"></span><span>' + esc(c.name) + '</span><span class="count">' + n + '</span></button>';
       }).join('');
     }
-    h += '<div class="side-foot"><div class="storage"><b>Storage</b><div class="meter"><i' + (st.over ? ' class="over"' : '') + ' style="width:' + st.pct + '%"></i></div><small>' + esc(st.txt) + '</small></div>' +
+    var pl = plan(), sc = 2 * Math.PI * 15, ringAnim = sideRingPct !== st.pct; sideRingPct = st.pct;
+    h += '<div class="side-foot">' +
+      '<button class="plan-s" data-go="plans" title="Plans"><span class="ps-l"><small>Your plan</small><b>' + esc(pl.name) + '</b></span><span class="ps-r"><b>' + pl.price + '</b><small>per month</small></span><span class="ps-cta">' + (pl.id === 'agency' ? 'See plans' : 'Upgrade') + ic('chevR') + '</span></button>' +
+      '<button class="storage" data-go="plans" title="Storage"><svg class="sring' + (ringAnim ? ' anim' : '') + '" viewBox="0 0 40 40" aria-hidden="true"><circle class="trk" cx="20" cy="20" r="15" fill="none" stroke-width="3.5"/><circle class="val' + (st.over ? ' over' : '') + '" cx="20" cy="20" r="15" fill="none" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="' + (sc * st.pct / 100).toFixed(1) + ' ' + sc.toFixed(1) + '" transform="rotate(-90 20 20)"/><text x="20" y="23.2" text-anchor="middle"' + (ringAnim ? ' data-count="' + st.pct + '" data-suffix="%"' : '') + '>' + st.pct + '%</text></svg>' +
+        '<span><b>Storage</b><small>' + esc(st.txt) + '</small></span></button>' +
       '<div class="acct">' + (ui.acct ? '<div class="menu acct-menu" role="menu"><button role="menuitem" data-go="account">Account</button><button role="menuitem" data-go="plans">Plans</button><button role="menuitem" data-theme-toggle>Switch light / dark</button><a role="menuitem" href="index.html">Back to site</a><button role="menuitem" data-act="reset">Reset demo data</button><hr><button role="menuitem" data-act="logout">Sign out</button></div>' : '') +
       '<button class="acct-btn" data-act="acct-toggle" aria-haspopup="menu" aria-expanded="' + ui.acct + '" title="Account">' + av(ME) + '<span><b>' + esc(USER.name) + '</b><small>' + esc(USER.email) + '</small></span>' + ic('chev') + '</button></div></div>';
     $('#side').innerHTML = h;
     $('#app').classList.toggle('collapsed', !!S.collapsed);
+    placeNavInd();
+    if (ringAnim) runCounts($('#side .storage'));
+  }
+
+  var sideRingPct = null, navY = null;
+  function placeNavInd() {
+    var side = $('#side'), on = side.querySelector('.nav-item.on'), ind = document.createElement('span');
+    ind.className = 'nav-ind'; side.appendChild(ind);
+    if (!on) { ind.style.opacity = '0'; navY = null; return; }
+    var y = on.offsetTop, setPos = function (yy) { ind.style.transform = 'translateY(' + yy + 'px)'; };
+    ind.style.left = on.offsetLeft + 'px'; ind.style.width = on.offsetWidth + 'px'; ind.style.height = on.offsetHeight + 'px';
+    if (navY !== null && navY !== y && !reduceMotion) { ind.style.transition = 'none'; setPos(navY); void ind.offsetWidth; ind.style.transition = ''; }
+    setPos(y); navY = y;
+  }
+  function unreadTotal() { return S.chats.filter(function (c) { return c.ws === S.ws; }).reduce(function (a, c) { return a + (c.unread || 0); }, 0); }
+  function runCounts(root) {
+    if (!root) return;
+    [].forEach.call(root.querySelectorAll('[data-count]'), function (el) {
+      var to = parseFloat(el.getAttribute('data-count')), from = parseFloat(el.getAttribute('data-from') || '0'), fmt = el.getAttribute('data-fmt'),
+        suf = el.getAttribute('data-suffix') || '', delay = +(el.getAttribute('data-delay') || 0), dur = +(el.getAttribute('data-dur') || 1000);
+      var out = function (v) { el.textContent = fmt === 'eur' ? '€' + (to % 1 ? v.toFixed(2) : Math.round(v)) : Math.round(v) + suf; };
+      if (reduceMotion) { out(to); return; }
+      out(from);
+      setTimeout(function () {
+        var t0 = performance.now();
+        (function step(now) { var k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 4); out(from + (to - from) * e); if (k < 1) requestAnimationFrame(step); })(t0);
+      }, delay);
+    });
+  }
+  var navHist = [], navBack = false, lastPath = currentPath();
+  function currentPath() { return location.hash.replace(/^#\/?/, '') || 'home'; }
+  function parentOf(path) { var q = path.split('/'); if (q[0] === 'f') return 'p/' + q[1]; if (q[0] === 'p') return q[2] ? 'p/' + q[1] : 'projects'; if (q[0] === 'c') return 'projects'; return 'home'; }
+  function goBack() {
+    var cur = currentPath(), t = navHist.pop();
+    while (t === cur && navHist.length) t = navHist.pop();
+    if (!t || t === cur) t = parentOf(cur);
+    navBack = true; go(t);
+  }
+  function bellItems() {
+    var items = S.chats.filter(function (c) { return c.ws === S.ws && c.unread && (c.kind !== 'dm' || memberById(c.member)); }).map(function (c) {
+      var l = c.entries[c.entries.length - 1] || {};
+      return { who: l.who || ME, text: c.unread + ' new message' + (c.unread > 1 ? 's' : '') + ' in ' + chatName(c), when: l.at ? relWhen(l.at) : '', unread: true, chat: c.id };
+    });
+    return items.concat(S.activity.slice(0, 8).map(function (a) { return { who: a.who, text: a.text, when: a.at ? relWhen(a.at) : a.when, unread: (a.at || 0) > (S.seenAt || 0) }; }));
+  }
+  function bellHtml() {
+    var items = bellItems(), n = items.filter(function (i) { return i.unread; }).length;
+    return '<div class="bell-wrap"><button class="icon-btn top-ic bell" data-act="bell" aria-label="Notifications' + (n ? ', ' + n + ' new' : '') + '" aria-expanded="' + ui.bell + '" title="Notifications">' + ic('bell') + (n ? '<em class="bdg">' + n + '</em>' : '') + '</button>' +
+      (ui.bell ? '<div class="menu bell-menu" role="menu"><header>Notifications' + (n ? '<button class="link" data-act="bell-read">Mark all read</button>' : '') + '</header><div class="bell-list">' +
+        (items.length ? items.map(function (i) {
+          return '<button class="bl-row' + (i.unread ? ' unread' : '') + '" ' + (i.chat ? 'data-act="chat-open" data-id="' + esc(i.chat) + '"' : 'data-go="activity"') + '>' + av(i.who, true) + '<span><span>' + (i.chat ? '' : '<b>' + esc(i.who) + '</b> ') + esc(i.text) + '</span><small>' + esc(i.when) + '</small></span></button>';
+        }).join('') : '<div class="empty-sm">You are all caught up.</div>') + '</div></div>' : '') + '</div>';
   }
 
   /* ---------- top bar ---------- */
@@ -334,22 +404,22 @@
     var r = route(), p, f, h = '<button class="icon-btn menu-btn" data-act="drawer" aria-label="Open menu">' + ic('menu') + '</button>';
     if (r.v === 'p' || r.v === 'f') {
       p = project(r.a); f = r.v === 'f' ? fileOf(p, r.b) : null;
-      h += '<button class="icon-btn" data-go="' + (f ? 'p/' + r.a : 'projects') + '" aria-label="Back">' + ic('back') + '</button>';
+      h += '<button class="icon-btn back-btn" data-act="back" aria-label="Back" title="Back">' + ic('back') + '</button>';
       if (p) h += '<div class="crumb"><b>' + esc(f ? f.name : p.name) + '</b><small>' + esc(f ? p.name : client(p.client).name + ' · ' + p.files.length + ' file' + (p.files.length === 1 ? '' : 's')) + '</small></div>';
-      h += '<span class="sp"></span>' + SEARCH_BTN + THEME_BTN;
+      h += '<span class="sp"></span>' + SEARCH_BTN + bellHtml() + THEME_BTN;
       if (p && !f) h += '<button class="btn btn-primary btn-sm" data-act="upload">' + ic('upload') + 'Upload</button>';
       if (f && ui.as === 'team') {
         h += '<button class="btn btn-ghost btn-sm" data-act="new-version">' + ic('upload') + 'New version</button>' +
           '<button class="btn btn-primary btn-sm" data-act="share-toggle">' + ic('link') + 'Share link</button>';
       }
     } else {
-      var now = new Date();
-      var titles = { home: 'Good flow, ' + ME, projects: 'Projects', review: 'In review', tasks: 'Tasks', notes: 'Notes', calendar: 'Calendar', team: 'Team', activity: 'Activity', plans: 'Plans', account: 'Account', c: client(r.a).name };
-      var subs = { home: now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }), projects: ws().name, review: 'Waiting on a client or on you', tasks: ws().name, notes: ws().name, calendar: 'Deliveries, finish dates and pay days', team: ws().name, activity: ws().name, plans: ws().name, account: USER.email, c: 'Client' };
-      h += '<div class="crumb"><b>' + esc(titles[r.v] || 'Deskspace') + '</b><small>' + esc(subs[r.v] || '') + '</small></div><span class="sp"></span>' + SEARCH_BTN + THEME_BTN;
+      if (r.v !== 'home') h += '<button class="icon-btn back-btn" data-act="back" aria-label="Back" title="Back">' + ic('back') + '</button>';
+      var titles = { home: '', projects: 'Projects', review: 'In review', tasks: 'Tasks', notes: 'Notes', calendar: 'Calendar', team: 'Team', activity: 'Activity', plans: 'Plans', account: 'Account', c: client(r.a).name };
+      var subs = { home: '', projects: ws().name, review: 'Waiting on a client or on you', tasks: ws().name, notes: ws().name, calendar: 'Deliveries, finish dates and pay days', team: ws().name, activity: ws().name, plans: ws().name, account: USER.email, c: 'Client' };
+      h += (r.v === 'home' ? '' : '<div class="crumb"><b>' + esc(titles[r.v] || 'Deskspace') + '</b><small>' + esc(subs[r.v] || '') + '</small></div>') + '<span class="sp"></span>' + SEARCH_BTN + bellHtml() + THEME_BTN;
       if (r.v === 'projects' || r.v === 'c') h += '<button class="btn btn-primary btn-sm" data-act="new-project">' + ic('plus') + 'New project</button>';
       if (r.v === 'calendar') h += '<button class="btn btn-primary btn-sm" data-act="ev-new" data-id="">' + ic('plus') + 'New event</button>';
-      if (r.v === 'team' && canManage()) h += '<button class="btn btn-primary btn-sm" data-act="invite">' + ic('plus') + 'Invite member</button>';
+      if (r.v === 'team') h += '<button class="btn btn-ghost btn-sm" data-act="join">' + ic('key') + 'Join with code</button>' + (canManage() ? '<button class="btn btn-primary btn-sm" data-act="invite">' + ic('plus') + 'Add member</button>' : '');
       if (r.v === 'tasks') h += '<button class="btn btn-primary btn-sm" data-act="task-new" data-id="">' + ic('plus') + 'New task</button>';
       if (r.v === 'notes') h += '<button class="btn btn-primary btn-sm" data-act="note-new" data-id="">' + ic('plus') + 'New note</button>';
     }
@@ -362,9 +432,11 @@
   function pCard(p) {
     var st = pStatus(p), c = client(p.client);
     var n = p.files.filter(function (f) { return f.status === 'changes'; }).length;
+    var okN = p.files.filter(function (f) { return f.status === 'approved'; }).length, okPct = p.files.length ? Math.round(okN / p.files.length * 100) : 0;
     var next = { draft: ['Not sent yet', 'Open'], review: ['Waiting on client feedback', 'Open'], changes: [n + ' file' + (n === 1 ? '' : 's') + ' to revise', 'Open'], approved: ['Ready to deliver', 'Deliver'] }[st];
     return '<button class="card pcard" data-go="p/' + p.id + (st === 'approved' ? '/delivery' : '') + '"><span class="thumb">' + thumb(p.cover, 'folder') + pill(st) + '</span>' +
-      '<span class="body"><b>' + esc(p.name) + '</b><small>' + esc(c.name) + ' · ' + p.files.length + ' file' + (p.files.length === 1 ? '' : 's') + (p.due ? ' · due ' + esc(p.due) : '') + '</small></span>' +
+      '<span class="body"><b>' + esc(p.name) + '</b><small>' + esc(c.name) + ' · ' + p.files.length + ' file' + (p.files.length === 1 ? '' : 's') + (p.due ? ' · due ' + esc(p.due) : '') + '</small>' +
+        '<span class="pprog" title="' + okN + ' of ' + p.files.length + ' approved"><i style="width:' + okPct + '%"></i></span></span>' +
       '<span class="next ' + st + '"><span>' + next[0] + '</span><span>' + next[1] + ' →</span></span></button>';
   }
   function emptyProjects() {
@@ -543,6 +615,7 @@
     n.entries.forEach(function (e, i) {
       var d = iso(new Date(e.at)), prev = n.entries[i - 1], me = e.who === ME;
       if (d !== lastDay) { out += '<div class="day-sep">' + esc(fmtDay(d)) + '</div>'; lastDay = d; }
+      if (e.sys) { out += '<div class="sys">' + esc(e.text) + '</div>'; return; }
       var cont = prev && prev.who === e.who && iso(new Date(prev.at)) === d && e.at - prev.at < 10 * 60 * 1000;
       var hasMedia = e.media && e.media.length;
       out += '<div class="msg' + (me ? ' me' : '') + (cont ? ' cont' : '') + (e.id === ui.freshEntry ? ' new' : '') + '">' +
@@ -650,6 +723,11 @@
     if (!len) return;
     ui.lb.i = (ui.lb.i + d + len) % len; renderLb();
   }
+  function copyText(t, msg) {
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { toast(msg); }, function () { toast('Copy failed. Select it and copy by hand.'); });
+    else toast('Copy failed. Select it and copy by hand.');
+  }
+  function animBody() { var b = $('.cal-body'); if (!b || reduceMotion) return; b.classList.add('anim'); setTimeout(function () { b.classList.remove('anim'); }, 900); }
   function closeModal() {
     var wasNote = ui.modal === 'note';
     if (wasNote) ui.pend[ui.noteId] = [];
@@ -658,43 +736,53 @@
   }
 
   function vHome() {
-    var w = ws(), st = store(w), all = projects(), td = today();
-    var recent = all.slice(0, 6), deliver = all.filter(function (p) { return pStatus(p) === 'approved'; }).length, revise = all.filter(function (p) { return pStatus(p) === 'changes'; }).length;
-    var open = wsTasks().filter(function (t) { return !t.done; }).sort(byDue).slice(0, 6), recentNotes = wsNotes().sort(byRecent).slice(0, 4);
+    var w = ws(), st = store(w), all = projects(), td = today(), recent = all.slice(0, 6), mem = activeMembers(w);
+    var open = wsTasks().filter(function (t) { return !t.done; }), dueToday = open.filter(function (t) { return t.due === td; }).length, overdue = open.filter(function (t) { return t.due && t.due < td; }).length;
+    var waiting = 0; all.forEach(function (p) { p.files.forEach(function (f) { if (f.status === 'review') waiting++; }); });
+    var nextDel = wsEvents().filter(function (e) { return e.type === 'delivery' && (e.end || e.start) >= td; }).sort(byStart)[0];
+    var openList = open.slice().sort(byDue).slice(0, 6), recentNotes = wsNotes().sort(byRecent).slice(0, 4);
     var up = wsEvents().filter(function (e) { return (e.end || e.start) >= td; }).sort(byStart).slice(0, 3);
     var circ = 2 * Math.PI * 28, tc0 = chatById(teamChatId()), last = tc0 && tc0.entries[tc0.entries.length - 1];
-    var tiles = [['new-project', 'folder', 'New project', 'Start a client project'], ['task-new', 'tasks', 'New task', 'Into My Tasks or a project'], ['note-new', 'notes', 'New note', 'Write, add images and videos'], ['ev-new', 'cal', 'New event', 'Delivery, finish date, pay day']];
+    var tiles = [['new-project', 'folder', 'New project'], ['task-new', 'tasks', 'New task'], ['note-new', 'notes', 'New note'], ['ev-new', 'cal', 'New event']];
     var h = '<div class="home"><div class="tiles">' + tiles.map(function (t) {
-      return '<button class="tile" data-act="' + t[0] + '" data-id=""><span class="tile-ic">' + ic(t[1]) + '<i>' + ic('plus') + '</i></span><span><b>' + t[2] + '</b><small>' + t[3] + '</small></span></button>';
+      return '<button class="tile" data-act="' + t[0] + '" data-id=""><span class="tile-ic">' + ic(t[1]) + '</span><b>' + t[2] + '</b><span class="tile-plus">' + ic('plus') + '</span></button>';
     }).join('') + '</div>';
-    h += '<div class="view-head"><h1>Recent projects</h1><small>' + deliver + ' to deliver · ' + revise + ' to revise</small><span class="sp"></span><button class="link see-all" data-go="projects">See all ' + ic('chevR') + '</button></div>';
+    h += '<div class="pulse">' +
+      '<button class="pl" data-go="tasks"><b data-count="' + dueToday + '">' + dueToday + '</b><span>due today</span></button>' +
+      '<button class="pl' + (overdue ? ' warn' : '') + '" data-go="tasks"><b data-count="' + overdue + '">' + overdue + '</b><span>overdue</span></button>' +
+      '<button class="pl" data-go="review"><b data-count="' + waiting + '">' + waiting + '</b><span>waiting on clients</span></button>' +
+      '<button class="pl" data-go="calendar">' + ic('cal') + '<span>' + (nextDel ? 'Next delivery <b class="inl">' + esc(fmtDay(nextDel.start)) + '</b>' : 'No delivery planned') + '</span></button></div>';
+    h += '<div class="view-head"><h1>Recent projects</h1><span class="sp"></span><button class="link see-all" data-go="projects">See all ' + ic('chevR') + '</button></div>';
     h += recent.length ? '<div class="pgrid six">' + recent.map(pCard).join('') + '</div>' : emptyProjects();
     h += '<div class="home3 grow">' +
       '<div class="card list"><div class="card-h">Tasks <span class="card-acts"><button class="icon-btn sm" data-act="task-new" data-id="" title="New task" aria-label="New task">' + ic('plus') + '</button><button class="link" data-go="tasks">See all</button></span></div>' +
-        (open.length ? open.map(function (t) { return taskRow(t, true); }).join('') : '<div class="empty-sm">Nothing open. Add the next thing to do.</div>') + quickAdd('', '') + '</div>' +
+        (openList.length ? openList.map(function (t) { return taskRow(t, true); }).join('') : '<div class="empty-sm">Nothing open.</div>') + quickAdd('', '') + '</div>' +
       '<div class="card list"><div class="card-h">Notes <span class="card-acts"><button class="icon-btn sm" data-act="note-new" data-id="" title="New note" aria-label="New note">' + ic('plus') + '</button><button class="link" data-go="notes">See all</button></span></div>' +
         (recentNotes.length ? recentNotes.map(function (n) { return nLine(n); }).join('') : '<div class="empty-sm">No notes yet.</div>') + '<button class="add-line" data-act="note-new" data-id="">' + ic('plus') + 'New note</button></div>' +
-      '<div class="card list"><div class="card-h">Activity <button class="link" data-go="activity">See all</button></div><div class="pad">' + (S.activity.length ? '<ul class="act">' + S.activity.slice(0, 6).map(actLi).join('') + '</ul>' : '<span class="muted">Uploads, comments and approvals show up here.</span>') + '</div></div></div>';
+      '<div class="card list"><div class="card-h">Activity <button class="link" data-go="activity">See all</button></div><div class="pad">' + (S.activity.length ? '<ul class="act">' + S.activity.slice(0, 6).map(actLi).join('') + '</ul>' : '<span class="muted">Nothing yet.</span>') + '</div></div></div>';
     h += '<div class="home3 bottom">' +
-      '<div class="card pad"><div class="sub-h">Storage <button class="link" style="font-size:12px" data-go="plans">Plans</button></div><div class="ring"><svg viewBox="0 0 68 68"><circle class="trk" cx="34" cy="34" r="28" fill="none" stroke-width="6"/><circle class="val' + (st.over ? ' over' : '') + '" cx="34" cy="34" r="28" fill="none" stroke-width="6" stroke-linecap="round" stroke-dasharray="' + (circ * st.pct / 100).toFixed(1) + ' ' + circ.toFixed(1) + '" transform="rotate(-90 34 34)"/><text x="34" y="38.5" text-anchor="middle">' + st.pct + '%</text></svg><div><b>' + esc(st.txt) + '</b><small>' + esc(st.free) + '</small></div></div></div>' +
-      '<div class="card"><div class="card-h">Coming up <button class="link" data-go="calendar">Calendar</button></div><div class="evlist">' + (up.length ? up.map(evLine).join('') : '<div class="empty-sm">Nothing planned. Add a delivery or a pay day.</div>') + '</div></div>' +
-      '<div class="card pad team-card"><div class="sub-h">Team <small>' + w.members.length + ' of ' + plan().team + ' seats</small></div><div class="avs">' + w.members.map(function (m) { return av(mName(m)); }).join('') + '</div>' +
-        '<p class="tc-prev">' + (last ? '<b>' + esc(last.who === ME ? 'You' : last.who) + ':</b> ' + esc(last.text || (last.noteRef ? 'Shared a note' : 'Sent an attachment')) : 'Clients review by link and don\'t need a seat.') + '</p>' +
-        '<div class="row-btns"><button class="btn btn-ghost btn-sm" data-act="chat-open" data-id="' + teamChatId() + '">' + ic('review') + 'Team chat</button><button class="btn btn-ghost btn-sm" data-act="team-tab" data-id="members">' + ic('people') + 'Members</button></div></div>' +
+      '<button class="card pad stor-card" data-go="plans"><div class="sub-h">Storage <span class="link">Plans ' + ic('chevR') + '</span></div><div class="ring"><svg viewBox="0 0 68 68"><circle class="trk" cx="34" cy="34" r="28" fill="none" stroke-width="6"/><circle class="val' + (st.over ? ' over' : '') + '" cx="34" cy="34" r="28" fill="none" stroke-width="6" stroke-linecap="round" stroke-dasharray="' + (circ * st.pct / 100).toFixed(1) + ' ' + circ.toFixed(1) + '" transform="rotate(-90 34 34)"/><text x="34" y="38.5" text-anchor="middle" data-count="' + st.pct + '" data-suffix="%">' + st.pct + '%</text></svg><div><b>' + esc(st.txt) + '</b><small>' + esc(st.free) + '</small></div></div></button>' +
+      '<div class="card"><div class="card-h">Coming up <button class="link" data-go="calendar">Calendar</button></div><div class="evlist">' + (up.length ? up.map(evLine).join('') : '<div class="empty-sm">Nothing planned.</div>') + '</div></div>' +
+      '<div class="card pad team-card"><div class="sub-h">Team <small>' + w.members.length + ' of ' + plan().team + ' seats</small></div><div class="avs">' + mem.map(function (m) { return av(mName(m)); }).join('') + '</div>' +
+        '<p class="tc-prev">' + (last ? '<b>' + esc(last.who === ME ? 'You' : last.who) + ':</b> ' + esc(last.text || (last.noteRef ? 'Shared a note' : 'Sent an attachment')) : '') + '</p>' +
+        '<div class="row-btns"><button class="btn btn-ghost btn-sm" data-act="chat-open" data-id="' + teamChatId() + '">' + ic('review') + 'Team chat</button><button class="btn btn-ghost btn-sm" data-act="invite">' + ic('plus') + 'Add member</button></div></div>' +
       '</div></div>';
     return h;
   }
 
   /* ---------- team ---------- */
   var ROLES = ['Owner', 'Admin', 'Editor', 'Viewer'];
-  var ROLE_INFO = { Owner: 'Plan, billing and everything else', Admin: 'Manages members, projects and clients', Editor: 'Uploads, comments and delivers', Viewer: 'Views and comments' };
+  var ROLE_INFO = { Owner: 'Plan, billing and everything else', Admin: 'Members, projects and clients', Editor: 'Uploads, comments, deliveries', Viewer: 'Views and comments' };
+  var GROUP_COLORS = ['blue', 'teal', 'violet', 'amber', 'rose'];
+  var REPLIES = ['On it.', 'Looks good to me.', 'Give me ten minutes.', 'Sending it over now.', 'Nice, thanks!', 'Can we go over this at 3?', 'Agreed, let\'s keep it.', 'I\'ll check and get back to you.'];
   function myMember(w) { w = w || ws(); return (w.members || []).filter(function (m) { return m.me; })[0]; }
   function canManage() { var m = myMember(); return !!m && (m.role === 'Owner' || m.role === 'Admin'); }
   function isOwner() { var m = myMember(); return !!m && m.role === 'Owner'; }
   function mName(m) { return m.me ? ME : m.name; }
-  function mFull(m) { return m.me ? USER.name : (m.full || m.name); }
+  function mFull(m) { return m ? (m.me ? USER.name : (m.full || m.name)) : 'Former member'; }
   function mEmail(m) { return m.me ? USER.email : (m.email || ''); }
   function memberById(id) { return (ws().members || []).filter(function (m) { return m.id === id; })[0]; }
+  function activeMembers(w) { return ((w || ws()).members || []).filter(function (m) { return !m.pending; }); }
   function teamChatId() { return 'team-' + S.ws; }
   function dmId(mid) { return 'dm:' + S.ws + ':' + mid; }
   function ensureChat(id) {
@@ -702,37 +790,75 @@
     if (!c) { var dm = id.indexOf('dm:') === 0; c = { id: id, ws: S.ws, kind: dm ? 'dm' : 'team', member: dm ? id.split(':')[2] : '', entries: [] }; S.chats.push(c); }
     return c;
   }
-  function chatOk(id) { return id === teamChatId() || (id.indexOf('dm:' + S.ws + ':') === 0 && !!memberById(id.split(':')[2])); }
+  function chatOk(id) {
+    if (id === teamChatId()) return true;
+    if (id.indexOf('dm:' + S.ws + ':') === 0) { var m = memberById(id.split(':')[2]); return !!m && !m.pending; }
+    var c = chatById(id); return !!c && c.kind === 'group' && c.ws === S.ws;
+  }
+  function genCode() { var a = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789', x = ''; for (var i = 0; i < 9; i++) x += a.charAt(Math.floor(Math.random() * a.length)); return x.slice(0, 3) + '-' + x.slice(3, 6) + '-' + x.slice(6); }
+  function wsCode(w) { w = w || ws(); if (!w.code) { w.code = genCode(); save(); } return w.code; }
+  function joinUrl() { return location.href.replace(/app\.html.*$/, '').replace(/#.*$/, '') + 'login.html?join=' + wsCode(); }
+  function chatMembers(c) {
+    if (c.kind === 'team') return activeMembers();
+    if (c.kind === 'dm') return [myMember(), memberById(c.member)].filter(Boolean);
+    return (c.members || []).map(memberById).filter(function (m) { return m && !m.pending; });
+  }
+  function chatName(c) { return c.kind === 'team' ? ws().name : c.kind === 'dm' ? mFull(memberById(c.member)) : c.name; }
+  function chatIcon(c, big) {
+    if (c.kind === 'dm') { var m = memberById(c.member); return av(m ? m.name : '?', false, big ? 'xl' : 'lg2'); }
+    var letters = c.kind === 'team' ? ws().letter : c.name.split(/\s+/).map(function (x) { return x.charAt(0); }).join('').slice(0, 2).toUpperCase();
+    return '<span class="gic' + (big ? ' big' : '') + ' g-' + (c.kind === 'team' ? 'blue' : (c.color || 'violet')) + '">' + esc(letters) + '</span>';
+  }
   function shortWhen(t) { var d = iso(new Date(t)); return d === today() ? fmtTime(t) : d === dayOffset(-1) ? 'Yesterday' : new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); }
+  function lastPreview(c) {
+    var l = c.entries[c.entries.length - 1];
+    if (!l) return c.kind === 'team' ? 'Everyone in ' + ws().name : c.kind === 'group' ? chatMembers(c).length + ' members' : ((memberById(c.member) || {}).job || 'Say hello');
+    if (l.sys) return l.text;
+    var what = l.text || (l.noteRef ? 'Shared a note' : (l.media && l.media.length ? (l.media[0].kind === 'video' ? 'Video' : 'Photo') + (l.media.length > 1 ? ' + ' + (l.media.length - 1) : '') : ''));
+    return (l.who === ME ? 'You: ' : (c.kind !== 'dm' ? l.who + ': ' : '')) + what;
+  }
+  function chatRow(c) {
+    var l = c.entries[c.entries.length - 1], un = c.unread || 0;
+    return '<button class="cl-row' + (ui.chatId === c.id ? ' on' : '') + (un ? ' unread' : '') + '" data-act="chat-open" data-id="' + esc(c.id) + '">' + chatIcon(c) +
+      '<span class="cl-main"><span class="cl-top"><b>' + esc(chatName(c)) + '</b>' + (l ? '<time>' + esc(shortWhen(l.at)) + '</time>' : '') + '</span>' +
+      '<span class="cl-bot"><small>' + esc(lastPreview(c)) + '</small>' + (un ? '<em class="badge">' + un + '</em>' : '') + '</span></span></button>';
+  }
   function chatListHtml() {
-    var w = ws(), rows = [{ id: teamChatId(), team: true }].concat(w.members.filter(function (m) { return !m.me; }).map(function (m) { return { id: dmId(m.id), m: m }; }));
-    return rows.map(function (r) {
-      var c = chatById(r.id), last = c && c.entries[c.entries.length - 1];
-      var what = last ? (last.text || (last.noteRef ? 'Shared a note' : (last.media && last.media.length ? last.media.length + ' attachment' + (last.media.length === 1 ? '' : 's') : ''))) : '';
-      var prev = last ? (last.who === ME ? 'You: ' : (r.team ? last.who + ': ' : '')) + what : (r.team ? 'Group chat for everyone in ' + w.name : (r.m.role + ' · ' + (r.m.job || 'No messages yet')));
-      var icon = r.team ? '<span class="ws-ic big ' + (w.cls || '') + '">' + w.letter + '</span>' : av(r.m.name, false, 'lg2');
-      return '<button class="cl-row' + (ui.chatId === r.id ? ' on' : '') + '" data-act="chat-open" data-id="' + esc(r.id) + '">' + icon +
-        '<span class="cl-main"><span class="cl-top"><b>' + esc(r.team ? w.name : mFull(r.m)) + '</b>' + (last ? '<time>' + esc(shortWhen(last.at)) + '</time>' : '') + '</span><small>' + esc(prev) + '</small></span></button>';
-    }).join('');
+    var q = (ui.chatQ || '').trim().toLowerCase(), f = function (c) { return !q || chatName(c).toLowerCase().indexOf(q) > -1; };
+    var groups = [ensureChat(teamChatId())].concat(S.chats.filter(function (c) { return c.ws === S.ws && c.kind === 'group'; }));
+    var dms = activeMembers().filter(function (m) { return !m.me; }).map(function (m) { return chatById(dmId(m.id)) || { id: dmId(m.id), kind: 'dm', member: m.id, entries: [] }; });
+    var g = groups.filter(f), d = dms.filter(f);
+    return '<div class="cl-sec"><span>Groups</span><button class="icon-btn sm" data-act="group-new" title="New group" aria-label="New group">' + ic('plus') + '</button></div>' + g.map(chatRow).join('') +
+      '<div class="cl-sec"><span>Direct messages</span></div>' + (d.length ? d.map(chatRow).join('') : '<div class="empty-sm">No one matches.</div>');
   }
   function paintChatList() { var el = $('#chat-list'); if (el) el.innerHTML = chatListHtml(); }
   function teamChatHtml() {
-    var w = ws();
     if (!ui.chatId || !chatOk(ui.chatId)) ui.chatId = teamChatId();
-    var c = ensureChat(ui.chatId), team = c.kind === 'team', m = team ? null : memberById(c.member);
-    var head = team ? '<span class="ws-ic big ' + (w.cls || '') + '">' + w.letter + '</span><div class="cp-t"><b>' + esc(w.name) + '</b><small>' + esc(w.members.map(mName).join(', ')) + '</small></div>' :
-      av(m.name, false, 'lg2') + '<div class="cp-t"><b>' + esc(mFull(m)) + '</b><small>' + esc(m.role + (m.job ? ' · ' + m.job : '')) + '</small></div>';
-    return '<div class="tchat"><aside class="cl"><div class="cl-h">Chats</div><div class="cl-list" id="chat-list">' + chatListHtml() + '</div></aside>' +
-      '<section class="chat-pane"><header class="cp-h">' + head + (team ? '<button class="btn btn-ghost btn-sm" data-act="team-tab" data-id="members">' + ic('people') + 'Members</button>' : '') + '</header>' +
+    var c = ensureChat(ui.chatId), mem = chatMembers(c), sub, acts = '';
+    if (c.unread) { c.unread = 0; save(); }
+    if (c.kind === 'dm') { var m = memberById(c.member); sub = m.role + (m.job ? ' · ' + m.job : ''); }
+    else sub = mem.length + ' members';
+    if (c.kind === 'group') acts = '<button class="btn btn-ghost btn-sm" data-act="group-add" data-id="' + esc(c.id) + '">' + ic('plus') + 'Add people</button><button class="icon-btn" data-act="group-del" data-id="' + esc(c.id) + '" title="Delete group" aria-label="Delete group">' + ic('trash') + '</button>';
+    else if (c.kind === 'team' && canManage()) acts = '<button class="btn btn-ghost btn-sm" data-act="invite">' + ic('plus') + 'Add member</button>';
+    var stack = c.kind === 'dm' ? '' : '<span class="avs mini">' + mem.slice(0, 5).map(function (x) { return av(mName(x), true); }).join('') + '</span>';
+    return '<div class="tchat"><aside class="cl"><label class="cl-search">' + ic('search') + '<input id="chat-q" placeholder="Search chats" value="' + esc(ui.chatQ || '') + '" autocomplete="off" aria-label="Search chats"></label>' +
+      '<div class="cl-list" id="chat-list">' + chatListHtml() + '</div>' +
+      (canManage() ? '<button class="cl-add" data-act="invite"><span class="cl-add-ic">' + ic('qr') + '</span><span><b>Add team member</b><small>QR code, join code or email</small></span></button>' : '') + '</aside>' +
+      '<section class="chat-pane"><header class="cp-h">' + chatIcon(c, true) + '<div class="cp-t"><b>' + esc(chatName(c)) + '</b><small>' + esc(sub) + '</small></div>' + stack + acts + '</header>' +
       '<div class="thread" data-thread-body="' + esc(c.id) + '">' + threadHtml(c) + '</div>' + composerHtml(c.id, true) + '</section></div>';
   }
+  function inviteCard() {
+    var w = ws(), code = wsCode(w), full = w.members.length >= plan().team;
+    if (full) return '<div class="card inv-card"><b>All ' + plan().team + ' seats are used</b><p class="muted">Upgrade the plan to add more people.</p><button class="btn btn-primary btn-sm" data-go="plans">See plans</button></div>';
+    return '<div class="card inv-card"><div class="sub-h">Invite with a QR code</div><div class="qr" id="qr-side"><span class="spin"></span></div>' +
+      '<small class="muted">Or share this join code</small><div class="join-code sm">' + code.split('-').map(function (x) { return '<span>' + x + '</span>'; }).join('<i>–</i>') + '</div>' +
+      '<div class="inv-acts"><button class="btn btn-ghost btn-sm" data-act="copy-code">' + ic('copy') + 'Copy code</button><button class="btn btn-ghost btn-sm" data-act="invite" data-id="email">' + ic('mail') + 'Email</button></div></div>';
+  }
   function teamMembersHtml() {
-    var w = ws(), mg = canManage(), own = isOwner(), seats = plan().team, used = w.members.length;
-    var h = '<div class="tm-bar card"><div><b>' + used + ' of ' + seats + ' seat' + (seats === 1 ? '' : 's') + ' used</b><small>' + esc(plan().name) + ' plan · clients review by link and don\'t take a seat</small></div>' +
-      '<div class="meter"><i' + (used > seats ? ' class="over"' : '') + ' style="width:' + Math.min(100, used / seats * 100) + '%"></i></div>' +
-      (mg ? '<button class="btn btn-primary btn-sm" data-act="invite">' + ic('plus') + 'Invite member</button>' : '') +
+    var w = ws(), mg = canManage(), own = isOwner(), seats = plan().team, used = w.members.length, act = activeMembers(w), pend = w.members.filter(function (m) { return m.pending; });
+    var h = '<div class="tm-grid"><div class="tm-main"><div class="tm-bar"><b>' + used + ' of ' + seats + ' seat' + (seats === 1 ? '' : 's') + ' used</b><div class="meter"><i' + (used > seats ? ' class="over"' : '') + ' style="width:' + Math.min(100, used / seats * 100) + '%"></i></div>' +
       (own ? '<button class="btn btn-ghost btn-sm" data-act="team-new">' + ic('people') + 'Create team</button>' : '') + '</div>';
-    h += '<div class="card members">' + w.members.map(function (m) {
+    h += '<div class="card members">' + act.map(function (m) {
       var editable = mg && !m.me && m.role !== 'Owner';
       return '<div class="mem" data-mid="' + m.id + '">' +
         (m.me ? '<button class="mem-ph" data-act="photo-up" title="Change your photo" aria-label="Change your photo">' + av(mName(m), false, 'xl') + '<span class="cam">' + ic('camera') + '</span></button>' : av(m.name, false, 'xl')) +
@@ -742,15 +868,67 @@
         '<div class="mem-acts">' + (!m.me ? '<button class="icon-btn" data-act="chat-open" data-id="' + esc(dmId(m.id)) + '" title="Message ' + esc(mName(m)) + '" aria-label="Message ' + esc(mName(m)) + '">' + ic('review') + '</button>' : '') +
           (editable && own ? '<button class="icon-btn" data-act="member-del" data-id="' + m.id + '" title="Remove from team" aria-label="Remove ' + esc(mName(m)) + ' from the team">' + ic('trash') + '</button>' : '') + '</div></div>';
     }).join('') + '</div>';
-    h += '<div class="roles-legend">' + ROLES.map(function (r) { return '<div><span class="role-pill r-' + r.toLowerCase() + '">' + r + '</span><small>' + ROLE_INFO[r] + '</small></div>'; }).join('') + '</div>';
-    return h;
+    if (pend.length) h += '<div class="sec-h">' + ic('mail') + '<span>Pending invites</span><span class="muted">' + pend.length + '</span></div><div class="card members">' + pend.map(function (m) {
+      return '<div class="mem pending" data-mid="' + m.id + '">' + av(m.name, false, 'xl') + '<div class="mem-id"><b>' + esc(mFull(m)) + '</b><small>' + esc(m.email) + '</small></div><div class="mem-job"><span>Invited as ' + esc(m.role) + (m.job ? ' · ' + esc(m.job) : '') + '</span></div>' +
+        '<div class="mem-role"><span class="role-pill">Pending</span></div><div class="mem-acts"><button class="icon-btn" data-act="inv-resend" data-id="' + m.id + '" title="Resend invite" aria-label="Resend invite">' + ic('send') + '</button><button class="icon-btn" data-act="member-del" data-id="' + m.id + '" title="Cancel invite" aria-label="Cancel invite">' + ic('x') + '</button></div></div>';
+    }).join('') + '</div>';
+    h += '<p class="roles-line">' + ROLES.map(function (r) { return '<span><span class="role-pill r-' + r.toLowerCase() + '">' + r + '</span>' + ROLE_INFO[r] + '</span>'; }).join('') + '</p></div>';
+    return h + '<aside class="tm-side">' + (mg ? inviteCard() : '') + '</aside></div>';
   }
   function vTeam() {
     var w = ws(), tab = ui.teamTab || 'chat';
-    return '<div class="view-head"><h1>' + esc(w.name) + '</h1><small>' + w.members.length + ' of ' + plan().team + ' seats · ' + esc(plan().name) + ' plan</small><span class="sp"></span>' +
-      '<div class="seg txt big" role="tablist"><button class="' + (tab === 'chat' ? 'on' : '') + '" data-act="team-tab" data-id="chat" role="tab" aria-selected="' + (tab === 'chat') + '">' + ic('review') + 'Chat</button>' +
+    return '<div class="view-head"><h1>' + esc(w.name) + '</h1><small>' + activeMembers(w).length + ' members · ' + esc(plan().name) + ' plan</small><span class="sp"></span>' +
+      '<div class="seg txt big" role="tablist"><button class="' + (tab === 'chat' ? 'on' : '') + '" data-act="team-tab" data-id="chat" role="tab" aria-selected="' + (tab === 'chat') + '">' + ic('review') + 'Chats</button>' +
       '<button class="' + (tab === 'members' ? 'on' : '') + '" data-act="team-tab" data-id="members" role="tab" aria-selected="' + (tab === 'members') + '">' + ic('people') + 'Members</button></div></div>' +
       (tab === 'members' ? teamMembersHtml() : teamChatHtml());
+  }
+  function showTyping(cid, who) {
+    var th = threadEl(cid); if (!th || th.querySelector('.typing')) return;
+    var t = document.createElement('div'); t.className = 'msg typing'; t.innerHTML = av(who, true) + '<div class="bubble"><span class="dots"><i></i><i></i><i></i></span></div>';
+    th.appendChild(t); th.scrollTop = th.scrollHeight;
+  }
+  function simulateReply(cid) {
+    var c = chatById(cid); if (!c || ui.replying[cid]) return;
+    var pool = chatMembers(c).filter(function (m) { return !m.me; }); if (!pool.length) return;
+    var who = mName(pool[Math.floor(Math.random() * pool.length)]);
+    ui.replying[cid] = true;
+    setTimeout(function () { showTyping(cid, who); }, 800);
+    setTimeout(function () {
+      ui.replying[cid] = false;
+      var e = { id: 'e' + uid(), who: who, at: Date.now(), text: REPLIES[Math.floor(Math.random() * REPLIES.length)], media: [] };
+      c.entries.push(e);
+      var open = route().v === 'team' && (ui.teamTab || 'chat') === 'chat' && ui.chatId === cid;
+      if (!open) c.unread = (c.unread || 0) + 1;
+      ui.freshEntry = e.id; save();
+      if (open) paintThread(cid); else { var tp = threadEl(cid); if (tp) { var ty = tp.querySelector('.typing'); if (ty) ty.remove(); } }
+      paintChatList(); renderSide(); renderTop();
+    }, 2300 + Math.random() * 1200);
+  }
+  var qrLib = null;
+  function loadQR() {
+    if (window.qrcode) return Promise.resolve(window.qrcode);
+    if (qrLib) return qrLib;
+    qrLib = new Promise(function (resolve, reject) {
+      var urls = ['https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js', 'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js'];
+      (function next(i) {
+        if (i >= urls.length) { qrLib = null; reject(new Error('QR library unavailable')); return; }
+        var sc = document.createElement('script'); sc.src = urls[i]; sc.async = true;
+        sc.onload = function () { if (window.qrcode) resolve(window.qrcode); else next(i + 1); };
+        sc.onerror = function () { sc.remove(); next(i + 1); };
+        document.head.appendChild(sc);
+      })(0);
+    });
+    return qrLib;
+  }
+  function renderQR(el, text) {
+    if (!el) return;
+    loadQR().then(function (qrcode) {
+      var q = qrcode(0, 'M'); q.addData(text); q.make();
+      var n = q.getModuleCount(), d = '';
+      for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) if (q.isDark(r, c)) d += 'M' + c + ' ' + r + 'h1v1h-1z';
+      el.innerHTML = '<svg viewBox="-2 -2 ' + (n + 4) + ' ' + (n + 4) + '" shape-rendering="crispEdges" role="img" aria-label="QR code to join ' + esc(ws().name) + '"><rect x="-2" y="-2" width="' + (n + 4) + '" height="' + (n + 4) + '" rx="1.5" fill="#fff"/><path d="' + d + '" fill="#0d1b2f"/></svg>';
+      el.classList.add('ready');
+    }, function () { el.innerHTML = '<span class="qr-off">The QR code needs an internet connection. Share the join code instead.</span>'; });
   }
   function squarePhoto(file) {
     return new Promise(function (resolve) {
@@ -782,32 +960,72 @@
     return '<button class="evl" data-act="ev-edit" data-id="' + e.id + '"><span class="evd t-' + e.type + '"><b>' + (+d[2]) + '</b><small>' + mon + '</small></span>' +
       '<span class="grow"><b>' + esc(e.title) + '</b><small>' + EV_TYPES[e.type] + ' · ' + esc(evSpan(e)) + (p ? ' · ' + esc(p.name) : '') + '</small></span></button>';
   }
-  function vCalendar() {
-    var ym = ui.calMonth || today().slice(0, 7), y = +ym.slice(0, 4), mo = +ym.slice(5, 7) - 1;
+  function calItems() {
+    var off = ui.calOff || {}, out = [];
+    wsEvents().forEach(function (e) { if (!off[e.type]) out.push({ id: e.id, kind: 'ev', type: e.type, title: e.title, s: e.start, e: e.end || e.start, p: e.project }); });
+    if (!off.task) wsTasks().forEach(function (t) { if (!t.done && t.due) out.push({ id: t.id, kind: 'task', type: 'task', title: t.text, s: t.due, e: t.due, p: t.project }); });
+    return out;
+  }
+  function itemTip(it) { return it.title + ' · ' + (it.kind === 'task' ? 'Task due ' + fmtDay(it.s) : EV_TYPES[it.type] + ' · ' + (it.s === it.e ? fmtDay(it.s) : fmtDay(it.s) + ' – ' + fmtDay(it.e))); }
+  function calMonth(items, y, mo) {
     var first = new Date(y, mo, 1, 12), lead = (first.getDay() + 6) % 7, start = new Date(y, mo, 1 - lead, 12);
-    var evs = wsEvents(), dueTasks = wsTasks().filter(function (t) { return !t.done && t.due; }), td = today();
-    var h = '<div class="cal-wrap"><div class="cal-main"><div class="cal-head"><h1>' + first.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) + '</h1>' +
-      '<div class="cal-nav"><button class="icon-btn" data-act="cal-nav" data-id="-1" aria-label="Previous month">' + ic('back') + '</button><button class="btn btn-ghost btn-sm" data-act="cal-today">Today</button><button class="icon-btn" data-act="cal-nav" data-id="1" aria-label="Next month">' + ic('arrow') + '</button></div></div>' +
-      '<div class="cal-grid"><div class="cal-dow">' + ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(function (d) { return '<span>' + d + '</span>'; }).join('') + '</div><div class="cal-cells">';
-    for (var i = 0; i < 42; i++) {
-      var d = new Date(start); d.setDate(start.getDate() + i);
-      var ds = iso(d), dow = i % 7;
-      var chips = evs.filter(function (e) { return e.start <= ds && (e.end || e.start) >= ds; }).sort(byStart).map(function (e) {
-        var st = e.start === ds, en = (e.end || e.start) === ds;
-        return '<button class="ev t-' + e.type + (st ? ' s' : '') + (en ? ' e' : '') + '" data-act="ev-edit" data-id="' + e.id + '" title="' + esc(e.title + ' · ' + evSpan(e)) + '">' + (st || dow === 0 ? esc(e.title) : '&nbsp;') + '</button>';
-      }).concat(dueTasks.filter(function (t) { return t.due === ds; }).map(function (t) {
-        return '<button class="ev t-task s e" data-act="task-edit" data-id="' + t.id + '" title="Task due: ' + esc(t.text) + '">' + ic('check') + esc(t.text) + '</button>';
-      }));
-      h += '<div class="cell' + (d.getMonth() === mo ? '' : ' out') + (ds === td ? ' today' : '') + (dow > 4 ? ' wkend' : '') + '" data-act="ev-new" data-id="' + ds + '" title="Add an event on ' + esc(fmtDay(ds)) + '">' +
-        '<span class="dn">' + d.getDate() + '</span>' + chips.slice(0, 3).join('') + (chips.length > 3 ? '<span class="ev-more">+' + (chips.length - 3) + ' more</span>' : '') + '</div>';
+    var weeks = Math.ceil((lead + new Date(y, mo + 1, 0).getDate()) / 7), td = today(), MAX = 3;
+    var h = '<div class="month"><div class="cal-dow">' + ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(function (d) { return '<span>' + d + '</span>'; }).join('') + '</div>';
+    for (var w = 0; w < weeks; w++) {
+      var ds = [];
+      for (var i = 0; i < 7; i++) { var d = new Date(start); d.setDate(start.getDate() + w * 7 + i); ds.push(d); }
+      var isos = ds.map(iso), a = isos[0], b = isos[6];
+      var segs = items.filter(function (it) { return it.s <= b && it.e >= a; }).map(function (it) {
+        var s0 = it.s < a ? a : it.s, e0 = it.e > b ? b : it.e;
+        return { it: it, c0: isos.indexOf(s0), c1: isos.indexOf(e0), cl: it.s < a, cr: it.e > b };
+      }).sort(function (x, z) { return x.c0 - z.c0 || (z.c1 - z.c0) - (x.c1 - x.c0) || (x.it.kind === 'task') - (z.it.kind === 'task'); });
+      var lanes = [], hidden = [0, 0, 0, 0, 0, 0, 0];
+      segs.forEach(function (sg) {
+        var L = 0;
+        while (lanes[L] && lanes[L].some(function (r) { return !(sg.c1 < r[0] || sg.c0 > r[1]); })) L++;
+        (lanes[L] = lanes[L] || []).push([sg.c0, sg.c1]); sg.lane = L;
+        if (L >= MAX) for (var k = sg.c0; k <= sg.c1; k++) hidden[k]++;
+      });
+      h += '<div class="wk"><div class="wk-bg">' + ds.map(function (dd, i2) {
+        return '<button class="day' + (dd.getMonth() === mo ? '' : ' out') + (isos[i2] === td ? ' today' : '') + (i2 > 4 ? ' wkend' : '') + '" data-act="ev-new" data-id="' + isos[i2] + '" aria-label="Add an event on ' + esc(fmtDay(isos[i2])) + '">' +
+          '<span class="dn">' + dd.getDate() + '</span><span class="day-add">' + ic('plus') + '</span>' + (hidden[i2] ? '<span class="more">+' + hidden[i2] + ' more</span>' : '') + '</button>';
+      }).join('') + '</div><div class="wk-fg">' + segs.filter(function (sg) { return sg.lane < MAX; }).map(function (sg) {
+        var it = sg.it;
+        return '<button class="bar t-' + it.type + (it.kind === 'task' ? ' task' : '') + (sg.cl ? ' cl' : '') + (sg.cr ? ' cr' : '') + '" style="grid-column:' + (sg.c0 + 1) + ' / ' + (sg.c1 + 2) + ';grid-row:' + (sg.lane + 1) + ';--d:' + (w * 2 + sg.lane + sg.c0) + '" data-act="' + (it.kind === 'task' ? 'task-edit' : 'ev-edit') + '" data-id="' + it.id + '" title="' + esc(itemTip(it)) + '">' +
+          (it.kind === 'task' ? ic('check') : '') + '<span>' + esc(it.title) + '</span></button>';
+      }).join('') + '</div></div>';
     }
-    h += '</div></div></div>';
-    var upc = evs.filter(function (e) { return (e.end || e.start) >= td; }).sort(byStart).slice(0, 8);
-    h += '<aside class="cal-side"><div class="card pad"><div class="sub-h">Coming up</div>' + (upc.length ? upc.map(evLine).join('') : '<p class="muted">Nothing planned yet.</p>') + '</div>' +
-      '<div class="card pad"><div class="sub-h">Types</div><div class="legend">' + Object.keys(EV_TYPES).map(function (k) {
-        var n = evs.filter(function (e) { return e.type === k; }).length;
-        return '<button class="lg-row t-' + k + '" data-act="ev-type-new" data-id="' + k + '"><i class="lg"></i>' + EV_TYPES[k] + '<span class="muted">' + n + '</span>' + ic('plus') + '</button>';
-      }).join('') + '<div class="lg-row t-task"><i class="lg"></i>Task due<span class="muted">' + dueTasks.length + '</span></div></div></div></aside></div>';
+    return h + '</div>';
+  }
+  function calList(items, a, b, first) {
+    var list = items.filter(function (it) { return it.s <= b && it.e >= a; }).sort(function (x, z) { return x.s < z.s ? -1 : x.s > z.s ? 1 : 0; }), td = today();
+    if (!list.length) return '<div class="cal-empty">' + ic('cal') + '<b>Nothing planned in ' + first.toLocaleDateString('en-GB', { month: 'long' }) + '</b><span>Add a delivery window, a finish date or a pay day.</span><button class="btn btn-primary btn-sm" data-act="ev-new" data-id="">' + ic('plus') + 'New event</button></div>';
+    var h = '<div class="agenda">', cur = '';
+    list.forEach(function (it, n) {
+      var day = it.s < a ? a : it.s;
+      if (day !== cur) {
+        var dd = day.split('-'), dt = new Date(+dd[0], +dd[1] - 1, +dd[2]);
+        h += (cur ? '</div></div>' : '') + '<div class="ag-day' + (day === td ? ' today' : '') + (day < td ? ' past' : '') + '"><div class="ag-date"><b>' + dt.getDate() + '</b><small>' + dt.toLocaleDateString('en-GB', { weekday: 'short' }) + '</small></div><div class="ag-items">';
+        cur = day;
+      }
+      var p = it.p && project(it.p);
+      h += '<button class="ag-row t-' + it.type + '" data-act="' + (it.kind === 'task' ? 'task-edit' : 'ev-edit') + '" data-id="' + it.id + '" style="--d:' + n + '"><i class="lg"></i><span class="grow"><b>' + esc(it.title) + '</b><small>' + (it.kind === 'task' ? 'Task due' : EV_TYPES[it.type]) + (p ? ' · ' + esc(p.name) : '') + '</small></span>' +
+        '<span class="ag-when">' + (it.s === it.e ? (day === td ? 'Today' : 'All day') : esc(fmtDay(it.s) + ' – ' + fmtDay(it.e))) + '</span>' + ic('chevR') + '</button>';
+    });
+    return h + '</div></div></div>';
+  }
+  function vCalendar() {
+    var ym = ui.calMonth || today().slice(0, 7), y = +ym.slice(0, 4), mo = +ym.slice(5, 7) - 1, mode = ui.calView || 'month', off = ui.calOff || {};
+    var first = new Date(y, mo, 1, 12), mStart = iso(first), mEnd = iso(new Date(y, mo + 1, 0, 12));
+    var items = calItems(), n = items.filter(function (it) { return it.s <= mEnd && it.e >= mStart; }).length;
+    var h = '<div class="cal"><div class="cal-top"><div class="cal-title"><h1>' + first.toLocaleDateString('en-GB', { month: 'long' }) + ' <span>' + y + '</span></h1><small>' + n + ' item' + (n === 1 ? '' : 's') + '</small></div>' +
+      '<div class="cal-ctrls"><div class="seg txt"><button class="' + (mode === 'month' ? 'on' : '') + '" data-act="cal-view" data-id="month">Month</button><button class="' + (mode === 'list' ? 'on' : '') + '" data-act="cal-view" data-id="list">List</button></div>' +
+      '<div class="cal-arrows"><button class="icon-btn" data-act="cal-nav" data-id="-1" aria-label="Previous month">' + ic('back') + '</button><button class="btn btn-ghost btn-sm" data-act="cal-today">Today</button><button class="icon-btn" data-act="cal-nav" data-id="1" aria-label="Next month">' + ic('arrow') + '</button></div></div></div>';
+    h += '<div class="cal-filters" role="group" aria-label="Show types">' + Object.keys(EV_TYPES).concat(['task']).map(function (k) {
+      return '<button class="cf t-' + k + (off[k] ? ' off' : '') + '" data-act="cal-filter" data-id="' + k + '" aria-pressed="' + !off[k] + '"><i class="lg"></i>' + (k === 'task' ? 'Task due' : EV_TYPES[k]) + '</button>';
+    }).join('') + '</div>';
+    h += '<div class="cal-body' + (ui.calDir ? (ui.calDir > 0 ? ' from-r' : ' from-l') : '') + '">' + (mode === 'list' ? calList(items, mStart, mEnd, first) : calMonth(items, y, mo)) + '</div></div>';
+    ui.calDir = 0;
     return h;
   }
 
@@ -858,19 +1076,31 @@
   }
 
   function vPlans() {
-    var w = ws(), st = store(w), cur = plan();
+    var w = ws(), st = store(w), cur = plan(), circ = 2 * Math.PI * 34;
     var h = '<div class="view-head"><h1>Plans</h1><small>Monthly. Pick by storage and by how many people work inside.</small></div>';
-    h += '<div class="card usage"><span><b>' + esc(cur.name) + ' plan</b><br><small>' + esc(st.free) + '</small></span><div class="meter"><i' + (st.over ? ' class="over"' : '') + ' style="width:' + st.pct + '%"></i></div><b>' + esc(st.txt) + '</b></div>';
+    h += '<div class="card usage"><svg class="uring" viewBox="0 0 84 84" aria-hidden="true"><circle class="trk" cx="42" cy="42" r="34" fill="none" stroke-width="7"/><circle class="val' + (st.over ? ' over' : '') + '" cx="42" cy="42" r="34" fill="none" stroke-width="7" stroke-linecap="round" stroke-dasharray="' + (circ * st.pct / 100).toFixed(1) + ' ' + circ.toFixed(1) + '" transform="rotate(-90 42 42)"/><text x="42" y="47" text-anchor="middle" data-count="' + st.pct + '" data-suffix="%">' + st.pct + '%</text></svg>' +
+      '<div class="u-t"><small>Storage in ' + esc(w.name) + '</small><b>' + esc(st.txt) + '</b><span class="muted">' + esc(st.free) + '</span></div>' +
+      '<div class="u-t"><small>Your plan</small><b>' + esc(cur.name) + '</b><span class="muted">' + cur.price + ' per month</span></div>' +
+      '<div class="u-t"><small>Seats</small><b>' + w.members.length + ' of ' + cur.team + '</b><span class="muted">' + S.workspaces.length + ' of ' + cur.ws + ' team' + (cur.ws === 1 ? '' : 's') + '</span></div></div>';
     h += '<div class="plan-grid">' + PLANS.map(function (p, i) {
-      var on = p.id === cur.id;
-      return '<div class="card plan-card' + (on ? ' cur' : '') + '">' + (on ? '<span class="pill review tag">Current plan</span>' : '') + '<h3>' + p.name + '</h3><p class="for">' + p.f + '</p><div class="price">' + p.price + '<small>per month</small></div>' +
-        '<ul><li>' + ic('check') + gb(p.gb) + ' storage</li><li>' + ic('check') + (p.ws > 1 ? 'Up to ' + p.ws + ' workspaces' : 'Personal space') + '</li>' + (p.team > 1 ? '<li>' + ic('check') + 'Up to ' + p.team + ' team members</li>' : '') + '</ul>' +
-        (on ? '<button class="btn btn-ghost btn-sm" disabled>Your plan</button>' : '<button class="btn btn-primary btn-sm" data-act="plan-set" data-id="' + p.id + '">' + (i > PLANS.indexOf(cur) ? 'Upgrade' : 'Switch') + ' to ' + p.name + '</button>') + '</div>';
-    }).join('') + '</div><p class="muted" style="margin-top:16px;max-width:640px">Clients review by link and don\'t need a seat. On Team and Agency, your personal space counts as one of the workspaces. This is a demo, so switching plans here does not charge anything.</p>';
+      var on = p.id === cur.id, rec = p.id === 'team', val = parseFloat(p.price.replace('€', '')), from = val ? Math.round(val * 1.7) + 0.99 : 9;
+      return '<div class="card plan-card' + (on ? ' cur' : '') + (rec ? ' recd' : '') + '">' + (rec ? '<span class="rec">Recommended</span>' : '') +
+        '<h3>' + p.name + (on ? '<span class="now">Current</span>' : '') + '</h3><p class="for">' + p.f + '</p>' +
+        '<div class="price"><span data-count="' + val + '" data-from="' + from + '" data-fmt="eur" data-dur="1100" data-delay="' + (i * 90) + '">' + p.price + '</span><small>per month</small></div>' +
+        '<ul><li>' + ic('check') + gb(p.gb) + ' storage</li><li>' + ic('check') + (p.ws > 1 ? 'Up to ' + p.ws + ' teams' : 'Personal space') + '</li>' + (p.team > 1 ? '<li>' + ic('check') + 'Up to ' + p.team + ' people</li>' : '<li>' + ic('check') + 'Just you</li>') + '</ul>' +
+        (on ? '<button class="btn btn-ghost btn-sm" disabled>Your plan</button>' : '<button class="btn ' + (rec ? 'btn-primary' : 'btn-ghost') + ' btn-sm" data-act="plan-set" data-id="' + p.id + '">' + (i > PLANS.indexOf(cur) ? 'Upgrade' : 'Switch') + ' to ' + p.name + '</button>') + '</div>';
+    }).join('') + '</div><p class="muted" style="margin-top:16px;max-width:640px">Clients review by link and don\'t take a seat. This is a demo, so switching plans does not charge anything.</p>';
     return h;
   }
 
-  function actLi(a) { return '<li>' + av(a.who) + '<span><span><b>' + esc(a.who) + '</b> ' + esc(a.text) + '</span><small>' + esc(a.when) + '</small></span></li>'; }
+  function relWhen(t) {
+    var m = Math.round((Date.now() - t) / 60000);
+    if (m < 1) return 'Just now';
+    if (m < 60) return m + ' min ago';
+    if (iso(new Date(t)) === today()) return Math.round(m / 60) + ' h ago';
+    return shortWhen(t);
+  }
+  function actLi(a) { return '<li>' + av(a.who) + '<span><span><b>' + esc(a.who) + '</b> ' + esc(a.text) + '</span><small>' + esc(a.at ? relWhen(a.at) : a.when) + '</small></span></li>'; }
 
   function vActivity() {
     var h = '<div class="view-head"><h1>Activity</h1><small>Uploads, comments and approvals</small></div>';
@@ -1121,11 +1351,18 @@
     view.innerHTML = h;
     ui.freshTask = '';
     if (r.v === 'team' && (ui.teamTab || 'chat') === 'chat') bindChat($('.chat-pane'), ui.chatId, true);
+    if (r.v === 'team' && ui.teamTab === 'members') renderQR($('#qr-side'), joinUrl());
     if (r.v === 'f') bindReview();
     if (r.v === 'p') bindDrop();
   }
   var shownModal = '';
   function renderModal() {
+    if (!ui.modal) {
+      var old = $('#layer .scrim'); shownModal = '';
+      if (old && !reduceMotion) { old.classList.remove('anim'); old.classList.add('out'); setTimeout(function () { if (!ui.modal) $('#layer').innerHTML = ''; }, 220); }
+      else $('#layer').innerHTML = '';
+      return;
+    }
     var m = ui.modal, h = '', key = m ? m + ':' + (ui.noteId || '') + ':' + (ui.taskId || '') + ':' + (ui.evId || '') : '', anim = !!m && key !== shownModal;
     shownModal = key;
     var cancel = '<button class="btn btn-ghost btn-sm" type="button" data-act="close-modal" data-force="1">Cancel</button>';
@@ -1179,15 +1416,37 @@
         '<div class="foot">' + (ev ? '<button class="btn btn-danger btn-sm" type="button" data-act="ev-del" data-id="' + ev.id + '" style="margin-right:auto">Delete</button>' : '') + cancel +
         '<button class="btn btn-primary btn-sm" type="submit">' + (ev ? 'Save' : 'Add event') + '</button></div></form></div>';
     } else if (m === 'invite') {
-      var full = ws().members.length >= plan().team;
-      h = '<div class="scrim" data-act="close-modal"><form class="modal" data-form="invite" role="dialog" aria-modal="true" aria-label="Invite member"><h3>Invite to ' + esc(ws().name) + '</h3>' +
-        (full ? '<p class="hint">' + ic('alert') + 'All ' + plan().team + ' seat' + (plan().team === 1 ? '' : 's') + ' on the ' + esc(plan().name) + ' plan are used. Upgrade to add more people.</p><div class="foot">' + cancel + '<button class="btn btn-primary btn-sm" type="button" data-go="plans">See plans</button></div>' :
-          '<label for="iv-name">Full name</label><input class="input" id="iv-name" name="name" required autocomplete="off" placeholder="e.g. Nina Petrov">' +
-          '<label for="iv-email">Email</label><input class="input" id="iv-email" name="email" type="email" required autocomplete="off" placeholder="nina@studio.com">' +
+      var w0 = ws(), full = w0.members.length >= plan().team, tab = ui.invTab || 'qr', code = wsCode(w0);
+      var tabs = [['qr', 'qr', 'QR code'], ['link', 'link', 'Link'], ['email', 'mail', 'Email']];
+      h = '<div class="scrim" data-act="close-modal"><div class="modal invite" role="dialog" aria-modal="true" aria-label="Add team member">' +
+        '<div class="inv-head"><div><h3>Add people to ' + esc(w0.name) + '</h3><small class="muted">' + w0.members.length + ' of ' + plan().team + ' seats used on the ' + esc(plan().name) + ' plan</small></div><button class="icon-btn" data-act="close-modal" data-force="1" aria-label="Close">' + ic('x') + '</button></div>';
+      if (full) h += '<div class="inv-full">' + ic('alert') + '<b>All seats are used</b><p>Upgrade the plan to add more people, or remove someone first.</p><button class="btn btn-primary btn-sm" data-go="plans">See plans</button></div></div></div>';
+      else {
+        h += '<div class="seg txt big inv-tabs" role="tablist">' + tabs.map(function (t) { return '<button class="' + (tab === t[0] ? 'on' : '') + '" data-act="inv-tab" data-id="' + t[0] + '" role="tab" aria-selected="' + (tab === t[0]) + '">' + ic(t[1]) + t[2] + '</button>'; }).join('') + '</div>';
+        if (tab === 'qr') h += '<div class="inv-qr"><div class="qr big" id="qr-modal"><span class="spin"></span></div><div class="inv-qr-t"><b>Scan to join</b><p>Point a phone camera at the code. It opens Deskspace with the invite to ' + esc(w0.name) + '. New people join as Editor; change it in Members.</p></div></div>' +
+          '<div class="code-box"><small>Or enter this code in Deskspace</small><div class="join-code">' + code.split('-').map(function (x) { return '<span>' + x + '</span>'; }).join('<i>–</i>') + '</div>' +
+          '<div class="code-acts"><button class="btn btn-ghost btn-sm" data-act="copy-code">' + ic('copy') + 'Copy code</button>' + (isOwner() ? '<button class="btn btn-ghost btn-sm" data-act="new-code">New code</button>' : '') + '</div></div>';
+        else if (tab === 'link') h += '<div class="inv-link"><label>Invite link</label><div class="linkbox">' + ic('link') + '<span>' + esc(joinUrl()) + '</span><button data-act="copy-link" aria-label="Copy link">' + ic('copy') + '</button></div><p class="hint">' + ic('key') + 'Anyone with the link can ask to join. Make a new code to turn the old link off.</p></div>';
+        else h += '<form class="inv-email" data-form="invite"><div class="two"><div><label for="iv-name">Full name</label><input class="input" id="iv-name" name="name" required autocomplete="off" placeholder="e.g. Nina Petrov"></div>' +
+          '<div><label for="iv-email">Email</label><input class="input" id="iv-email" name="email" type="email" required autocomplete="off" placeholder="nina@studio.com"></div></div>' +
           '<div class="two"><div><label for="iv-role">Role</label><select class="input" id="iv-role" name="role">' + ROLES.slice(1).map(function (r) { return '<option' + (r === 'Editor' ? ' selected' : '') + '>' + r + '</option>'; }).join('') + '</select></div>' +
           '<div><label for="iv-job">What they do</label><input class="input" id="iv-job" name="job" autocomplete="off" placeholder="e.g. Sound design"></div></div>' +
-          '<p class="hint">' + ic('people') + (ws().members.length + 1) + ' of ' + plan().team + ' seats after this invite. This demo sends no email.</p>' +
-          '<div class="foot">' + cancel + '<button class="btn btn-primary btn-sm" type="submit">Send invite</button></div>') + '</form></div>';
+          '<div class="foot"><span class="muted" style="margin-right:auto">This demo sends no email.</span><button class="btn btn-primary btn-sm" type="submit">' + ic('send') + 'Send invite</button></div></form>';
+        h += '</div></div>';
+      }
+    } else if (m === 'join') {
+      h = '<div class="scrim" data-act="close-modal"><form class="modal" data-form="join" role="dialog" aria-modal="true" aria-label="Join a team"><h3>Join a team</h3>' +
+        '<label for="jn-code">Join code</label><input class="input code-in" id="jn-code" name="code" required autocomplete="off" placeholder="ABC-123-XYZ" maxlength="11">' +
+        '<p class="hint">' + ic('qr') + 'Ask the team owner for the code, or scan their QR code with your phone.</p>' +
+        '<div class="foot">' + cancel + '<button class="btn btn-primary btn-sm" type="submit">Join</button></div></form></div>';
+    } else if (m === 'group-new' || m === 'group-add') {
+      var gc = m === 'group-add' ? chatById(ui.groupId) : null, pick = activeMembers().filter(function (x) { return !x.me && (!gc || gc.members.indexOf(x.id) < 0); });
+      h = '<div class="scrim" data-act="close-modal"><form class="modal" data-form="' + m + '" role="dialog" aria-modal="true" aria-label="' + (gc ? 'Add people' : 'New group') + '"><h3>' + (gc ? 'Add people to ' + esc(gc.name) : 'New group') + '</h3>' +
+        (gc ? '' : '<label for="gn-name">Group name</label><input class="input" id="gn-name" name="name" required autocomplete="off" placeholder="e.g. Forma shoot">') +
+        '<label>' + (gc ? 'People' : 'Members') + '</label><div class="pick">' + (pick.length ? pick.map(function (x) {
+          return '<label class="pick-row"><input type="checkbox" name="m" value="' + x.id + '">' + av(x.name, true) + '<span><b>' + esc(mFull(x)) + '</b><small>' + esc(x.role + (x.job ? ' · ' + x.job : '')) + '</small></span><i class="tick">' + ic('check') + '</i></label>';
+        }).join('') : '<div class="empty-sm">Everyone is already in this group.</div>') + '</div>' +
+        '<div class="foot">' + cancel + '<button class="btn btn-primary btn-sm" type="submit">' + (gc ? 'Add' : 'Create group') + '</button></div></form></div>';
     } else if (m === 'team-new') {
       var canNew = S.workspaces.length < plan().ws;
       h = '<div class="scrim" data-act="close-modal"><form class="modal" data-form="team-new" role="dialog" aria-modal="true" aria-label="Create team"><h3>Create a team</h3>' +
@@ -1207,6 +1466,8 @@
     if (anim) h = h.replace('class="scrim', 'class="scrim anim');
     $('#layer').innerHTML = h;
     if (m === 'note') bindChat($('#chat'), ui.noteId, anim);
+    else if (m === 'invite' && (ui.invTab || 'qr') === 'qr') renderQR($('#qr-modal'), joinUrl());
+    if (m === 'note' || m === 'invite') { /* focus handled above */ }
     else { var first = $('#layer input:not([type=file]):not([type=date])'); if (first) first.focus(); }
   }
   function render() { renderSide(); renderTop(); renderView(); renderModal(); }
@@ -1304,8 +1565,25 @@
       case 'search': openSearch(); break;
       case 'sr-go': srGo(parseInt(id, 10)); break;
       case 'team-tab': ui.teamTab = id; if (route().v === 'team') { renderView(); } else go('team'); break;
-      case 'chat-open': ui.teamTab = 'chat'; ui.chatId = id; if (route().v === 'team') { renderView(); } else go('team'); break;
-      case 'invite': ui.modal = 'invite'; renderModal(); break;
+      case 'chat-open': ui.bell = false; ui.teamTab = 'chat'; ui.chatId = id; if (route().v === 'team') { renderView(); renderSide(); renderTop(); } else go('team'); break;
+      case 'invite': ui.modal = 'invite'; ui.invTab = id === 'email' ? 'email' : (ui.invTab || 'qr'); renderModal(); break;
+      case 'inv-tab': ui.invTab = id; renderModal(); break;
+      case 'copy-code': copyText(wsCode(), 'Join code copied'); break;
+      case 'copy-link': copyText(joinUrl(), 'Invite link copied'); break;
+      case 'new-code': ws().code = genCode(); save(); renderModal(); if (route().v === 'team') renderView(); toast('New join code made. The old code no longer works.'); break;
+      case 'inv-resend': var ir = memberById(id); if (ir) toast('Invite sent again to ' + ir.email + ' (demo)'); break;
+      case 'join': ui.modal = 'join'; renderModal(); break;
+      case 'group-new': ui.modal = 'group-new'; renderModal(); break;
+      case 'group-add': ui.modal = 'group-add'; ui.groupId = id; renderModal(); break;
+      case 'group-del':
+        var gd = chatById(id);
+        if (gd && confirm('Delete the group “' + gd.name + '” and its messages?')) { S.chats = S.chats.filter(function (c) { return c.id !== id; }); ui.chatId = teamChatId(); save(); renderView(); toast('Group deleted'); }
+        break;
+      case 'back': goBack(); break;
+      case 'bell': ui.bell = !ui.bell; renderTop(); break;
+      case 'bell-read': S.seenAt = Date.now(); S.chats.forEach(function (c) { if (c.ws === S.ws) c.unread = 0; }); save(); renderTop(); renderSide(); paintChatList(); break;
+      case 'cal-view': ui.calView = id; renderView(); animBody(); break;
+      case 'cal-filter': ui.calOff[id] = !ui.calOff[id]; renderView(); break;
       case 'team-new': ui.modal = 'team-new'; renderModal(); break;
       case 'member-del':
         var md = memberById(id);
@@ -1321,7 +1599,7 @@
         if (sc && sNote) {
           var se = { id: 'e' + uid(), who: ME, at: Date.now(), text: '', media: [], noteRef: id };
           sc.entries.push(se); ui.freshEntry = se.id; save();
-          ui.modal = null; renderModal(); paintThread(ui.shareFor); paintChatList(); toast('Shared “' + sNote.title + '” in the chat');
+          ui.modal = null; renderModal(); paintThread(ui.shareFor); paintChatList(); toast('Shared “' + sNote.title + '” in the chat'); simulateReply(ui.shareFor);
         }
         break;
       case 'photo-up': photoPicker.click(); break;
@@ -1335,8 +1613,8 @@
         break;
       case 'cal-nav':
         var cm0 = (ui.calMonth || today().slice(0, 7)).split('-'), cd = new Date(+cm0[0], +cm0[1] - 1 + parseInt(id, 10), 1, 12);
-        ui.calMonth = iso(cd).slice(0, 7); renderView(); break;
-      case 'cal-today': ui.calMonth = ''; renderView(); break;
+        ui.calMonth = iso(cd).slice(0, 7); ui.calDir = parseInt(id, 10); renderView(); animBody(); break;
+      case 'cal-today': ui.calDir = (ui.calMonth || today().slice(0, 7)) < today().slice(0, 7) ? 1 : -1; ui.calMonth = ''; renderView(); animBody(); break;
       case 'task-new': ui.modal = 'task'; ui.taskId = ''; ui.preset = id || ''; renderModal(); break;
       case 'task-edit': ui.modal = 'task'; ui.taskId = id; renderModal(); break;
       case 'task-del':
@@ -1393,6 +1671,7 @@
     if (a) { act(a.getAttribute('data-act'), a.getAttribute('data-id'), a, e); return; }
     if (ui.wsOpen && !e.target.closest('.ws')) { ui.wsOpen = false; renderSide(); }
     if (ui.acct && !e.target.closest('.acct')) { ui.acct = false; renderSide(); }
+    if (ui.bell && !e.target.closest('.bell-wrap')) { ui.bell = false; renderTop(); }
     if (ui.share && !e.target.closest('#pop')) { ui.share = false; renderView(); }
     if (e.target.id === 'app' || (e.target.closest('.main') && $('#app').classList.contains('drawer'))) $('#app').classList.remove('drawer');
   });
@@ -1431,7 +1710,7 @@
       nObj.entries.push(en); ui.pend[tid] = []; ui.freshEntry = en.id;
       ta.value = ''; ta.style.height = '';
       save(); paintThread(tid); paintPending(tid);
-      if (noteById(tid)) renderView(); else paintChatList();
+      if (noteById(tid)) renderView(); else { paintChatList(); simulateReply(tid); }
       ta.focus();
     } else if (kind === 'ev') {
       var et = form.elements.title.value.trim(); if (!et) return;
@@ -1445,9 +1724,30 @@
     } else if (kind === 'invite') {
       var iname = form.elements.name.value.trim(), iemail = form.elements.email.value.trim();
       if (!iname || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(iemail)) { toast('Enter a name and a valid email'); return; }
-      ws().members.push({ id: 'u-' + uid(), name: iname.split(' ')[0], full: iname, email: iemail, role: form.elements.role.value, job: form.elements.job.value.trim() });
+      ws().members.push({ id: 'u-' + uid(), name: iname.split(' ')[0], full: iname, email: iemail, role: form.elements.role.value, job: form.elements.job.value.trim(), pending: true });
       log(ME, 'invited ' + iname + ' as ' + form.elements.role.value);
-      ui.modal = null; renderModal(); save(); renderView(); renderSide(); toast('Invite ready for ' + iemail + ' (demo, no email is sent)');
+      ui.modal = null; renderModal(); save(); ui.teamTab = 'members'; if (route().v === 'team') renderView(); else go('team'); renderSide(); toast('Invite sent to ' + iemail + ' (demo, no email is sent)');
+    } else if (kind === 'join') {
+      var jc = form.elements.code.value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+      var jw = S.workspaces.filter(function (x) { return x.code && x.code.replace(/-/g, '') === jc; })[0];
+      if (!jw) { toast('No team uses that code. Codes look like ABC-123-XYZ.'); form.elements.code.focus(); return; }
+      ui.modal = null; renderModal();
+      if (jw.id === S.ws) { toast('You are already in ' + jw.name); return; }
+      S.ws = jw.id; ui.chatId = ''; save(); toast('Switched to ' + jw.name); if (route().v === 'team') render(); else go('team');
+    } else if (kind === 'group-new' || kind === 'group-add') {
+      var picked = [].map.call(form.querySelectorAll('input[name=m]:checked'), function (x) { return x.value; });
+      if (kind === 'group-new') {
+        var gname = form.elements.name.value.trim(); if (!gname) return;
+        var gnc = { id: 'grp:' + S.ws + ':' + uid(), ws: S.ws, kind: 'group', name: gname, color: GROUP_COLORS[S.chats.length % GROUP_COLORS.length], members: ['u-me'].concat(picked), entries: [{ id: 'e' + uid(), sys: true, who: ME, at: Date.now(), text: ME + ' created the group' }] };
+        S.chats.push(gnc); ui.chatId = gnc.id; toast('Group “' + gname + '” created');
+      } else {
+        var ga = chatById(ui.groupId); if (!ga) return;
+        if (!picked.length) { toast('Pick at least one person'); return; }
+        picked.forEach(function (x) { if (ga.members.indexOf(x) < 0) ga.members.push(x); });
+        ga.entries.push({ id: 'e' + uid(), sys: true, who: ME, at: Date.now(), text: ME + ' added ' + picked.map(function (x) { return mName(memberById(x)); }).join(', ') });
+        ui.chatId = ga.id; toast('Added to ' + ga.name);
+      }
+      ui.modal = null; renderModal(); save(); ui.teamTab = 'chat'; if (route().v === 'team') renderView(); else go('team');
     } else if (kind === 'team-new') {
       var tname = form.elements.name.value.trim(); if (!tname) return;
       if (S.workspaces.length >= plan().ws) { toast('Your plan has no free team slot'); return; }
@@ -1492,6 +1792,7 @@
 
   document.addEventListener('input', function (e) {
     if (e.target.id === 'q') { ui.q = e.target.value; renderView(); }
+    if (e.target.id === 'chat-q') { ui.chatQ = e.target.value; paintChatList(); }
     if (e.target.id === 'sq') { ui.sq = e.target.value; ui.si = 0; var sr = $('#sres'); if (sr) sr.innerHTML = searchResultsHtml(); }
     if (e.target.classList && e.target.classList.contains('compose')) { e.target.style.height = 'auto'; e.target.style.height = Math.min(140, e.target.scrollHeight) + 'px'; }
   });
@@ -1517,6 +1818,7 @@
     if (e.key === 'Escape') {
       if (ui.modal) closeModal();
       else if (ui.share) { ui.share = false; renderView(); }
+      else if (ui.bell) { ui.bell = false; renderTop(); }
       else if (ui.wsOpen || ui.acct) { ui.wsOpen = false; ui.acct = false; renderSide(); }
     }
     if (e.key === ' ' && curFile() && !/INPUT|TEXTAREA|BUTTON|SELECT/.test(e.target.tagName)) { e.preventDefault(); setPlaying(!ui.playing); }
@@ -1588,8 +1890,19 @@
     });
   });
 
-  function enter() { var v = $('#view'); v.classList.remove('enter'); void v.offsetWidth; v.classList.add('enter'); }
-  addEventListener('hashchange', function () { ui.modal = null; ui.pend = {}; ui.lb = null; renderLb(); render(); $('#view').scrollTop = 0; enter(); });
+  var enterTimer;
+  function enter() {
+    var v = $('#view'), i = 0;
+    clearTimeout(enterTimer);
+    v.classList.remove('enter'); void v.offsetWidth;
+    [].forEach.call(v.querySelectorAll(':scope > *, .home > *, .tiles > *, .pulse > *, .pgrid > *, .ngrid > *, .home3 > *, .fgrid > *, .plan-grid > *, .cal > *, .members > .mem, .cl-row, .tk, .ag-row'), function (el) {
+      el.style.setProperty('--i', Math.min(i++, 18));
+    });
+    v.classList.add('enter');
+    runCounts(v);
+    enterTimer = setTimeout(function () { v.classList.remove('enter'); }, 2200);
+  }
+  addEventListener('hashchange', function () { if (!navBack) { navHist.push(lastPath); if (navHist.length > 50) navHist.shift(); } navBack = false; lastPath = currentPath(); ui.modal = null; ui.bell = false; ui.pend = {}; ui.lb = null; renderLb(); render(); $('#view').scrollTop = 0; enter(); });
 
   render();
   enter();
