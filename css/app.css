@@ -1199,3 +1199,7 @@ kbd { padding: 2px 6px; border-radius: 5px; background: var(--fill); color: var(
 }
 
 @media (max-width: 760px) { .side { position: fixed; } }
+
+/* the top bar (and its notification panel) must sit above the page content */
+.top { position: relative; z-index: 20; }
+.bell-menu { z-index: 40; max-width: calc(100vw - 24px); }

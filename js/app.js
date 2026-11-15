@@ -400,10 +400,11 @@
       var l = c.entries[c.entries.length - 1] || {};
       return { who: l.who || ME, text: c.unread + ' new message' + (c.unread > 1 ? 's' : '') + ' in ' + chatName(c), when: l.at ? relWhen(l.at) : '', unread: true, chat: c.id };
     });
-    return items.concat(S.activity.slice(0, 8).map(function (a) { return { who: a.who, text: a.text, when: a.at ? relWhen(a.at) : a.when, unread: (a.at || 0) > (S.seenAt || 0) }; }));
+    var seen = ui.bell ? (ui.bellPrev || 0) : (S.seenAt || 0);
+    return items.concat(S.activity.slice(0, 8).map(function (a) { return { who: a.who, text: a.text, when: a.at ? relWhen(a.at) : a.when, unread: (a.at || 0) > seen, fresh: (a.at || 0) > (S.seenAt || 0) }; }));
   }
   function bellHtml() {
-    var items = bellItems(), n = items.filter(function (i) { return i.unread; }).length;
+    var items = bellItems(), n = items.filter(function (i) { return i.chat || i.fresh; }).length;
     return '<div class="bell-wrap"><button class="icon-btn top-ic bell" data-act="bell" aria-label="Notifications' + (n ? ', ' + n + ' new' : '') + '" aria-expanded="' + ui.bell + '" title="Notifications">' + ic('bell') + (n ? '<em class="bdg">' + n + '</em>' : '') + '</button>' +
       (ui.bell ? '<div class="menu bell-menu" role="menu"><header>Notifications' + (n ? '<button class="link" data-act="bell-read">Mark all read</button>' : '') + '</header><div class="bell-list">' +
         (items.length ? items.map(function (i) {
@@ -847,7 +848,7 @@
   function teamChatHtml() {
     if (!ui.chatId || !chatOk(ui.chatId)) ui.chatId = teamChatId();
     var c = ensureChat(ui.chatId), mem = chatMembers(c), sub, acts = '';
-    if (c.unread) { c.unread = 0; save(); }
+    if (c.unread) { c.unread = 0; save(); ui.unreadDirty = true; }
     if (c.kind === 'dm') { var m = memberById(c.member); sub = m.role + (m.job ? ' · ' + m.job : ''); }
     else sub = mem.length + ' members';
     if (c.kind === 'group') acts = '<button class="btn btn-ghost btn-sm" data-act="group-add" data-id="' + esc(c.id) + '">' + ic('plus') + 'Add people</button><button class="icon-btn" data-act="group-del" data-id="' + esc(c.id) + '" title="Delete group" aria-label="Delete group">' + ic('trash') + '</button>';
@@ -1362,6 +1363,7 @@
     }
     view.innerHTML = h;
     ui.freshTask = '';
+    if (ui.unreadDirty) { ui.unreadDirty = false; renderSide(); renderTop(); }
     if (r.v === 'team' && (ui.teamTab || 'chat') === 'chat') bindChat($('.chat-pane'), ui.chatId, true);
     if (r.v === 'team' && ui.teamTab === 'members') renderQR($('#qr-side'), joinUrl());
     if (r.v === 'f') bindReview();
@@ -1592,8 +1594,11 @@
         if (gd && confirm('Delete the group “' + gd.name + '” and its messages?')) { S.chats = S.chats.filter(function (c) { return c.id !== id; }); ui.chatId = teamChatId(); save(); renderView(); toast('Group deleted'); }
         break;
       case 'back': goBack(); break;
-      case 'bell': ui.bell = !ui.bell; renderTop(); break;
-      case 'bell-read': S.seenAt = Date.now(); S.chats.forEach(function (c) { if (c.ws === S.ws) c.unread = 0; }); save(); renderTop(); renderSide(); paintChatList(); break;
+      case 'bell':
+        ui.bell = !ui.bell;
+        if (ui.bell) { ui.bellPrev = S.seenAt || 0; S.seenAt = Date.now(); save(); }
+        renderTop(); break;
+      case 'bell-read': S.seenAt = Date.now(); ui.bellPrev = S.seenAt; S.chats.forEach(function (c) { if (c.ws === S.ws) c.unread = 0; }); save(); renderTop(); renderSide(); paintChatList(); break;
       case 'cal-view': ui.calView = id; renderView(); animBody(); break;
       case 'cal-filter': ui.calOff[id] = !ui.calOff[id]; renderView(); break;
       case 'team-new': ui.modal = 'team-new'; renderModal(); break;
