@@ -330,7 +330,7 @@
       var on = r.v === v || (v === 'projects' && (r.v === 'p' || r.v === 'f'));
       return '<button class="nav-item' + (on ? ' on' : '') + '" data-go="' + v + '" title="' + label + '">' + ic(icon) + '<span>' + label + '</span>' + (count != null ? '<span class="count' + (hot ? ' hot' : '') + '">' + count + '</span>' : '') + '</button>';
     }
-    var h = '<div class="side-top"><a class="logo" href="#/home" title="Deskspace"><svg><use href="#mark"/></svg><span>Desk<span class="space">space</span></span></a>' +
+    var h = '<div class="side-top"><a class="logo" href="index.html" title="Go to the Deskspace website" aria-label="Go to the Deskspace website"><svg><use href="#mark"/></svg><span>Desk<span class="space">space</span></span></a>' +
       '<button class="icon-btn" data-act="collapse" title="Collapse sidebar" aria-label="Collapse sidebar">' + ic('panel') + '</button></div>';
     h += '<div class="ws"><button class="ws-btn" data-act="ws-toggle" aria-expanded="' + ui.wsOpen + '"><span class="ws-ic ' + (w.cls || '') + '">' + w.letter + '</span><span><b>' + esc(w.name) + '</b><small>' + esc(wsSub(w)) + '</small></span>' + ic('chev') + '</button>';
     if (ui.wsOpen) {
