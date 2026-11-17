@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="js/theme.js?v=v18-11151951"></script>
-<link rel="stylesheet" href="css/base.css?v=v18-11151951">
+<script src="js/theme.js?v=v19-11180014"></script>
+<link rel="stylesheet" href="css/base.css?v=v19-11180014">
 <style>
   html, body { height: 100%; }
   body { display: flex; flex-direction: column; min-height: 100%; }
@@ -35,15 +35,41 @@
   .err { font-size: 13px; color: var(--red); min-height: 18px; margin: -4px 0 -6px; }
   .or { display: flex; align-items: center; gap: 12px; margin: 20px 0 14px; font-size: 12.5px; color: var(--muted); }
   .or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
-  .demo-btn { margin-top: 0; background: var(--fill); color: var(--ink); }
-  .demo-btn:hover { background: var(--fill-hover); }
-  .demo-btn svg { width: 16px; height: 16px; }
   .swap { margin-top: 22px; text-align: center; font-size: 14px; color: var(--ink-2); }
   .swap button { color: var(--blue); font-weight: 500; }
   .swap button:hover { text-decoration: underline; text-underline-offset: 3px; }
   .join-note { display: none; margin-top: 18px; padding: 12px 14px; border-radius: 12px; background: var(--sky-100); color: var(--ink-2); font-size: 13px; line-height: 1.45; text-align: center; }
   .join-note.on { display: block; animation: card-in 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s both; }
   .join-note b { display: block; margin-top: 4px; color: var(--blue); font: 600 18px var(--mono); letter-spacing: 0.08em; }
+  .pw { position: relative; }
+  .pw input { padding-right: 44px; }
+  .eye { position: absolute; right: 6px; top: 6px; width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; color: var(--muted); transition: color 0.2s, background 0.2s; }
+  .eye:hover, .eye.on { color: var(--blue); background: var(--fill); }
+  .eye svg { width: 18px; height: 18px; }
+  .keep { display: flex; align-items: center; gap: 9px; margin: -2px 0 0; font-size: 13.5px; font-weight: 400; color: var(--ink-2); cursor: pointer; user-select: none; }
+  .keep input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .keep .tick { width: 18px; height: 18px; border-radius: 5px; display: grid; place-items: center; box-shadow: inset 0 0 0 1.5px var(--line-2); color: transparent; background: var(--surface); transition: background 0.2s, box-shadow 0.2s, color 0.2s; }
+  .keep .tick svg { width: 12px; height: 12px; }
+  .keep input:checked + .tick { background: var(--accent); box-shadow: none; color: var(--on-accent); }
+  .keep input:focus-visible + .tick { box-shadow: 0 0 0 3px var(--ring), inset 0 0 0 1.5px var(--sky-500); }
+  .btn.busy { opacity: 0.75; pointer-events: none; }
+  .link-btn { color: var(--blue); font-weight: 500; }
+  .link-btn:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .recent { margin-top: 22px; display: flex; flex-direction: column; gap: 6px; }
+  .recent[hidden] { display: none; }
+  .rc-h { font-size: 12px; font-weight: 600; color: var(--muted); }
+  .rc { position: relative; }
+  .rc-pick { width: 100%; display: flex; align-items: center; gap: 11px; padding: 9px 40px 9px 10px; border-radius: 12px; text-align: left; background: var(--surface); box-shadow: 0 0 0 1px var(--line); transition: box-shadow 0.2s, transform 0.25s; }
+  .rc-pick:hover { box-shadow: 0 0 0 1px var(--sky-400); transform: translateY(-1px); }
+  .rc-pick.on { box-shadow: 0 0 0 2px var(--sky-500); }
+  .rc-pick img, .rc-av { width: 34px; height: 34px; border-radius: 50%; flex: none; object-fit: cover; }
+  .rc-av { display: grid; place-items: center; background: var(--sky-200); color: var(--blue); font-weight: 600; font-size: 14px; }
+  .rc-t { min-width: 0; }
+  .rc-t b { display: block; font-size: 14px; font-weight: 600; color: var(--ink); }
+  .rc-t small { display: block; font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rc-x { position: absolute; right: 8px; top: 50%; width: 26px; height: 26px; margin-top: -13px; border-radius: 50%; color: var(--muted); font-size: 18px; line-height: 1; }
+  .rc-x:hover { background: var(--fill); color: var(--ink); }
+  .err .link-btn { font-size: 13px; }
   .demo { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); text-align: center; font-size: 12.5px; line-height: 1.45; color: var(--muted); }
   @media (max-width: 460px) { .card { padding: 32px 22px 26px; } }
   @media (prefers-reduced-motion: reduce) { .card { animation: none; } }
@@ -77,46 +103,66 @@
     <h1 id="title">Sign in to Deskspace</h1>
     <p class="sub" id="sub">Pick up where your projects left off.</p>
     <p class="join-note" id="join-note" role="status"></p>
-
-    <form id="form" novalidate>
+    <div class="recent" id="recent" hidden></div>
+    <form id="form" method="post" action="#" novalidate>
       <div class="field" id="f-name" hidden>
         <label for="name">Full name</label>
         <input id="name" name="name" type="text" autocomplete="name" placeholder="Ana Petrova">
       </div>
       <div class="field">
         <label for="email">Work email</label>
-        <input id="email" name="email" type="email" autocomplete="email" placeholder="you@studio.com" required>
+        <input id="email" name="email" type="email" autocomplete="username" placeholder="you@studio.com" required>
       </div>
       <div class="field">
         <label for="password">Password</label>
-        <input id="password" name="password" type="password" autocomplete="current-password" placeholder="At least 6 characters" required minlength="6">
+        <div class="pw">
+          <input id="password" name="password" type="password" autocomplete="current-password" placeholder="At least 8 characters" required minlength="8">
+          <button type="button" class="eye" id="eye" aria-label="Show password" title="Show password"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        </div>
       </div>
+      <label class="keep"><input type="checkbox" id="keep" checked><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>Keep me signed in on this device</label>
       <p class="err" id="err" role="alert"></p>
       <button class="btn btn-primary" type="submit" id="submit">Sign in</button>
     </form>
-
-    <div class="or">or</div>
-    <button class="btn demo-btn" type="button" id="demo">Enter the demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
-
     <p class="swap"><span id="swap-q">New to Deskspace?</span> <button type="button" id="swap">Create an account</button></p>
-    <p class="demo">“Enter the demo” opens a sample workspace with one click, no sign-up. The form is a demo too: any email and password work, and nothing leaves this browser.</p>
+    <p class="demo">Your account and its workspace are saved in this browser. <button type="button" class="link-btn" id="demo">Try the sample workspace</button></p>
   </div>
 </main>
-
 <script>
 (function () {
-  var KEY = 'deskspace-user';
-  try { var u = JSON.parse(localStorage.getItem(KEY) || 'null'); if (u && u.email) { location.replace('app.html'); return; } } catch (e) { /* storage unavailable */ }
-
+  var KEY = 'deskspace-user', ACC = 'deskspace-accounts';
   var $ = function (id) { return document.getElementById(id); };
-  // One click into a sample workspace: no form, no password.
+  function session() { try { return JSON.parse(localStorage.getItem(KEY) || sessionStorage.getItem(KEY) || 'null'); } catch (e) { return null; } }
+  var s0 = session(); if (s0 && s0.email) { location.replace('app.html'); return; }
+  function accounts() { try { return JSON.parse(localStorage.getItem(ACC) || '{}') || {}; } catch (e) { return {}; } }
+  function saveAccounts(a) { localStorage.setItem(ACC, JSON.stringify(a)); }
+  function esc(t) { return String(t).replace(/[&<>"']/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]; }); }
+  function hex(buf) { return [].map.call(new Uint8Array(buf), function (b) { return ('0' + b.toString(16)).slice(-2); }).join(''); }
+  function randomSalt() { var a = new Uint8Array(16); crypto.getRandomValues(a); return hex(a.buffer); }
+  // The password never gets stored: only a salted PBKDF2 hash of it.
+  function hashPw(pw, salt) {
+    if (!window.crypto || !crypto.subtle) return Promise.reject(new Error('no-crypto'));
+    var enc = new TextEncoder();
+    return crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveBits']).then(function (k) {
+      return crypto.subtle.deriveBits({ name: 'PBKDF2', salt: enc.encode(salt), iterations: 150000, hash: 'SHA-256' }, k, 256);
+    }).then(hex);
+  }
+  function startSession(acc, keep) {
+    var u = { name: acc.name, email: acc.email };
+    if (acc.photo) u.photo = acc.photo;
+    try { localStorage.removeItem(KEY); sessionStorage.removeItem(KEY); (keep ? localStorage : sessionStorage).setItem(KEY, JSON.stringify(u)); }
+    catch (err) { $('err').textContent = 'This browser is blocking storage, so it cannot keep you signed in.'; return false; }
+    return true;
+  }
+
   function enterDemo() {
     try { localStorage.setItem(KEY, JSON.stringify({ name: 'Ana Petrova', email: 'ana@haldenstudio.co', demo: true })); }
-    catch (err) { $('err').textContent = 'This browser is blocking storage, so the demo cannot open.'; return; }
+    catch (err) { $('err').textContent = 'This browser is blocking storage, so the sample workspace cannot open.'; return; }
     location.replace('app.html');
   }
   if (/[?&]demo=1/.test(location.search)) { enterDemo(); return; }
   $('demo').addEventListener('click', enterDemo);
+
   var signup = /[?&]new=1/.test(location.search);
   var jm = location.search.match(/[?&]join=([A-Za-z0-9-]{5,20})/);
   if (jm) {
@@ -124,6 +170,31 @@
     jn.innerHTML = 'You have an invite to a team on Deskspace. Sign in, then use “Join with code” on the Team page with this code:<b></b>';
     jn.querySelector('b').textContent = jm[1].toUpperCase();
   }
+
+  // accounts that signed in here before, newest first
+  function paintRecent() {
+    var A = accounts(), list = Object.keys(A).map(function (k) { return A[k]; }).filter(function (a) { return !a.hidden; }).sort(function (a, b) { return (b.last || 0) - (a.last || 0); }).slice(0, 3), box = $('recent');
+    box.hidden = signup || !list.length;
+    if (box.hidden) return;
+    box.innerHTML = '<div class="rc-h">Signed in here before</div>' + list.map(function (a) {
+      var ini = (a.name || a.email).trim().charAt(0).toUpperCase();
+      return '<div class="rc"><button type="button" class="rc-pick" data-email="' + esc(a.email) + '">' + (a.photo ? '<img src="' + esc(a.photo) + '" alt="">' : '<span class="rc-av">' + esc(ini) + '</span>') +
+        '<span class="rc-t"><b>' + esc(a.name) + '</b><small>' + esc(a.email) + '</small></span></button>' +
+        '<button type="button" class="rc-x" data-forget="' + esc(a.email) + '" aria-label="Remove ' + esc(a.email) + ' from this list" title="Remove from this list">&times;</button></div>';
+    }).join('');
+  }
+  $('recent').addEventListener('click', function (e) {
+    var f = e.target.closest('[data-forget]');
+    if (f) {
+      var A = accounts(), k = f.getAttribute('data-forget').toLowerCase();
+      if (A[k]) { A[k].last = 0; A[k].hidden = true; }
+      // keep the account itself, only drop it from the quick list
+      saveAccounts(A); f.closest('.rc').remove(); if (!$('recent').querySelector('.rc')) $('recent').hidden = true; return;
+    }
+    var p = e.target.closest('[data-email]');
+    if (p) { $('email').value = p.getAttribute('data-email'); $('password').value = ''; $('password').focus(); [].forEach.call(document.querySelectorAll('.rc-pick'), function (b) { b.classList.toggle('on', b === p); }); }
+  });
+
   function paint() {
     $('title').textContent = signup ? 'Create your Deskspace account' : 'Sign in to Deskspace';
     $('sub').textContent = signup ? 'Start with a free workspace. Upgrade when the team grows.' : 'Pick up where your projects left off.';
@@ -132,27 +203,46 @@
     $('swap-q').textContent = signup ? 'Already have an account?' : 'New to Deskspace?';
     $('swap').textContent = signup ? 'Sign in' : 'Create an account';
     $('password').autocomplete = signup ? 'new-password' : 'current-password';
+    $('password').placeholder = 'At least 8 characters';
     $('err').textContent = '';
+    paintRecent();
   }
   $('swap').addEventListener('click', function () { signup = !signup; paint(); (signup ? $('name') : $('email')).focus(); });
-
-  $('form').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var email = $('email').value.trim(), name = $('name').value.trim(), pw = $('password').value;
-    if (signup && !name) { $('err').textContent = 'Enter your name.'; $('name').focus(); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { $('err').textContent = 'Enter a valid email address.'; $('email').focus(); return; }
-    if (pw.length < 6) { $('err').textContent = 'The password needs at least 6 characters.'; $('password').focus(); return; }
-    if (!name) {
-      name = email.split('@')[0].replace(/[._-]+/g, ' ').replace(/\d+/g, '').trim().replace(/\b[a-z]/g, function (c) { return c.toUpperCase(); }) || 'You';
-    }
-    // The password is checked for length only and is never stored.
-    try { localStorage.setItem(KEY, JSON.stringify({ name: name, email: email })); }
-    catch (err) { $('err').textContent = 'This browser is blocking storage, so the demo cannot sign you in.'; return; }
-    location.href = 'app.html';
+  $('eye').addEventListener('click', function () {
+    var pw = $('password'), show = pw.type === 'password';
+    pw.type = show ? 'text' : 'password';
+    this.setAttribute('aria-label', show ? 'Hide password' : 'Show password'); this.title = show ? 'Hide password' : 'Show password'; this.classList.toggle('on', show);
+    pw.focus();
   });
 
+  var busy = false;
+  $('form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (busy) return;
+    var email = $('email').value.trim(), key = email.toLowerCase(), name = $('name').value.trim(), pw = $('password').value, keep = $('keep').checked, A = accounts(), acc = A[key];
+    $('err').textContent = '';
+    if (signup && !name) { $('err').textContent = 'Enter your name.'; $('name').focus(); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { $('err').textContent = 'Enter a valid email address.'; $('email').focus(); return; }
+    if (signup && acc) { $('err').textContent = 'There is already an account with this email. Sign in instead.'; return; }
+    if (!signup && !acc) { $('err').innerHTML = 'No account uses this email on this device. <button type="button" class="link-btn" id="go-new">Create one</button>'; $('go-new').onclick = function () { signup = true; paint(); $('name').focus(); }; return; }
+    if (pw.length < 8) { $('err').textContent = signup ? 'Use at least 8 characters for the password.' : 'Enter your password.'; $('password').focus(); return; }
+    busy = true; $('submit').classList.add('busy'); $('submit').textContent = signup ? 'Creating account…' : 'Signing in…';
+    var salt = signup ? randomSalt() : acc.salt;
+    hashPw(pw, salt).then(function (h) {
+      if (signup) { acc = { name: name, email: email, salt: salt, hash: h, created: Date.now() }; }
+      else if (h !== acc.hash) { throw new Error('wrong'); }
+      acc.last = Date.now(); acc.hidden = false; A[key] = acc; saveAccounts(A);
+      if (startSession(acc, keep)) location.href = 'app.html';
+      else { busy = false; paint(); }
+    }).catch(function (err) {
+      busy = false; $('submit').classList.remove('busy'); paint();
+      $('err').textContent = err && err.message === 'wrong' ? 'That password is not right. Try again.' : err && err.message === 'no-crypto' ? 'This browser cannot sign you in securely. Open the site over https.' : 'Something went wrong. Try again.';
+      $('password').select();
+    });
+  });
   paint();
-  $('email').focus();
+  var first = document.querySelector('.rc-pick');
+  if (first && !signup) first.focus(); else $(signup ? 'name' : 'email').focus();
 })();
 </script>
 </body>

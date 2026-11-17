@@ -6,9 +6,11 @@
   var $ = function (s, r) { return (r || document).querySelector(s); };
   // Demo sign-in: the user is whoever signed in on login.html (stored in this browser only).
   var USER = null;
-  try { USER = JSON.parse(localStorage.getItem(USER_KEY) || 'null'); } catch (e) { USER = null; }
+  try { USER = JSON.parse(localStorage.getItem(USER_KEY) || sessionStorage.getItem(USER_KEY) || 'null'); } catch (e) { USER = null; }
   if (!USER || !USER.email) { location.replace('login.html'); return; }
   var ME = (USER.name || 'You').split(' ')[0];
+  // A real account keeps its own workspace data; the sample workspace keeps the shared key.
+  if (!USER.demo) KEY = KEY + ':' + String(USER.email).toLowerCase();
 
   /* ---------- helpers ---------- */
   function esc(s) {
@@ -51,6 +53,12 @@
     clip: '<path d="M20.5 11.5l-8.2 8.2a5.2 5.2 0 0 1-7.4-7.4l8.5-8.5a3.5 3.5 0 0 1 5 5l-8.5 8.5a1.8 1.8 0 0 1-2.5-2.5l7.8-7.8"/>',
     trash: '<path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 12.6a1.5 1.5 0 0 0 1.5 1.4h6a1.5 1.5 0 0 0 1.5-1.4L17.5 7"/>',
     chevR: '<path d="M9 6l6 6-6 6"/>',
+    chevL: '<path d="M15 6l-6 6 6 6"/>',
+    chevD: '<path d="M7 10l5 5 5-5"/>',
+    compose: '<path d="M11 4.5H6.5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V13"/><path d="M17.6 3.9a1.8 1.8 0 0 1 2.5 2.5l-7.6 7.6-3.2.7.7-3.2z"/>',
+    grid: '<rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/>',
+    list: '<path d="M9 6.5h11M9 12h11M9 17.5h11"/><circle cx="4.8" cy="6.5" r=".9" fill="currentColor"/><circle cx="4.8" cy="12" r=".9" fill="currentColor"/><circle cx="4.8" cy="17.5" r=".9" fill="currentColor"/>',
+    sort: '<path d="M7 4v16M3.5 16.5L7 20l3.5-3.5M17 20V4M13.5 7.5L17 4l3.5 3.5"/>',
     bell: '<path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>',
     qr: '<rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2v2h-2zM18 18h2v2h-2zM14 18h2M18 14h2"/>',
     mail: '<rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="M4 7l8 6 8-6"/>',
@@ -83,6 +91,25 @@
   };
   function ic(n) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICON[n] + '</svg>'; }
 
+  // Finder-style folder: a lighter back tab and a front panel, tinted by a colour.
+  function macFolder(color, size, ghost) {
+    var col = color || '#4896e6';
+    if (ghost) return '<svg class="mf mf-' + (size || 'md') + ' ghost" viewBox="0 0 32 26" aria-hidden="true"><path d="M2.6 6A3.4 3.4 0 0 1 6 2.6h5.6c.8 0 1.5.3 2 .9l1.4 1.5c.4.4.9.6 1.4.6h9.6A3.4 3.4 0 0 1 29.4 9v11.6A3.4 3.4 0 0 1 26 24H6a3.4 3.4 0 0 1-3.4-3.4z" fill="none" stroke="' + col + '" stroke-width="1.3" stroke-dasharray="2.6 2.2"/><path d="M16 10.5v8M12 14.5h8" stroke="' + col + '" stroke-width="1.6" stroke-linecap="round"/></svg>';
+    return '<svg class="mf mf-' + (size || 'md') + '" viewBox="0 0 32 26" aria-hidden="true"><path d="M2 5.6A3.6 3.6 0 0 1 5.6 2h6.1c.9 0 1.7.4 2.3 1l1.5 1.6c.4.4 1 .7 1.6.7h9.3A3.6 3.6 0 0 1 30 8.9V11H2z" fill="' + col + '"/><path d="M2 5.6A3.6 3.6 0 0 1 5.6 2h6.1c.9 0 1.7.4 2.3 1l1.5 1.6c.4.4 1 .7 1.6.7h9.3A3.6 3.6 0 0 1 30 8.9V11H2z" fill="#000" fill-opacity=".14"/>' +
+      '<rect x="2" y="7.2" width="28" height="16.8" rx="3.2" fill="' + col + '"/><rect x="2" y="7.2" width="28" height="16.8" rx="3.2" fill="url(#mf-g)"/><path d="M5 8.4h22" stroke="#fff" stroke-opacity=".45" stroke-width=".9" stroke-linecap="round"/></svg>';
+  }
+  // Big Sur-style app icons for the quick-create tiles.
+  function appIcon(k) {
+    if (k === 'folder') return macFolder('#4896e6', 'tile');
+    var d = new Date(), mon = d.toLocaleDateString('en-GB', { month: 'short' }).toUpperCase();
+    var A = {
+      file: '<rect x="6" y="2" width="20" height="28" rx="3.5" fill="#fff"/><rect x="6" y="2" width="20" height="28" rx="3.5" fill="none" stroke="#0e1b2e" stroke-opacity=".12"/><path d="M19 2v5.5a2 2 0 0 0 2 2h5" fill="#d6e8fb"/><path d="M19 2l7 7.5h-5a2 2 0 0 1-2-2z" fill="#b9d7f7"/><rect x="10" y="15" width="12" height="2" rx="1" fill="#8fc5f7"/><rect x="10" y="19.5" width="9" height="2" rx="1" fill="#8fc5f7"/><path d="M14 24.5l2.4-2.4 2.4 2.4" stroke="#2f7fe0" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+      tasks: '<defs><linearGradient id="ai-t" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6cc0f7"/><stop offset="1" stop-color="#2a7fe0"/></linearGradient></defs><rect x="1" y="1" width="30" height="30" rx="8" fill="url(#ai-t)"/><circle cx="9.5" cy="11" r="2.4" fill="none" stroke="#fff" stroke-width="1.5"/><circle cx="9.5" cy="20.5" r="2.4" fill="#fff"/><path d="M8.4 20.5l.9.9 1.6-1.7" stroke="#2a7fe0" stroke-width="1.3" fill="none" stroke-linecap="round"/><rect x="14.5" y="10" width="10" height="2" rx="1" fill="#fff"/><rect x="14.5" y="19.5" width="10" height="2" rx="1" fill="#fff" fill-opacity=".7"/>',
+      notes: '<rect x="1" y="1" width="30" height="30" rx="8" fill="#fff"/><rect x="1" y="1" width="30" height="30" rx="8" fill="none" stroke="#0e1b2e" stroke-opacity=".12"/><path d="M1 9a8 8 0 0 1 8-8h14a8 8 0 0 1 8 8v.5H1z" fill="#8fc5f7"/><path d="M6 15.5h20M6 20h20M6 24.5h13" stroke="#c9d6e4" stroke-width="1.2" stroke-linecap="round"/>',
+      cal: '<rect x="1" y="1" width="30" height="30" rx="8" fill="#fff"/><rect x="1" y="1" width="30" height="30" rx="8" fill="none" stroke="#0e1b2e" stroke-opacity=".12"/><path d="M1 9a8 8 0 0 1 8-8h14a8 8 0 0 1 8 8v1H1z" fill="#2f7fe0"/><text x="16" y="7.6" text-anchor="middle" font-size="5.2" font-weight="700" fill="#fff" font-family="-apple-system, Segoe UI, sans-serif">' + mon + '</text><text x="16" y="25.6" text-anchor="middle" font-size="13.5" font-weight="500" fill="#0e1b2e" font-family="-apple-system, Segoe UI, sans-serif">' + d.getDate() + '</text>'
+    };
+    return '<svg class="ai" viewBox="0 0 32 32" aria-hidden="true">' + (A[k] || A.file) + '</svg>';
+  }
   var STATUS = { draft: 'Draft', review: 'In Review', changes: 'Changes', approved: 'Approved' };
   var THEME_BTN = '<button class="theme-btn" type="button" data-theme-toggle aria-label="Switch between light and dark theme" title="Light / dark">' +
     '<svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5V5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>' +
@@ -263,6 +290,12 @@
       if (t.due == null) t.due = '';
     });
     S.notes = S.notes.map(function (n) {
+      if (n.entries && n.entries.length > 1) {
+        // older notes were chat threads: fold them into one page of text with all the attachments
+        var media = [], txt = [];
+        n.entries.forEach(function (e) { if (e.text) txt.push(e.text); (e.media || []).forEach(function (m) { media.push(m); }); });
+        n.entries = [{ id: n.entries[0].id, who: n.entries[0].who, at: n.entries[n.entries.length - 1].at, text: txt.join('\n\n'), media: media }];
+      }
       if (n.entries) return n;
       return { id: n.id, ws: n.ws || S.ws, project: n.project || '', title: String(n.text || 'Note').split(/[.!?]/)[0].slice(0, 60), date: today(), created: Date.now(),
         entries: [{ id: 'e' + uid(), who: ME, at: Date.now(), text: n.text || '', media: [] }] };
@@ -330,7 +363,7 @@
       var on = r.v === v || (v === 'projects' && (r.v === 'p' || r.v === 'f'));
       return '<button class="nav-item' + (on ? ' on' : '') + '" data-go="' + v + '" title="' + label + '">' + ic(icon) + '<span>' + label + '</span>' + (count != null ? '<span class="count' + (hot ? ' hot' : '') + '">' + count + '</span>' : '') + '</button>';
     }
-    var h = '<div class="side-top"><a class="logo" href="index.html" title="Go to the Deskspace website" aria-label="Go to the Deskspace website"><svg><use href="#mark"/></svg><span>Desk<span class="space">space</span></span></a>' +
+    var h = '<div class="side-top"><a class="logo" href="#/home" data-go="home" title="Home" aria-label="Deskspace, go to Home"><svg><use href="#mark"/></svg><span>Desk<span class="space">space</span></span></a>' +
       '<button class="icon-btn" data-act="collapse" title="Collapse sidebar" aria-label="Collapse sidebar">' + ic('panel') + '</button></div>';
     h += '<div class="ws"><button class="ws-btn" data-act="ws-toggle" aria-expanded="' + ui.wsOpen + '"><span class="ws-ic ' + (w.cls || '') + '">' + w.letter + '</span><span><b>' + esc(w.name) + '</b><small>' + esc(wsSub(w)) + '</small></span>' + ic('chev') + '</button>';
     if (ui.wsOpen) {
@@ -345,20 +378,20 @@
     if (cs.length) {
       h += '<div class="side-label">Clients</div>' + cs.map(function (c) {
         var n = ps.filter(function (p) { return p.client === c.id; }).length;
-        return '<button class="nav-item' + (r.v === 'c' && r.a === c.id ? ' on' : '') + '" data-go="c/' + c.id + '" title="' + esc(c.name) + '"><span class="dot" style="background:' + c.color + '"></span><span>' + esc(c.name) + '</span><span class="count">' + n + '</span></button>';
+        return '<button class="nav-item' + (r.v === 'c' && r.a === c.id ? ' on' : '') + '" data-go="c/' + c.id + '" title="' + esc(c.name) + '">' + macFolder(c.color, 'sm') + '<span>' + esc(c.name) + '</span><span class="count">' + n + '</span></button>';
       }).join('');
     }
     var pl = plan(), sc = 2 * Math.PI * 15, ringAnim = sideRingPct !== st.pct; sideRingPct = st.pct;
     h += '<div class="side-foot">' +
-      '<button class="plan-s" data-go="plans" title="Plans"><span class="ps-l"><small>Your plan</small><b>' + esc(pl.name) + '</b></span><span class="ps-r"><b>' + pl.price + '</b><small>per month</small></span><span class="ps-cta">' + (pl.id === 'agency' ? 'See plans' : 'Upgrade') + ic('chevR') + '</span></button>' +
-      '<button class="storage" data-go="plans" title="Storage"><svg class="sring' + (ringAnim ? ' anim' : '') + '" viewBox="0 0 40 40" aria-hidden="true"><circle class="trk" cx="20" cy="20" r="15" fill="none" stroke-width="3.5"/><circle class="val' + (st.over ? ' over' : '') + '" cx="20" cy="20" r="15" fill="none" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="' + (sc * st.pct / 100).toFixed(1) + ' ' + sc.toFixed(1) + '" transform="rotate(-90 20 20)"/><text x="20" y="23.2" text-anchor="middle"' + (ringAnim ? ' data-count="' + st.pct + '" data-suffix="%"' : '') + '>' + st.pct + '%</text></svg>' +
-        '<span><b>Storage</b><small>' + esc(st.txt) + '</small></span></button>' +
+      '<button class="plan-s" data-go="plans" title="Plan and storage: ' + esc(st.txt) + ' used"><span class="ps-l"><small>Your plan</small><b>' + esc(pl.name) + '</b><span class="ps-price">' + pl.price + ' / month</span><span class="ps-cta">' + (pl.id === 'agency' ? 'See plans' : 'Upgrade') + ic('chevR') + '</span></span>' +
+        '<span class="ps-st"><svg class="sring' + (ringAnim ? ' anim' : '') + '" viewBox="0 0 40 40" aria-hidden="true"><circle class="trk" cx="20" cy="20" r="15" fill="none" stroke-width="3.5"/><circle class="val' + (st.over ? ' over' : '') + '" cx="20" cy="20" r="15" fill="none" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="' + (sc * st.pct / 100).toFixed(1) + ' ' + sc.toFixed(1) + '" transform="rotate(-90 20 20)"/><text x="20" y="23.2" text-anchor="middle"' + (ringAnim ? ' data-count="' + st.pct + '" data-suffix="%"' : '') + '>' + st.pct + '%</text></svg>' +
+        '<small><b>' + gb(w.usedGb) + '</b>of ' + gb(pl.gb) + '</small></span></button>' +
       '<div class="acct">' + (ui.acct ? '<div class="menu acct-menu" role="menu"><button role="menuitem" data-go="account">Account</button><button role="menuitem" data-go="plans">Plans</button><button role="menuitem" data-theme-toggle>Switch light / dark</button><a role="menuitem" href="index.html">Back to site</a><button role="menuitem" data-act="reset">Reset demo data</button><hr><button role="menuitem" data-act="logout">Sign out</button></div>' : '') +
       '<button class="acct-btn" data-act="acct-toggle" aria-haspopup="menu" aria-expanded="' + ui.acct + '" title="Account">' + av(ME) + '<span><b>' + esc(USER.name) + '</b><small>' + esc(USER.email) + '</small></span>' + ic('chev') + '</button></div></div>';
     $('#side').innerHTML = h;
     $('#app').classList.toggle('collapsed', !!S.collapsed);
     placeNavInd();
-    if (ringAnim) runCounts($('#side .storage'));
+    if (ringAnim) runCounts($('#side .plan-s'));
   }
 
   var sideRingPct = null, navY = null;
@@ -543,13 +576,13 @@
     var finish = function () { t.done = true; t.doneAt = Date.now(); log(ME, 'completed “' + t.text + '”'); afterTasks(); toast('Completed: ' + t.text); };
     if (!tk || reduceMotion) { finish(); return; }
     if (tk.classList.contains('leaving')) return;
-    var row = tk.querySelector('.row'), chk = tk.querySelector('.check');
-    if (chk) { chk.classList.add('on', 'pop'); }
+    var chk = tk.querySelector('.check');
+    if (chk) { chk.classList.add('on', 'ticked'); }
     tk.style.height = tk.offsetHeight + 'px';
-    tk.classList.add('leaving');
-    setTimeout(function () { tk.classList.add('arm'); row.style.transform = 'translateX(-104%)'; }, 150);
-    setTimeout(function () { tk.classList.add('gone'); }, 560);
-    setTimeout(finish, 840);
+    tk.classList.add('leaving', 'striking');
+    setTimeout(function () { tk.classList.add('fading'); }, 520);
+    setTimeout(function () { tk.classList.add('gone'); }, 760);
+    setTimeout(finish, 1020);
   }
 
   /* ---------- notes ---------- */
@@ -562,12 +595,14 @@
   function byRecent(a, b) { return lastAt(b) - lastAt(a); }
   function notesOf(pid) { return wsNotes().filter(function (n) { return (n.project || '') === pid; }).sort(byRecent); }
   function noteMedia(n) { var out = []; n.entries.forEach(function (e) { (e.media || []).forEach(function (m) { out.push(m); }); }); return out; }
-  function noteExcerpt(n) { for (var i = n.entries.length - 1; i >= 0; i--) if (n.entries[i].text) return n.entries[i].text; return ''; }
+  function noteExcerpt(n) { for (var i = n.entries.length - 1; i >= 0; i--) if (n.entries[i].text) return n.entries[i].text.replace(/\s+/g, ' ').trim(); return ''; }
   function noteLoc(n) { var p = n.project && project(n.project); return p ? p.name : 'My Notes'; }
   function isUrl(x) { return /^(data:|blob:|media\/|https?:)/.test(x || ''); }
   function mUrl(m) { return m.src ? (isUrl(m.src) ? m.src : src(m.src)) : (mediaBlobs[m.id] || ''); }
   function mThumb(m) { return m.kind === 'image' ? mUrl(m) : (m.thumb ? (isUrl(m.thumb) ? m.thumb : src(m.thumb)) : ''); }
-  function countTxt(n) { var k = n.entries.length, f = noteMedia(n).length; return k + ' message' + (k === 1 ? '' : 's') + (f ? ' · ' + f + ' file' + (f === 1 ? '' : 's') : ''); }
+  function countTxt(n) { var t = noteExcerptAll(n), k = t ? t.split(/\s+/).filter(Boolean).length : 0, f = noteMedia(n).length; return k + ' word' + (k === 1 ? '' : 's') + (f ? ' · ' + f + ' file' + (f === 1 ? '' : 's') : ''); }
+  function noteExcerptAll(n) { return n.entries.map(function (e) { return e.text || ''; }).join(' ').trim(); }
+  function nT(n) { return (n.title || '').trim() || 'New note'; }
 
   function nCard(n) {
     var media = noteMedia(n), ths = media.map(mThumb).filter(Boolean), who = [], cover;
@@ -577,28 +612,122 @@
       cover = '<span class="ncover' + (pics.length === 3 ? ' stack' : '') + '">' + (pics.length ? pics.map(function (u) { return '<img src="' + u + '" alt="" loading="lazy">'; }).join('') : '<span class="ph">' + ic('film') + '</span>') +
         '<span class="nbadge">' + ic('clip') + media.length + '</span></span>';
     } else cover = '<span class="ncover"><span class="quote">' + esc(noteExcerpt(n) || 'Empty note. Open it to start writing.') + '</span></span>';
-    var k = n.entries.length;
     return '<button class="card ncard' + (n.id === ui.freshNote && !ui.modal ? ' fresh' : '') + '" data-act="note-open" data-id="' + n.id + '">' + cover +
-      '<span class="body"><b>' + esc(n.title) + '</b><small>' + esc(noteLoc(n)) + (n.date ? ' · ' + esc(fmtDay(n.date)) : '') + '</small></span>' +
-      '<span class="nfoot"><span class="avs">' + who.slice(0, 3).map(function (w) { return av(w, true); }).join('') + '</span><span>' + k + ' message' + (k === 1 ? '' : 's') + '</span></span></button>';
+      '<span class="body"><b>' + esc(nT(n)) + '</b><small>' + esc(noteLoc(n)) + '</small></span>' +
+      '<span class="nfoot"><span>' + esc(noteShort(lastAt(n))) + '</span><span>' + esc(countTxt(n)) + '</span></span></button>';
   }
   function nLine(n, actName) {
     var media = noteMedia(n), th = media.length ? mThumb(media[0]) : '';
     return '<button class="row nline" data-act="' + (typeof actName === 'string' ? actName : 'note-open') + '" data-id="' + n.id + '">' + (th ? '<img class="nthumb" src="' + th + '" alt="">' : '<span class="nic">' + ic('notes') + '</span>') +
-      '<span class="grow"><b>' + esc(n.title) + '</b><small>' + esc(noteLoc(n)) + ' · ' + esc(noteExcerpt(n) || 'No messages yet') + '</small></span>' +
+      '<span class="grow"><b>' + esc(nT(n)) + '</b><small>' + esc(noteShort(lastAt(n))) + ' · ' + esc(noteExcerpt(n) || 'No additional text') + '</small></span>' +
       (media.length ? '<span class="due">' + ic('clip') + media.length + '</span>' : '') + '</button>';
   }
   function addNoteTile(pid) { return '<button class="add-tile" data-act="note-new" data-id="' + esc(pid) + '"><span>' + ic('plus') + '</span>New note</button>'; }
+  function noteEntry(n) { if (!n.entries.length) n.entries.push({ id: 'e' + uid(), who: ME, at: n.created || Date.now(), text: '', media: [] }); return n.entries[0]; }
+  function noteWhen(t) { return new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) + ' at ' + fmtTime(t); }
+  function noteShort(t) {
+    var d = iso(new Date(t)), dt = new Date(t);
+    if (d === today()) return fmtTime(t);
+    if (d === dayOffset(-1)) return 'Yesterday';
+    if (Date.now() - t < 6 * 864e5) return dt.toLocaleDateString('en-GB', { weekday: 'long' });
+    return dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric', year: '2-digit' });
+  }
+  function noteGroup(t) {
+    var d = iso(new Date(t)), age = Date.now() - t;
+    if (d === today()) return 'Today';
+    if (d === dayOffset(-1)) return 'Yesterday';
+    if (age < 7 * 864e5) return 'Previous 7 days';
+    if (age < 30 * 864e5) return 'Previous 30 days';
+    return new Date(t).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+  }
+  function noteMediaHtml(n) {
+    return '<div class="nd-media" data-thread-body="' + n.id + '">' + noteMedia(n).map(function (m) {
+      var th = mThumb(m);
+      return '<div class="nd-m"><button type="button" class="mt' + (m.kind === 'video' ? ' vid' : '') + '" data-act="lb" data-id="' + m.id + '" aria-label="Open ' + esc(m.name || m.kind) + '">' +
+        (th ? '<img src="' + th + '" alt="">' : '<span class="ph">' + ic('film') + '</span>') + (m.kind === 'video' ? '<span class="play">' + ic('play') + '</span>' : '') + '</button>' +
+        '<button type="button" class="nd-mx" data-act="nmedia-del" data-id="' + m.id + '" aria-label="Remove ' + esc(m.name || 'attachment') + '" title="Remove">' + ic('x') + '</button></div>';
+    }).join('') + (ui.reading === n.id ? '<div class="nd-m loading"><span class="spin"></span></div>' : '') + '</div>';
+  }
+  function noteDoc(n, modal) {
+    var e = noteEntry(n);
+    return '<div class="nd' + (modal ? ' in-modal' : '') + '" data-note="' + n.id + '">' +
+      '<div class="nd-bar">' + (modal ? '<button class="nd-back" data-act="close-modal" data-force="1">' + ic('chevL') + 'Notes</button>' : '') +
+        '<label class="meta-chip" title="Folder">' + macFolder(n.project ? client((project(n.project) || {}).client).color : '#7fb9f1', 'xs') + '<select data-note-field="project" aria-label="Folder">' + locOptions(n.project, 'My Notes') + '</select></label>' +
+        '<span class="sp"></span>' +
+        '<button class="icon-btn" data-act="note-attach" data-id="' + n.id + '" title="Add images or videos" aria-label="Add images or videos">' + ic('camera') + '</button>' +
+        '<button class="icon-btn" data-act="note-del" data-id="' + n.id + '" title="Delete note" aria-label="Delete note">' + ic('trash') + '</button>' +
+        (modal ? '<button class="nd-done" data-act="close-modal" data-force="1">Done</button>' : '') + '</div>' +
+      '<div class="nd-page"><div class="nd-date">' + esc(noteWhen(lastAt(n))) + '</div>' +
+        '<input class="nd-title" data-note-field="title" data-note-live="title" value="' + esc(n.title || '') + '" placeholder="Title" aria-label="Note title" maxlength="80" autocomplete="off">' +
+        '<textarea class="nd-body" data-note-live="body" placeholder="Start writing…" aria-label="Note text">' + esc(e.text || '') + '</textarea>' +
+        noteMediaHtml(n) + '</div></div>';
+  }
+  function noteRow(n, sel) {
+    var media = noteMedia(n), th = media.length ? mThumb(media[0]) : '';
+    return '<button class="nl-row' + (sel && sel.id === n.id ? ' on' : '') + '" data-act="note-pick" data-id="' + n.id + '"><span class="grow"><b>' + esc(nT(n)) + '</b>' +
+      '<small><span class="nl-t">' + esc(noteShort(lastAt(n))) + '</span><span class="nl-ex">' + esc(noteExcerpt(n) || 'No additional text') + '</span></small>' +
+      '<small class="nl-loc">' + macFolder(n.project ? client((project(n.project) || {}).client).color : '#7fb9f1', 'xs') + esc(noteLoc(n)) + '</small></span>' +
+      (th ? '<img src="' + th + '" alt="">' : '') + '</button>';
+  }
   function vNotes() {
-    var all = wsNotes().sort(byRecent), mine = all.filter(function (n) { return !n.project; });
-    var h = '<div class="view-head"><h1>Notes</h1><small>' + all.length + ' note' + (all.length === 1 ? '' : 's') + ' · open one to write and attach images or videos</small></div>';
-    h += sec(ic('inbox'), 'My Notes', mine.length) + '<div class="ngrid">' + mine.map(nCard).join('') + addNoteTile('') + '</div>';
-    projects().forEach(function (p) {
-      var ns = all.filter(function (n) { return n.project === p.id; });
-      if (ns.length) h += sec(cdot(p), esc(p.name), ns.length, 'p/' + p.id + '/notes') + '<div class="ngrid">' + ns.map(nCard).join('') + addNoteTile(p.id) + '</div>';
-    });
+    var all = wsNotes().sort(byRecent), f = ui.noteFolder == null ? 'all' : ui.noteFolder, q = (ui.noteQ || '').trim().toLowerCase();
+    var folders = [['all', 'All notes', all.length, '#4896e6'], ['', 'My Notes', all.filter(function (n) { return !n.project; }).length, '#7fb9f1']];
+    projects().forEach(function (p) { var k = all.filter(function (n) { return n.project === p.id; }).length; if (k || f === p.id) folders.push([p.id, p.name, k, client(p.client).color]); });
+    if (!folders.some(function (x) { return x[0] === f; })) f = 'all';
+    ui.noteFolder = f;
+    var cur = folders.filter(function (x) { return x[0] === f; })[0];
+    var list = all.filter(function (n) { return f === 'all' || (n.project || '') === f; }).filter(function (n) { return !q || (nT(n) + ' ' + noteExcerptAll(n)).toLowerCase().indexOf(q) > -1; });
+    var sel = noteById(ui.noteSel); if (!sel || list.indexOf(sel) < 0) sel = list[0];
+    ui.noteSel = sel ? sel.id : ''; if (!ui.modal) ui.noteId = ui.noteSel;
+    var h = '<div class="notes-app"><aside class="na-folders"><div class="na-h">Folders</div>' + folders.map(function (x) {
+      return '<button class="na-f' + (x[0] === f ? ' on' : '') + '" data-act="note-folder" data-id="' + esc(x[0]) + '">' + macFolder(x[3], 'sm') + '<span>' + esc(x[1]) + '</span><em>' + x[2] + '</em></button>';
+    }).join('') + '</aside>';
+    h += '<section class="na-list"><div class="na-lh"><div><b>' + esc(cur[1]) + '</b><small>' + list.length + ' note' + (list.length === 1 ? '' : 's') + '</small></div>' +
+      '<button class="icon-btn" data-act="note-new" data-id="' + (f === 'all' ? '' : esc(f)) + '" title="New note" aria-label="New note">' + ic('compose') + '</button></div>' +
+      '<label class="na-search">' + ic('search') + '<input id="note-q" placeholder="Search" value="' + esc(ui.noteQ || '') + '" aria-label="Search notes" autocomplete="off"></label><div class="na-rows">';
+    var g = '';
+    list.forEach(function (n) { var gg = noteGroup(lastAt(n)); if (gg !== g) { h += '<div class="na-g">' + esc(gg) + '</div>'; g = gg; } h += noteRow(n, sel); });
+    if (!list.length) h += '<div class="na-empty">' + (q ? 'No notes match “' + esc(ui.noteQ) + '”.' : 'No notes in this folder yet.') + '</div>';
+    h += '</div></section><section class="na-doc">' + (sel ? noteDoc(sel, false) : '<div class="na-none">' + appIcon('notes') + '<b>No note selected</b><span>Pick a note, or start a new one with the pencil.</span></div>') + '</section></div>';
     return h;
   }
+  function autoGrow(t) { if (!t) return; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }
+  function paintNoteRow(n) {
+    var r = document.querySelector('.nl-row[data-id="' + n.id + '"]'); if (!r) return;
+    r.querySelector('b').textContent = nT(n);
+    var ex = r.querySelector('.nl-ex'), t = r.querySelector('.nl-t');
+    if (ex) ex.textContent = noteExcerpt(n) || 'No additional text';
+    if (t) t.textContent = noteShort(lastAt(n));
+  }
+  function paintNoteMedia(n) { var el = document.querySelector('.nd[data-note="' + n.id + '"] .nd-media'); if (el) el.outerHTML = noteMediaHtml(n); }
+  function addNoteMedia(list, id) {
+    var n = noteById(id); if (!n) return;
+    var files = [].slice.call(list || []), ok = files.filter(function (f) { return /^(image|video)\//.test(f.type); });
+    if (ok.length < files.length) toast('Only images and videos can go in a note');
+    if (!ok.length) return;
+    ui.reading = id; paintNoteMedia(n);
+    Promise.all(ok.slice(0, 12).map(readMedia)).then(function (res) {
+      var en = noteEntry(n), k = 0;
+      res.forEach(function (m) { if (m) { en.media.push(m); k++; } });
+      en.at = Date.now(); ui.reading = ''; save(); paintNoteMedia(n); paintNoteRow(n);
+      if (k) toast(k === 1 ? 'Added to the note' : k + ' files added to the note');
+    });
+  }
+  function dropIfEmpty(id) {
+    var n = noteById(id);
+    if (n && !(n.title || '').trim() && !noteExcerptAll(n) && !noteMedia(n).length) { S.notes = S.notes.filter(function (x) { return x.id !== id; }); save(); return true; }
+    return false;
+  }
+  function bindNote(root, focusTitle) {
+    if (!root) return;
+    var body = root.querySelector('.nd-body'), title = root.querySelector('.nd-title'), id = root.getAttribute('data-note');
+    autoGrow(body);
+    root.ondragover = function (e) { if (e.dataTransfer && [].indexOf.call(e.dataTransfer.types || [], 'Files') > -1) { e.preventDefault(); root.classList.add('drop-hi'); } };
+    root.ondragleave = function (e) { if (!root.contains(e.relatedTarget)) root.classList.remove('drop-hi'); };
+    root.ondrop = function (e) { e.preventDefault(); root.classList.remove('drop-hi'); addNoteMedia(e.dataTransfer.files, id); };
+    if (focusTitle && title) title.focus();
+  }
+  var noteSaveT;
 
   /* chat threads: notes and team chats share one look */
   function chatById(id) { return S.chats.filter(function (c) { return c.id === id; })[0]; }
@@ -619,7 +748,7 @@
     if (!n) return '<span class="nref gone"><span class="nic">' + ic('notes') + '</span><span><b>Note deleted</b><small>It is no longer available</small></span></span>';
     var th = noteMedia(n).map(mThumb).filter(Boolean)[0];
     return '<button type="button" class="nref" data-act="note-open" data-id="' + n.id + '">' + (th ? '<img src="' + th + '" alt="">' : '<span class="nic">' + ic('notes') + '</span>') +
-      '<span><b>' + esc(n.title) + '</b><small>' + esc(noteLoc(n)) + ' · ' + countTxt(n) + '</small></span>' + ic('chevR') + '</button>';
+      '<span><b>' + esc(nT(n)) + '</b><small>' + esc(noteLoc(n)) + ' · ' + countTxt(n) + '</small></span>' + ic('chevR') + '</button>';
   }
   function threadHtml(n) {
     if (!n.entries.length) return n.kind ? '<div class="thread-empty">' + ic('review') + '<b>No messages yet</b>Say hello, share a note, or drop images and videos here.</div>' :
@@ -743,7 +872,7 @@
   function animBody() { var b = $('.cal-body'); if (!b || reduceMotion) return; b.classList.add('anim'); setTimeout(function () { b.classList.remove('anim'); }, 900); }
   function closeModal() {
     var wasNote = ui.modal === 'note';
-    if (wasNote) ui.pend[ui.noteId] = [];
+    if (wasNote) { ui.pend[ui.noteId] = []; if (dropIfEmpty(ui.noteId)) renderSide(); }
     ui.modal = null; ui.taskId = ''; ui.evId = ''; ui.lb = null; renderLb(); renderModal();
     if (wasNote) { renderView(); ui.freshNote = ''; }
   }
@@ -756,9 +885,9 @@
     var openList = open.slice().sort(byDue).slice(0, 6), recentNotes = wsNotes().sort(byRecent).slice(0, 4);
     var up = wsEvents().filter(function (e) { return (e.end || e.start) >= td; }).sort(byStart).slice(0, 3);
     var circ = 2 * Math.PI * 28, tc0 = chatById(teamChatId()), last = tc0 && tc0.entries[tc0.entries.length - 1];
-    var tiles = [['new-project', 'folder', 'New project'], ['task-new', 'tasks', 'New task'], ['note-new', 'notes', 'New note'], ['ev-new', 'cal', 'New event']];
+    var tiles = [['new-project', 'folder', 'New project'], ['file-new', 'file', 'New file'], ['task-new', 'tasks', 'New task'], ['note-new', 'notes', 'New note'], ['ev-new', 'cal', 'New event']];
     var h = '<div class="home"><div class="tiles">' + tiles.map(function (t) {
-      return '<button class="tile" data-act="' + t[0] + '" data-id=""><span class="tile-ic">' + ic(t[1]) + '</span><b>' + t[2] + '</b><span class="tile-plus">' + ic('plus') + '</span></button>';
+      return '<button class="tile" data-act="' + t[0] + '" data-id=""><span class="tile-ic">' + appIcon(t[1]) + '</span><b>' + t[2] + '</b><span class="tile-plus">' + ic('plus') + '</span></button>';
     }).join('') + '</div>';
     h += '<div class="pulse">' +
       '<button class="pl" data-go="tasks"><b data-count="' + dueToday + '">' + dueToday + '</b><span>due today</span></button>' +
@@ -774,13 +903,27 @@
         (recentNotes.length ? recentNotes.map(function (n) { return nLine(n); }).join('') : '<div class="empty-sm">No notes yet.</div>') + '<button class="add-line" data-act="note-new" data-id="">' + ic('plus') + 'New note</button></div>' +
       '<div class="card list"><div class="card-h">Activity <button class="link" data-go="activity">See all</button></div><div class="pad">' + (S.activity.length ? '<ul class="act">' + S.activity.slice(0, 6).map(actLi).join('') + '</ul>' : '<span class="muted">Nothing yet.</span>') + '</div></div></div>';
     h += '<div class="home3 bottom">' +
-      '<button class="card pad stor-card" data-go="plans"><div class="sub-h">Storage <span class="link">Plans ' + ic('chevR') + '</span></div><div class="ring"><svg viewBox="0 0 68 68"><circle class="trk" cx="34" cy="34" r="28" fill="none" stroke-width="6"/><circle class="val' + (st.over ? ' over' : '') + '" cx="34" cy="34" r="28" fill="none" stroke-width="6" stroke-linecap="round" stroke-dasharray="' + (circ * st.pct / 100).toFixed(1) + ' ' + circ.toFixed(1) + '" transform="rotate(-90 34 34)"/><text x="34" y="38.5" text-anchor="middle" data-count="' + st.pct + '" data-suffix="%">' + st.pct + '%</text></svg><div><b>' + esc(st.txt) + '</b><small>' + esc(st.free) + '</small></div></div></button>' +
+      '<div class="card pad stor-card"><div class="sub-h">Storage <button class="link" data-go="plans">Plans ' + ic('chevR') + '</button></div><div class="ring"><svg viewBox="0 0 68 68"><circle class="trk" cx="34" cy="34" r="28" fill="none" stroke-width="6"/><circle class="val' + (st.over ? ' over' : '') + '" cx="34" cy="34" r="28" fill="none" stroke-width="6" stroke-linecap="round" stroke-dasharray="' + (circ * st.pct / 100).toFixed(1) + ' ' + circ.toFixed(1) + '" transform="rotate(-90 34 34)"/><text x="34" y="38.5" text-anchor="middle" data-count="' + st.pct + '" data-suffix="%">' + st.pct + '%</text></svg><div><b>' + esc(st.txt) + '</b><small>' + esc(st.free) + '</small></div></div>' + storBreak(w) + '</div>' +
       '<div class="card"><div class="card-h">Coming up <button class="link" data-go="calendar">Calendar</button></div><div class="evlist">' + (up.length ? up.map(evLine).join('') : '<div class="empty-sm">Nothing planned.</div>') + '</div></div>' +
       '<div class="card pad team-card"><div class="sub-h">Team <small>' + w.members.length + ' of ' + plan().team + ' seats</small></div><div class="avs">' + mem.map(function (m) { return av(mName(m)); }).join('') + '</div>' +
         '<p class="tc-prev">' + (last ? '<b>' + esc(last.who === ME ? 'You' : last.who) + ':</b> ' + esc(last.text || (last.noteRef ? 'Shared a note' : 'Sent an attachment')) : '') + '</p>' +
         '<div class="row-btns"><button class="btn btn-ghost btn-sm" data-act="chat-open" data-id="' + teamChatId() + '">' + ic('review') + 'Team chat</button><button class="btn btn-ghost btn-sm" data-act="invite">' + ic('plus') + 'Add member</button></div></div>' +
       '</div></div>';
     return h;
+  }
+
+  // Storage split by kind of file, scaled to what the workspace uses.
+  function sizeGb(s) { var m = String(s || '').match(/([\d.]+)\s*(KB|MB|GB|TB)/i); if (!m) return 0; return +m[1] * ({ KB: 1e-6, MB: 1e-3, GB: 1, TB: 1000 })[m[2].toUpperCase()]; }
+  function storBreak(w) {
+    var by = { video: 0, image: 0, doc: 0 }, tot = 0;
+    projects().forEach(function (p) { p.files.forEach(function (f) { var k = f.kind === 'video' ? 'video' : f.kind === 'image' ? 'image' : 'doc', g = sizeGb(f.size) * Math.max(1, f.version || 1); by[k] += g; tot += g; }); });
+    var parts = tot ? [['video', 'Video', by.video / tot * 0.92], ['image', 'Images', by.image / tot * 0.92], ['doc', 'Documents', by.doc / tot * 0.92]] : [['video', 'Video', 0.74], ['image', 'Images', 0.12], ['doc', 'Documents', 0.06]];
+    parts = parts.filter(function (x) { return x[2] > 0.004; });
+    parts.push(['other', 'Other', 0.08]);
+    var used = w.usedGb || 0, cap = plan().gb, fmt = function (g) { return g >= 1000 ? (Math.round(g / 10) / 100) + ' TB' : (g >= 10 ? Math.round(g) : Math.round(g * 10) / 10) + ' GB'; };
+    return '<div class="sbar" role="img" aria-label="Storage by kind">' + parts.map(function (x) { return '<i class="k-' + x[0] + '" style="width:' + (x[2] * Math.min(1, used / cap) * 100).toFixed(2) + '%"></i>'; }).join('') + '</div>' +
+      '<ul class="slegend">' + parts.map(function (x) { return '<li><i class="k-' + x[0] + '"></i><span>' + x[1] + '</span><b>' + fmt(used * x[2]) + '</b></li>'; }).join('') +
+      '<li class="free"><i></i><span>Free</span><b>' + fmt(Math.max(0, cap - used)) + '</b></li></ul>';
   }
 
   /* ---------- team ---------- */
@@ -956,7 +1099,12 @@
       img.src = url;
     });
   }
-  function saveUser() { try { localStorage.setItem(USER_KEY, JSON.stringify(USER)); return true; } catch (e) { toast('Browser storage is full, so this lasts only until you reload'); return false; } }
+  function saveUser() { try { (localStorage.getItem(USER_KEY) ? localStorage : sessionStorage).setItem(USER_KEY, JSON.stringify(USER)); syncAccount(); return true; } catch (e) { toast('Browser storage is full, so this lasts only until you reload'); return false; } }
+
+  function syncAccount() {
+    try { var A = JSON.parse(localStorage.getItem('deskspace-accounts') || '{}'), k = String(USER.email || '').toLowerCase();
+      if (A[k]) { A[k].name = USER.name; A[k].photo = USER.photo || ''; localStorage.setItem('deskspace-accounts', JSON.stringify(A)); } } catch (e) { /* storage unavailable */ }
+  }
 
   /* ---------- calendar ---------- */
   var EV_TYPES = { delivery: 'Delivery', deadline: 'Finish date', payday: 'Pay day', shoot: 'Shoot', meeting: 'Review or meeting' };
@@ -1000,7 +1148,7 @@
         if (L >= MAX) for (var k = sg.c0; k <= sg.c1; k++) hidden[k]++;
       });
       h += '<div class="wk"><div class="wk-bg">' + ds.map(function (dd, i2) {
-        return '<button class="day' + (dd.getMonth() === mo ? '' : ' out') + (isos[i2] === td ? ' today' : '') + (i2 > 4 ? ' wkend' : '') + '" data-act="ev-new" data-id="' + isos[i2] + '" aria-label="Add an event on ' + esc(fmtDay(isos[i2])) + '">' +
+        return '<button class="day' + (dd.getMonth() === mo ? '' : ' out') + (isos[i2] === td ? ' today' : '') + (isos[i2] === ui.calDay ? ' picked' : '') + (i2 > 4 ? ' wkend' : '') + '" data-act="ev-new" data-id="' + isos[i2] + '" aria-label="Add an event on ' + esc(fmtDay(isos[i2])) + '">' +
           '<span class="dn">' + dd.getDate() + '</span><span class="day-add">' + ic('plus') + '</span>' + (hidden[i2] ? '<span class="more">+' + hidden[i2] + ' more</span>' : '') + '</button>';
       }).join('') + '</div><div class="wk-fg">' + segs.filter(function (sg) { return sg.lane < MAX; }).map(function (sg) {
         var it = sg.it;
@@ -1027,17 +1175,54 @@
     });
     return h + '</div></div></div>';
   }
+  function miniCal(y, mo, items) {
+    var first = new Date(y, mo, 1, 12), lead = (first.getDay() + 6) % 7, start = new Date(y, mo, 1 - lead, 12), td = today(), has = {};
+    items.forEach(function (it) { var d = new Date(+it.s.slice(0, 4), +it.s.slice(5, 7) - 1, +it.s.slice(8, 10), 12), k = 0; while (iso(d) <= it.e && k++ < 62) { has[iso(d)] = 1; d.setDate(d.getDate() + 1); } });
+    var h = '<div class="mini"><div class="mini-h"><b>' + first.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) + '</b><span><button class="icon-btn sm" data-act="cal-nav" data-id="-1" aria-label="Previous month">' + ic('chevL') + '</button><button class="icon-btn sm" data-act="cal-nav" data-id="1" aria-label="Next month">' + ic('chevR') + '</button></span></div>' +
+      '<div class="mini-g">' + ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(function (d) { return '<i>' + d + '</i>'; }).join('');
+    for (var i = 0; i < 42; i++) {
+      var d = new Date(start); d.setDate(start.getDate() + i); var s = iso(d);
+      h += '<button class="md' + (d.getMonth() !== mo ? ' out' : '') + (s === td ? ' today' : '') + (s === ui.calDay ? ' sel' : '') + (has[s] ? ' has' : '') + '" data-act="cal-day" data-id="' + s + '" aria-label="' + esc(fmtDay(s)) + '">' + d.getDate() + '</button>';
+    }
+    return h + '</div></div>';
+  }
+  function calPicker(y, mo) {
+    var py = ui.calPickY || y, ty = +today().slice(0, 4), tm = +today().slice(5, 7) - 1;
+    return '<div class="cp-back" data-act="cal-pick"></div><div class="menu cal-pick" role="dialog" aria-label="Pick a month and year"><div class="cp-y"><button class="icon-btn sm" data-act="cal-pick-y" data-id="-1" aria-label="Previous year">' + ic('chevL') + '</button><b>' + py + '</b><button class="icon-btn sm" data-act="cal-pick-y" data-id="1" aria-label="Next year">' + ic('chevR') + '</button></div><div class="cp-m">' +
+      ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map(function (m, i) {
+        return '<button class="' + (py === y && i === mo ? 'on' : '') + (py === ty && i === tm ? ' now' : '') + '" data-act="cal-pick-m" data-id="' + py + '-' + pad(i + 1) + '">' + m + '</button>';
+      }).join('') + '</div><button class="link cp-today" data-act="cal-today">Go to today</button></div>';
+  }
+  var calWheelAcc = 0, calWheelLock = 0;
+  function bindCalWheel() {
+    var b = $('.cal-body'); if (!b) return;
+    b.addEventListener('wheel', function (e) {
+      if (ui.calView === 'list' && b.scrollHeight > b.clientHeight + 4) return;
+      if (Math.abs(e.deltaY) < Math.abs(e.deltaX) || e.ctrlKey) return;
+      e.preventDefault();
+      var now = Date.now(); if (now < calWheelLock) return;
+      calWheelAcc += e.deltaY;
+      if (Math.abs(calWheelAcc) > 70) {
+        var d = calWheelAcc > 0 ? 1 : -1, cm = (ui.calMonth || today().slice(0, 7)).split('-'), cd = new Date(+cm[0], +cm[1] - 1 + d, 1, 12);
+        calWheelAcc = 0; calWheelLock = now + 620; ui.calMonth = iso(cd).slice(0, 7); ui.calDir = d * 2; renderView(); animBody();
+      }
+    }, { passive: false });
+  }
   function vCalendar() {
     var ym = ui.calMonth || today().slice(0, 7), y = +ym.slice(0, 4), mo = +ym.slice(5, 7) - 1, mode = ui.calView || 'month', off = ui.calOff || {};
     var first = new Date(y, mo, 1, 12), mStart = iso(first), mEnd = iso(new Date(y, mo + 1, 0, 12));
-    var items = calItems(), n = items.filter(function (it) { return it.s <= mEnd && it.e >= mStart; }).length;
-    var h = '<div class="cal"><div class="cal-top"><div class="cal-title"><h1>' + first.toLocaleDateString('en-GB', { month: 'long' }) + ' <span>' + y + '</span></h1><small>' + n + ' item' + (n === 1 ? '' : 's') + '</small></div>' +
+    var items = calItems(), n = items.filter(function (it) { return it.s <= mEnd && it.e >= mStart; }).length, td0 = today();
+    var up = wsEvents().filter(function (e) { return (e.end || e.start) >= td0; }).sort(byStart).slice(0, 4);
+    var allItems = []; wsEvents().forEach(function (e) { allItems.push({ s: e.start, e: e.end || e.start }); }); wsTasks().forEach(function (t) { if (!t.done && t.due) allItems.push({ s: t.due, e: t.due }); });
+    var h = '<div class="cal cal2"><aside class="cal-side2">' + miniCal(y, mo, allItems) +
+      '<div class="cs-sec"><div class="cs-h">Calendars</div>' + Object.keys(EV_TYPES).concat(['task']).map(function (k) {
+        return '<button class="cs-f t-' + k + (off[k] ? ' off' : '') + '" data-act="cal-filter" data-id="' + k + '" aria-pressed="' + !off[k] + '"><i class="cbx">' + ic('check') + '</i>' + (k === 'task' ? 'Task due' : EV_TYPES[k]) + '</button>';
+      }).join('') + '</div>' +
+      '<div class="cs-sec grow"><div class="cs-h">Coming up</div><div class="evlist">' + (up.length ? up.map(evLine).join('') : '<div class="empty-sm">Nothing planned.</div>') + '</div></div></aside><div class="cal-main2">';
+    h += '<div class="cal-top"><div class="cal-title"><button class="cal-tbtn" data-act="cal-pick" aria-expanded="' + !!ui.calPick + '" title="Pick a month and year"><h1>' + first.toLocaleDateString('en-GB', { month: 'long' }) + ' <span>' + y + '</span></h1>' + ic('chevD') + '</button>' + (ui.calPick ? calPicker(y, mo) : '') + '<small>' + n + ' item' + (n === 1 ? '' : 's') + ' · scroll over the month to move through dates</small></div>' +
       '<div class="cal-ctrls"><div class="seg txt"><button class="' + (mode === 'month' ? 'on' : '') + '" data-act="cal-view" data-id="month">Month</button><button class="' + (mode === 'list' ? 'on' : '') + '" data-act="cal-view" data-id="list">List</button></div>' +
       '<div class="cal-arrows"><button class="icon-btn" data-act="cal-nav" data-id="-1" aria-label="Previous month">' + ic('back') + '</button><button class="btn btn-ghost btn-sm" data-act="cal-today">Today</button><button class="icon-btn" data-act="cal-nav" data-id="1" aria-label="Next month">' + ic('arrow') + '</button></div></div></div>';
-    h += '<div class="cal-filters" role="group" aria-label="Show types">' + Object.keys(EV_TYPES).concat(['task']).map(function (k) {
-      return '<button class="cf t-' + k + (off[k] ? ' off' : '') + '" data-act="cal-filter" data-id="' + k + '" aria-pressed="' + !off[k] + '"><i class="lg"></i>' + (k === 'task' ? 'Task due' : EV_TYPES[k]) + '</button>';
-    }).join('') + '</div>';
-    h += '<div class="cal-body' + (ui.calDir ? (ui.calDir > 0 ? ' from-r' : ' from-l') : '') + '">' + (mode === 'list' ? calList(items, mStart, mEnd, first) : calMonth(items, y, mo)) + '</div></div>';
+    h += '<div class="cal-body' + (ui.calDir ? ({ '1': ' from-r', '-1': ' from-l', '2': ' from-b', '-2': ' from-t' })[ui.calDir] : '') + '">' + (mode === 'list' ? calList(items, mStart, mEnd, first) : calMonth(items, y, mo)) + '</div></div></div>';
     ui.calDir = 0;
     return h;
   }
@@ -1134,12 +1319,47 @@
       '<div class="group"><h2>Session</h2><div class="card"><div class="kv"><span><b>Sign out</b><small>You stay signed in on this browser until you sign out.</small></span><button class="btn btn-danger btn-sm" data-act="logout">Sign out</button></div></div></div></div>';
   }
 
+  var MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+  function dueKey(p) { var m = String(p.due || '').match(/(\d{1,2})\s+([A-Za-z]{3})/); return m ? MONTHS.indexOf(m[2].toLowerCase()) * 40 + +m[1] : 9999; }
+  var ST_ORDER = { changes: 0, review: 1, draft: 2, approved: 3 };
+  function toolsHtml(kind) {
+    var isP = kind === 'p', v = isP ? (ui.pView || 'grid') : (ui.fView || 'grid'), s = isP ? (ui.pSort || 'recent') : (ui.fSort || 'recent'), fl = isP ? (ui.pFilter || 'all') : (ui.fFilter || 'all');
+    var sorts = isP ? [['recent', 'Recent'], ['name', 'Name'], ['due', 'Due date'], ['client', 'Client'], ['status', 'Status']] : [['recent', 'Recent'], ['name', 'Name'], ['size', 'Size'], ['kind', 'Kind'], ['status', 'Status']];
+    var fils = [['all', 'All'], ['draft', 'Draft'], ['review', 'In Review'], ['changes', 'Changes'], ['approved', 'Approved']];
+    return '<div class="ptools"><div class="seg txt fil" role="group" aria-label="Filter by status">' + fils.map(function (x) {
+        return '<button class="' + (fl === x[0] ? 'on' : '') + '" data-act="pt-filter" data-id="' + kind + ':' + x[0] + '" aria-pressed="' + (fl === x[0]) + '">' + (x[0] !== 'all' ? '<i class="sdot ' + x[0] + '"></i>' : '') + x[1] + '</button>';
+      }).join('') + '</div><span class="sp"></span>' +
+      '<label class="sortsel" title="Sort">' + ic('sort') + '<select data-sort="' + kind + '" aria-label="Sort by">' + sorts.map(function (x) { return '<option value="' + x[0] + '"' + (s === x[0] ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select>' + ic('chevD') + '</label>' +
+      '<div class="seg icn" role="group" aria-label="View"><button class="' + (v === 'grid' ? 'on' : '') + '" data-act="pt-view" data-id="' + kind + ':grid" aria-label="Grid" title="Grid">' + ic('grid') + '</button><button class="' + (v === 'list' ? 'on' : '') + '" data-act="pt-view" data-id="' + kind + ':list" aria-label="List" title="List">' + ic('list') + '</button></div></div>';
+  }
+  function animList() {
+    if (reduceMotion) return;
+    [].forEach.call(document.querySelectorAll('.pgrid > *, .fgrid > *, .plist > .prow, .flist > .frow'), function (el, i) { el.style.setProperty('--i', Math.min(i, 14)); el.classList.remove('li-in'); void el.offsetWidth; el.classList.add('li-in'); });
+  }
+  function pRow(p) {
+    var st = pStatus(p), c = client(p.client), okN = p.files.filter(function (f) { return f.status === 'approved'; }).length, okPct = p.files.length ? Math.round(okN / p.files.length * 100) : 0;
+    return '<button class="prow" data-go="p/' + p.id + (st === 'approved' ? '/delivery' : '') + '">' + macFolder(c.color, 'md') +
+      '<span class="pr-name"><b>' + esc(p.name) + '</b><small>' + esc(c.name) + '</small></span><span class="pr-c">' + esc(c.name) + '</span>' +
+      '<span class="pr-n">' + p.files.length + ' file' + (p.files.length === 1 ? '' : 's') + '</span><span class="pr-p"><span class="pprog"><i style="width:' + okPct + '%"></i></span></span>' +
+      '<span class="pr-s">' + pill(st) + '</span><span class="pr-d">' + esc(p.due || '—') + '</span>' + ic('chevR') + '</button>';
+  }
   function vProjects(clientId) {
     var ps = projects();
     if (clientId) ps = ps.filter(function (p) { return p.client === clientId; });
     ps = filtered(ps);
-    var h = '<div class="view-head"><h1>' + (clientId ? esc(client(clientId).name) : 'All projects') + '</h1><small>' + ps.length + ' project' + (ps.length === 1 ? '' : 's') + '</small></div>';
-    return h + (ps.length ? '<div class="pgrid">' + ps.map(pCard).join('') + '</div>' : (ui.q ? '<div class="empty"><b>Nothing matches “' + esc(ui.q) + '”</b>Try another name or client.</div>' : emptyProjects()));
+    var fl = ui.pFilter || 'all', s = ui.pSort || 'recent', total = ps.length;
+    if (fl !== 'all') ps = ps.filter(function (p) { return pStatus(p) === fl; });
+    ps = ps.slice();
+    if (s === 'name') ps.sort(function (a, b) { return a.name.localeCompare(b.name); });
+    else if (s === 'due') ps.sort(function (a, b) { return dueKey(a) - dueKey(b); });
+    else if (s === 'client') ps.sort(function (a, b) { return client(a.client).name.localeCompare(client(b.client).name) || a.name.localeCompare(b.name); });
+    else if (s === 'status') ps.sort(function (a, b) { return ST_ORDER[pStatus(a)] - ST_ORDER[pStatus(b)]; });
+    var h = '<div class="view-head"><h1>' + (clientId ? esc(client(clientId).name) : 'All projects') + '</h1><small>' + (fl === 'all' ? total + ' project' + (total === 1 ? '' : 's') : ps.length + ' of ' + total + ' projects') + '</small></div>';
+    if (!total) return h + (ui.q ? '<div class="empty"><b>Nothing matches “' + esc(ui.q) + '”</b>Try another name or client.</div>' : emptyProjects());
+    h += toolsHtml('p');
+    if (!ps.length) return h + '<div class="empty"><b>No projects with this status</b><button class="btn btn-ghost btn-sm" data-act="pt-filter" data-id="p:all">Show all projects</button></div>';
+    if ((ui.pView || 'grid') === 'list') return h + '<div class="card plist"><div class="prow head"><span></span><span class="pr-name">Name</span><span class="pr-c">Client</span><span class="pr-n">Files</span><span class="pr-p">Approved</span><span class="pr-s">Status</span><span class="pr-d">Due</span><span></span></div>' + ps.map(pRow).join('') + '</div>';
+    return h + '<div class="pgrid">' + ps.map(pCard).join('') + '</div>';
   }
 
   function fCard(p, f) {
@@ -1150,6 +1370,12 @@
       '<span class="meta"><b>' + esc(f.name) + '</b><small>v' + f.version + ' · ' + esc(f.size) + '</small></span></button>';
   }
 
+  function fRow(p, f) {
+    var open = f.comments.filter(function (c) { return !c.resolvedIn; }).length;
+    return '<button class="frow" data-go="f/' + p.id + '/' + f.id + '"><span class="fr-th">' + thumb(f.thumb, f.kind === 'video' ? 'film' : 'file') + '</span>' +
+      '<span class="fr-name"><b>' + esc(f.name) + '</b><small>' + esc(f.folder || '') + '</small></span><span class="fr-k">' + (f.kind === 'video' ? 'Video' + (f.dur ? ' · ' + tc(f.dur) : '') : f.kind === 'image' ? 'Still' : 'Document') + '</span>' +
+      '<span class="fr-v">v' + f.version + '</span><span class="fr-sz">' + esc(f.size) + '</span><span class="fr-s">' + pill(f.status) + '</span><span class="fr-c">' + (open ? ic('review') + open : '—') + '</span></button>';
+  }
   function vProject(p, tab) {
     if (!p) return '<div class="empty"><b>Project not found</b><button class="btn btn-ghost btn-sm" data-go="projects">Back to projects</button></div>';
     tab = tab || 'files';
@@ -1164,11 +1390,21 @@
       var folders = {}, names = foldersOf(p);
       if (ui.folder && names.indexOf(ui.folder) < 0) ui.folder = '';
       p.files.forEach(function (f) { folders[f.folder] = (folders[f.folder] || 0) + 1; });
-      h += '<div class="chips"><button class="chip' + (!ui.folder ? ' on' : '') + '" data-act="folder" data-id="">All <em>' + p.files.length + '</em></button>' + names.map(function (n) {
-        return '<button class="chip' + (ui.folder === n ? ' on' : '') + '" data-act="folder" data-id="' + esc(n) + '">' + ic('folder') + esc(n) + ' <em>' + (folders[n] || 0) + '</em></button>';
-      }).join('') + '<button class="chip add" data-act="new-folder">' + ic('plus') + 'New folder</button></div>';
-      var fs = p.files.filter(function (f) { return !ui.folder || f.folder === ui.folder; });
-      h += fs.length ? '<div class="fgrid">' + fs.map(function (f) { return fCard(p, f); }).join('') + '</div>' : '';
+      h += '<div class="folders"><button class="fold' + (!ui.folder ? ' on' : '') + '" data-act="folder" data-id="">' + macFolder('#2f7fe0', 'lg') + '<b>All files</b><small>' + p.files.length + ' item' + (p.files.length === 1 ? '' : 's') + '</small></button>' + names.map(function (n) {
+        var k = folders[n] || 0;
+        return '<button class="fold' + (ui.folder === n ? ' on' : '') + '" data-act="folder" data-id="' + esc(n) + '">' + macFolder('#5aa9f5', 'lg') + '<b>' + esc(n) + '</b><small>' + k + ' item' + (k === 1 ? '' : 's') + '</small></button>';
+      }).join('') + '<button class="fold add" data-act="new-folder">' + macFolder('#7fa6cf', 'lg', true) + '<b>New folder</b><small>&nbsp;</small></button></div>';
+      var fs = p.files.filter(function (f) { return !ui.folder || f.folder === ui.folder; }), ffl = ui.fFilter || 'all', fso = ui.fSort || 'recent', fall = fs.length;
+      if (ffl !== 'all') fs = fs.filter(function (f) { return f.status === ffl; });
+      fs = fs.slice();
+      if (fso === 'name') fs.sort(function (a, b) { return a.name.localeCompare(b.name); });
+      else if (fso === 'size') fs.sort(function (a, b) { return sizeGb(b.size) - sizeGb(a.size); });
+      else if (fso === 'kind') fs.sort(function (a, b) { return String(a.kind).localeCompare(String(b.kind)) || a.name.localeCompare(b.name); });
+      else if (fso === 'status') fs.sort(function (a, b) { return ST_ORDER[a.status] - ST_ORDER[b.status]; });
+      if (fall) h += toolsHtml('f');
+      if (fall && !fs.length) h += '<div class="empty"><b>No files with this status here</b><button class="btn btn-ghost btn-sm" data-act="pt-filter" data-id="f:all">Show all files</button></div>';
+      else if (fs.length && (ui.fView || 'grid') === 'list') h += '<div class="card flist"><div class="frow head"><span></span><span class="fr-name">Name</span><span class="fr-k">Kind</span><span class="fr-v">Version</span><span class="fr-sz">Size</span><span class="fr-s">Status</span><span class="fr-c">Notes</span></div>' + fs.map(function (f) { return fRow(p, f); }).join('') + '</div>';
+      else h += fs.length ? '<div class="fgrid">' + fs.map(function (f) { return fCard(p, f); }).join('') + '</div>' : '';
       h += '<div class="drop" id="drop">' + (p.files.length ? 'Drop videos, photos or documents here to add them to ' + (ui.folder ? '“' + esc(ui.folder) + '”' : 'this project') : '<b style="color:var(--ink);display:block;margin-bottom:4px">No files yet</b>Drop the first cut here, or use Upload.') + '</div>';
     } else if (tab === 'tasks') {
       var po = tasks.filter(function (t) { return !t.done; }).sort(byDue);
@@ -1338,7 +1574,7 @@
     var r = route(), view = $('#view'), h;
     clearInterval(tick); tick = null;
     view.classList.toggle('flush', r.v === 'f');
-    view.classList.toggle('fill', r.v === 'home' || r.v === 'team' || r.v === 'calendar');
+    view.classList.toggle('fill', r.v === 'home' || r.v === 'team' || r.v === 'calendar' || r.v === 'notes');
     if (r.v === 'f') {
       var p = project(r.a), f = fileOf(p, r.b), key = r.a + '/' + r.b;
       if (f && lastFile !== key) { lastFile = key; ui.t = 0; ui.sel = f.version; ui.hot = ''; ui.share = false; }
@@ -1368,6 +1604,8 @@
     if (r.v === 'team' && ui.teamTab === 'members') renderQR($('#qr-side'), joinUrl());
     if (r.v === 'f') bindReview();
     if (r.v === 'p') bindDrop();
+    if (r.v === 'calendar') bindCalWheel();
+    if (r.v === 'notes') bindNote($('.na-doc .nd'));
   }
   var shownModal = '';
   function renderModal() {
@@ -1412,10 +1650,16 @@
         '<div><label for="nn-date">Date</label><input class="input" id="nn-date" name="date" type="date" value="' + today() + '"></div></div>' +
         '<p class="hint">' + ic('clip') + 'The note opens like a chat. Write in it and attach images or videos.</p>' +
         '<div class="foot">' + cancel + '<button class="btn btn-primary btn-sm" type="submit">Create note</button></div></form></div>';
+    } else if (m === 'upload') {
+      var ups = projects(), upCur = route().v === 'p' ? route().a : (ups[0] || {}).id;
+      h = '<div class="scrim" data-act="close-modal"><form class="modal" data-form="upload" role="dialog" aria-modal="true" aria-label="New file"><h3>Add files</h3>' +
+        (ups.length ? '<label for="up-p">Project</label><select class="input" id="up-p" name="p">' + ups.map(function (p) { return '<option value="' + p.id + '"' + (p.id === upCur ? ' selected' : '') + '>' + esc(p.name) + '</option>'; }).join('') + '</select>' +
+          '<p class="hint">' + ic('upload') + 'Next, pick videos, photos or documents. Each one is added as a v1 draft.</p><div class="foot">' + cancel + '<button class="btn btn-primary btn-sm" type="submit">Choose files</button></div>'
+          : '<p class="hint">' + ic('folder') + 'Files live inside a project. Create a project first.</p><div class="foot">' + cancel + '<button class="btn btn-primary btn-sm" type="button" data-act="new-project">New project</button></div>') +
+        '</form></div>';
     } else if (m === 'note') {
       var nObj = noteById(ui.noteId);
-      if (nObj) h = '<div class="scrim chat-scrim" data-act="close-modal"><div class="modal chat" id="chat" role="dialog" aria-modal="true" aria-label="' + esc(nObj.title) + '">' +
-        chatHead(nObj) + '<div class="thread" data-thread-body="' + nObj.id + '">' + threadHtml(nObj) + '</div>' + composerHtml(nObj.id, false) + '</div></div>';
+      if (nObj) h = '<div class="scrim chat-scrim" data-act="close-modal"><div class="modal notesheet" role="dialog" aria-modal="true" aria-label="' + esc(nT(nObj)) + '">' + noteDoc(nObj, true) + '</div></div>';
       ui.freshEntry = '';
     } else if (m === 'ev') {
       var ev = ui.evId ? evById(ui.evId) : null, eS = ev ? ev.start : (ui.preset || today()), eE = ev ? (ev.end || ev.start) : eS, eT = ev ? ev.type : (ui.evType || 'delivery'), eP = ev ? ev.project : '';
@@ -1479,7 +1723,7 @@
     }
     if (anim) h = h.replace('class="scrim', 'class="scrim anim');
     $('#layer').innerHTML = h;
-    if (m === 'note') bindChat($('#chat'), ui.noteId, anim);
+    if (m === 'note') { var nfresh = ui.freshNote === ui.noteId; bindNote($('.notesheet .nd'), anim && nfresh); }
     else if (m === 'invite' && (ui.invTab || 'qr') === 'qr') renderQR($('#qr-modal'), joinUrl());
     if (m === 'note' || m === 'invite') { /* focus handled above */ }
     else { var first = $('#layer input:not([type=file]):not([type=date])'); if (first) first.focus(); }
@@ -1519,19 +1763,21 @@
   function kindOf(file) { return file.type.indexOf('video/') === 0 ? 'video' : file.type.indexOf('image/') === 0 ? 'image' : 'doc'; }
 
   function addFiles(list) {
-    var r = route(), p = project(r.a);
+    var r = route(), to = ui.uploadTo, p = project(to) || project(r.a);
+    ui.uploadTo = '';
     if (!p || !list || !list.length) return;
-    var files = [].slice.call(list);
+    var files = [].slice.call(list), fold = to && to !== r.a ? (foldersOf(p)[0] || 'Files') : '';
     Promise.all(files.map(makeThumb)).then(function (res) {
       files.forEach(function (file, i) {
         var id = 'u' + uid(), kind = kindOf(file);
         blobs[id] = res[i].url;
-        p.files.unshift({ id: id, name: file.name, kind: kind, folder: ui.folder || foldersOf(p)[0] || 'Files', size: fmtSize(file.size), dur: kind === 'video' ? (res[i].dur || 0) : 0, version: 1, status: 'draft', thumb: res[i].thumb, segs: [], comments: [] });
+        p.files.unshift({ id: id, name: file.name, kind: kind, folder: fold || ui.folder || foldersOf(p)[0] || 'Files', size: fmtSize(file.size), dur: kind === 'video' ? (res[i].dur || 0) : 0, version: 1, status: 'draft', thumb: res[i].thumb, segs: [], comments: [] });
         if (!p.cover && res[i].thumb) p.cover = res[i].thumb;
         log(ME, 'uploaded ' + file.name);
       });
-      save(); render();
-      toast(files.length === 1 ? files[0].name + ' added' : files.length + ' files added');
+      save();
+      if (to && r.a !== to) go('p/' + p.id); else render();
+      toast(files.length === 1 ? files[0].name + ' added to ' + p.name : files.length + ' files added to ' + p.name);
     });
   }
   function bindDrop() {
@@ -1550,7 +1796,7 @@
       case 'drawer': $('#app').classList.toggle('drawer'); break;
       case 'ws-toggle': ui.wsOpen = !ui.wsOpen; ui.acct = false; renderSide(); break;
       case 'acct-toggle': ui.acct = !ui.acct; ui.wsOpen = false; renderSide(); break;
-      case 'logout': try { localStorage.removeItem(USER_KEY); } catch (e) { /* ignore */ } location.href = 'login.html'; break;
+      case 'logout': try { localStorage.removeItem(USER_KEY); sessionStorage.removeItem(USER_KEY); } catch (e) { /* ignore */ } location.href = 'login.html'; break;
       case 'ws-set': S.ws = id; ui.wsOpen = false; ui.q = ''; save(); go('home'); break;
       case 'reset':
         ui.acct = false; renderSide();
@@ -1560,14 +1806,43 @@
       case 'new-folder': ui.modal = 'folder'; renderModal(); break;
       case 'note-del':
         var dn = noteById(id || ui.noteId);
-        if (dn && confirm('Delete “' + dn.title + '” and everything in it?')) {
+        if (dn && confirm('Delete “' + nT(dn) + '” and everything in it?')) {
           S.notes = S.notes.filter(function (n) { return n.id !== dn.id; }); save();
+          if (ui.noteSel === dn.id) ui.noteSel = '';
           ui.modal = null; renderModal(); renderView(); renderSide(); toast('Note deleted');
         }
         break;
-      case 'note-new': ui.modal = 'note-new'; ui.preset = id || ''; renderModal(); break;
+      case 'note-new':
+        var pre = id || '', nn0 = { id: 'n' + uid(), ws: S.ws, project: pre, title: '', date: today(), created: Date.now(), entries: [{ id: 'e' + uid(), who: ME, at: Date.now(), text: '', media: [] }] };
+        if (route().v === 'notes' && ui.noteSel) dropIfEmpty(ui.noteSel);
+        S.notes.unshift(nn0); save(); ui.freshNote = nn0.id;
+        if (route().v === 'notes') {
+          ui.noteSel = nn0.id; ui.noteQ = ''; if (ui.noteFolder !== 'all') ui.noteFolder = pre;
+          renderView(); renderSide(); bindNote($('.na-doc .nd'), true);
+        } else { ui.modal = 'note'; ui.noteId = nn0.id; renderModal(); renderView(); renderSide(); }
+        break;
       case 'note-open': ui.modal = 'note'; ui.noteId = id; ui.pend[id] = []; renderModal(); break;
-      case 'note-attach': ui.attachFor = el.closest('form').getAttribute('data-thread'); notePicker.click(); break;
+      case 'note-pick':
+        if (ui.noteSel && ui.noteSel !== id) dropIfEmpty(ui.noteSel);
+        ui.noteSel = id; ui.noteId = id; renderView(); renderSide();
+        var npd = $('.na-doc .nd'); bindNote(npd); if (npd && !reduceMotion) { npd.classList.add('swap'); }
+        break;
+      case 'note-folder': if (ui.noteSel) dropIfEmpty(ui.noteSel); ui.noteFolder = id; ui.noteSel = ''; renderView(); renderSide(); bindNote($('.na-doc .nd')); break;
+      case 'nmedia-del':
+        var mdn = noteById((el.closest('.nd') || {}).getAttribute ? el.closest('.nd').getAttribute('data-note') : '');
+        if (mdn) { var mde = noteEntry(mdn); mde.media = mde.media.filter(function (m) { return m.id !== id; }); save(); paintNoteMedia(mdn); paintNoteRow(mdn); }
+        break;
+      case 'note-attach': var nfm = el.closest('form'); ui.attachFor = nfm ? nfm.getAttribute('data-thread') : id; notePicker.click(); break;
+      case 'file-new': ui.modal = 'upload'; renderModal(); break;
+      case 'pt-view': var pv = id.split(':'); if (pv[0] === 'p') ui.pView = pv[1]; else ui.fView = pv[1]; renderView(); animList(); break;
+      case 'pt-filter': var pfl = id.split(':'); if (pfl[0] === 'p') ui.pFilter = pfl[1]; else ui.fFilter = pfl[1]; renderView(); animList(); break;
+      case 'cal-pick': ui.calPick = !ui.calPick; ui.calPickY = +((ui.calMonth || today().slice(0, 7)).slice(0, 4)); renderView(); break;
+      case 'cal-pick-y': ui.calPickY += parseInt(id, 10); renderView(); break;
+      case 'cal-pick-m': var cpm = ui.calMonth || today().slice(0, 7); ui.calDir = id > cpm ? 1 : id < cpm ? -1 : 0; ui.calMonth = id; ui.calPick = false; renderView(); animBody(); break;
+      case 'cal-day':
+        var cdm = ui.calMonth || today().slice(0, 7), ndm = id.slice(0, 7);
+        ui.calDay = id; if (ndm !== cdm) { ui.calDir = ndm > cdm ? 1 : -1; ui.calMonth = ndm; renderView(); animBody(); } else renderView();
+        break;
       case 'pend-del': var pf = el.closest('[data-pend]').getAttribute('data-pend'); ui.pend[pf] = pendOf(pf).filter(function (m) { return m.id !== id; }); paintPending(pf); break;
       case 'lb':
         var tb = el.closest('[data-thread-body]'), tid = tb && tb.getAttribute('data-thread-body'), ln = tid && threadById(tid);
@@ -1578,8 +1853,19 @@
       case 'lb-close': if (ev.target === el || el.getAttribute('data-force')) { ui.lb = null; renderLb(); } break;
       case 'search': openSearch(); break;
       case 'sr-go': srGo(parseInt(id, 10)); break;
-      case 'team-tab': ui.teamTab = id; if (route().v === 'team') { renderView(); } else go('team'); break;
-      case 'chat-open': ui.bell = false; ui.teamTab = 'chat'; ui.chatId = id; if (route().v === 'team') { renderView(); renderSide(); renderTop(); } else go('team'); break;
+      case 'team-tab':
+        if (route().v !== 'team') { ui.teamTab = id; go('team'); break; }
+        if ((ui.teamTab || 'chat') === id) break;
+        ui.teamTab = id; renderView(); swapIn('.tchat, .tm-grid');
+        break;
+      case 'chat-open':
+        ui.bell = false;
+        if (route().v !== 'team') { ui.teamTab = 'chat'; ui.chatId = id; go('team'); break; }
+        var wasTab = ui.teamTab || 'chat', clEl = $('.cl-list') || $('.cl'), clTop = clEl ? clEl.scrollTop : 0, same = ui.chatId === id && wasTab === 'chat';
+        ui.teamTab = 'chat'; ui.chatId = id; renderView(); renderSide(); renderTop();
+        clEl = $('.cl-list') || $('.cl'); if (clEl) clEl.scrollTop = clTop;
+        if (!same) swapIn(wasTab === 'chat' ? '.chat-pane' : '.tchat');
+        break;
       case 'invite': ui.modal = 'invite'; ui.invTab = id === 'email' ? 'email' : (ui.invTab || 'qr'); renderModal(); break;
       case 'inv-tab': ui.invTab = id; renderModal(); break;
       case 'copy-code': copyText(wsCode(), 'Join code copied'); break;
@@ -1631,7 +1917,7 @@
       case 'cal-nav':
         var cm0 = (ui.calMonth || today().slice(0, 7)).split('-'), cd = new Date(+cm0[0], +cm0[1] - 1 + parseInt(id, 10), 1, 12);
         ui.calMonth = iso(cd).slice(0, 7); ui.calDir = parseInt(id, 10); renderView(); animBody(); break;
-      case 'cal-today': ui.calDir = (ui.calMonth || today().slice(0, 7)) < today().slice(0, 7) ? 1 : -1; ui.calMonth = ''; renderView(); animBody(); break;
+      case 'cal-today': ui.calPick = false; ui.calDay = today(); ui.calDir = (ui.calMonth || today().slice(0, 7)) < today().slice(0, 7) ? 1 : -1; ui.calMonth = ''; renderView(); animBody(); break;
       case 'task-new': ui.modal = 'task'; ui.taskId = ''; ui.preset = id || ''; renderModal(); break;
       case 'task-edit': ui.modal = 'task'; ui.taskId = id; renderModal(); break;
       case 'task-del':
@@ -1712,6 +1998,8 @@
       if (ex) { ex.text = tt; ex.project = tl; ex.due = td; ex.ws = S.ws; toast('Task saved'); }
       else { var nt2 = { id: 't' + uid(), text: tt, project: tl, ws: S.ws, due: td, done: false }; S.tasks.push(nt2); ui.freshTask = nt2.id; toast('Added to ' + taskLoc(nt2) + (td ? ' · due ' + fmtDay(td) : '')); }
       ui.modal = null; ui.taskId = ''; renderModal(); afterTasks();
+    } else if (kind === 'upload') {
+      ui.uploadTo = form.elements.p.value; ui.modal = null; renderModal(); $('#picker').click();
     } else if (kind === 'note-new') {
       var title = form.elements.title.value.trim() || 'Untitled note';
       var nn = { id: 'n' + uid(), ws: S.ws, project: form.elements.loc.value, title: title, date: form.elements.date.value || today(), created: Date.now(), entries: [] };
@@ -1810,6 +2098,17 @@
   document.addEventListener('input', function (e) {
     if (e.target.id === 'q') { ui.q = e.target.value; renderView(); }
     if (e.target.id === 'chat-q') { ui.chatQ = e.target.value; paintChatList(); }
+    var live = e.target.getAttribute && e.target.getAttribute('data-note-live');
+    if (live) {
+      var nbox = e.target.closest('.nd'), ln = nbox && noteById(nbox.getAttribute('data-note'));
+      if (ln) {
+        var len = noteEntry(ln);
+        if (live === 'body') { len.text = e.target.value; autoGrow(e.target); } else ln.title = e.target.value;
+        len.at = Date.now(); clearTimeout(noteSaveT); noteSaveT = setTimeout(save, 300); paintNoteRow(ln);
+        var ndt = nbox.querySelector('.nd-date'); if (ndt) ndt.textContent = noteWhen(len.at);
+      }
+    }
+    if (e.target.id === 'note-q') { ui.noteQ = e.target.value; var qpos = e.target.selectionStart; renderView(); bindNote($('.na-doc .nd')); var nq = $('#note-q'); if (nq) { nq.focus(); nq.setSelectionRange(qpos, qpos); } }
     if (e.target.id === 'sq') { ui.sq = e.target.value; ui.si = 0; var sr = $('#sres'); if (sr) sr.innerHTML = searchResultsHtml(); }
     if (e.target.classList && e.target.classList.contains('compose')) { e.target.style.height = 'auto'; e.target.style.height = Math.min(140, e.target.scrollHeight) + 'px'; }
   });
@@ -1874,6 +2173,8 @@
   document.addEventListener('pointercancel', endDrag);
 
   document.addEventListener('change', function (e) {
+    var sk = e.target.getAttribute && e.target.getAttribute('data-sort');
+    if (sk) { if (sk === 'p') ui.pSort = e.target.value; else ui.fSort = e.target.value; renderView(); animList(); return; }
     var mf = e.target.getAttribute && e.target.getAttribute('data-member-field');
     if (mf) {
       var mrow = e.target.closest('[data-mid]'), mem = mrow && memberById(mrow.getAttribute('data-mid'));
@@ -1887,17 +2188,19 @@
     var field = e.target.getAttribute && e.target.getAttribute('data-note-field'); if (!field) return;
     var n = noteById(ui.noteId); if (!n) return;
     var v = e.target.value;
-    if (field === 'title') { v = v.trim() || 'Untitled note'; e.target.value = v; }
-    n[field] = v; save(); renderView(); renderSide();
-    if (field === 'project') toast('Moved to ' + noteLoc(n));
+    if (field === 'title') v = v.trim();
+    n[field] = v; save();
+    if (field === 'project') { renderView(); renderSide(); if (route().v === 'notes') bindNote($('.na-doc .nd')); var nsel = $('.notesheet .nd'); if (nsel) nsel.outerHTML = noteDoc(n, true), bindNote($('.notesheet .nd')); toast('Moved to ' + noteLoc(n)); }
+    else { paintNoteRow(n); if (route().v !== 'notes') renderView(); }
   });
   document.addEventListener('paste', function (e) {
+    if (e.target.classList && e.target.classList.contains('nd-body') && e.clipboardData && e.clipboardData.files && e.clipboardData.files.length) { e.preventDefault(); addNoteMedia(e.clipboardData.files, e.target.closest('.nd').getAttribute('data-note')); return; }
     if (!e.target.classList || !e.target.classList.contains('compose') || !e.clipboardData) return;
     var files = [].slice.call(e.clipboardData.files || []);
     if (files.length) { e.preventDefault(); addPending(files, e.target.form.getAttribute('data-thread')); }
   });
   document.addEventListener('toggle', function (e) { if (e.target.classList && e.target.classList.contains('tdone')) ui.doneOpen = e.target.open; }, true);
-  notePicker.addEventListener('change', function () { addPending(this.files, ui.attachFor); this.value = ''; });
+  notePicker.addEventListener('change', function () { if (noteById(ui.attachFor)) addNoteMedia(this.files, ui.attachFor); else addPending(this.files, ui.attachFor); this.value = ''; });
   photoPicker.addEventListener('change', function () {
     var f = this.files[0]; this.value = '';
     if (!f) return;
@@ -1907,6 +2210,12 @@
     });
   });
 
+  function swapIn(sel) {
+    if (reduceMotion) return;
+    var el = document.querySelector(sel); if (!el) return;
+    el.classList.remove('swap'); void el.offsetWidth; el.classList.add('swap');
+    setTimeout(function () { el.classList.remove('swap'); }, 600);
+  }
   var enterTimer;
   function enter() {
     var v = $('#view'), i = 0;
